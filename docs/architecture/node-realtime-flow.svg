@@ -1,0 +1,26 @@
+<svg width="720" height="160" viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .box { fill: #e0f2fe; stroke: #0f172a; stroke-width: 2; rx: 12; }
+    .label { font-family: 'Inter', sans-serif; font-size: 16px; fill: #0f172a; text-anchor: middle; }
+    .arrow { stroke: #0f172a; stroke-width: 2; marker-end: url(#arrowhead); }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#0f172a" />
+    </marker>
+  </defs>
+  <rect class="box" x="40" y="40" width="200" height="80" fill="#c7d2fe" />
+  <text class="label" x="140" y="85">Serviço Node</text>
+  <text class="label" x="140" y="105">State / Strategy</text>
+
+  <rect class="box" x="260" y="40" width="200" height="80" fill="#bfdbfe" />
+  <text class="label" x="360" y="85">Supabase Realtime</text>
+  <text class="label" x="360" y="105">Observer</text>
+
+  <rect class="box" x="480" y="40" width="200" height="80" fill="#bbf7d0" />
+  <text class="label" x="580" y="85">Clientes Next.js</text>
+  <text class="label" x="580" y="105">HUD / Chat / Admin</text>
+
+  <line class="arrow" x1="240" y1="80" x2="260" y2="80" />
+  <line class="arrow" x1="460" y1="80" x2="480" y2="80" />
+</svg>

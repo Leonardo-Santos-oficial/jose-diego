@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 3.9%;
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 45.1%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+  --primary: 0 0% 9%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 0 0% 96.1%;
+  --secondary-foreground: 0 0% 9%;
+  --accent: 0 0% 96.1%;
+  --accent-foreground: 0 0% 9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 0 0% 3.9%;
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+  --radius: 0.65rem;
+}
+
+.dark {
+  --background: 224 35% 4%;
+  --foreground: 210 40% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --popover: 226 47% 7%;
+  --popover-foreground: 210 40% 98%;
+  --card: 226 47% 7%;
+  --card-foreground: 210 40% 98%;
+  --border: 220 23% 16%;
+  --input: 220 23% 16%;
+  --primary: 0 84% 60%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 222 47% 11%;
+  --secondary-foreground: 210 40% 98%;
+  --accent: 215 27% 20%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 0 84% 60%;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      sans-serif;
+    @apply bg-background text-foreground antialiased;
+    margin: 0;
+  }
+}
+
+.aviator-plane {
+  --plane-loop: 5s;
+  animation: aviator-plane-loop var(--plane-loop) linear infinite;
+  filter: drop-shadow(0 15px 35px rgba(14, 165, 233, 0.45));
+}
+
+.aviator-particles {
+  background-image: url('/aviator/images/particles.png');
+  background-repeat: repeat;
+  background-size: 280px;
+  animation: aviator-particles-flow 8s linear infinite;
+  opacity: 0.25;
+}
+
+@keyframes aviator-plane-loop {
+  0% {
+    transform: translate(-25%, 15%) scale(0.9);
+  }
+  40% {
+    transform: translate(20%, -20%) scale(1.05);
+  }
+  70% {
+    transform: translate(65%, -5%) scale(1.1);
+  }
+  100% {
+    transform: translate(120%, 20%) scale(0.95);
+  }
+}
+
+@keyframes aviator-particles-flow {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-120px, -120px, 0);
+  }
+}

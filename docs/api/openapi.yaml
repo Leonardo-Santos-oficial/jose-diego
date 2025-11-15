@@ -1,0 +1,374 @@
+openapi: 3.1.0
+info:
+  title: Aviator Demo API
+  version: 0.1.0
+  description: >-
+    Especificação REST inicial derivada do PRD v1.1. Cada feature deverá atualizar este
+    documento antes da implementação e passar por revisão com o proprietário do produto.
+servers:
+  - url: https://api.demo-aviator.local
+    description: Ambiente local/preview
+  - url: https://api.demo-aviator.prod
+    description: Produção
+security:
+  - userTokenAuth: []
+tags:
+  - name: Auth
+    description: Fluxos de cadastro, login e sessão Supabase
+  - name: Wallet
+    description: Operações de saldo do usuário
+  - name: Bets
+    description: Apostas, cashout e histórico
+  - name: Withdrawals
+    description: Solicitações de saque e auditoria
+  - name: Admin
+    description: Ações exclusivas do painel administrativo
+  - name: Chat
+    description: Mensagens do suporte em tempo real
+paths:
+  /api/auth/signup:
+    post:
+      tags: [Auth]
+      summary: Cria uma conta demo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpPayload'
+      responses:
+        '201':
+          description: Usuário criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '409':
+          $ref: '#/components/responses/UserAlreadyExists'
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Inicia sessão
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginPayload'
+      responses:
+        '200':
+          description: Sessão válida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/wallet:
+    get:
+      tags: [Wallet]
+      summary: Recupera saldo atual
+      security:
+        - userTokenAuth: []
+      responses:
+        '200':
+          description: Saldo retornado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/bets:
+    post:
+      tags: [Bets]
+      summary: Registra até duas apostas para a rodada atual
+      security:
+        - userTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BetRequest'
+      responses:
+        '202':
+          description: Apostas enfileiradas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BetResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          description: Limite de apostas excedido
+  /api/bets/{betId}/cashout:
+    post:
+      tags: [Bets]
+      summary: Solicita cashout manual
+      security:
+        - userTokenAuth: []
+      parameters:
+        - name: betId
+          in: path
+          required: true
+          schema:
+            format: uuid
+            type: string
+      responses:
+        '200':
+          description: Cashout confirmado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashoutResponse'
+        '423':
+          description: Aposta já finalizada
+  /api/withdrawals:
+    post:
+      tags: [Withdrawals]
+      summary: Solicita saque
+      security:
+        - userTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawalRequest'
+      responses:
+        '201':
+          description: Solicitação registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Withdrawal'
+  /api/admin/users/{userId}/balance:
+    patch:
+      tags: [Admin]
+      summary: Ajuste manual de saldo
+      security:
+        - adminTokenAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            format: uuid
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BalanceAdjustment'
+      responses:
+        '200':
+          description: Saldo atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/chat/messages:
+    get:
+      tags: [Chat]
+      summary: Mensagens do canal atual
+      security:
+        - userTokenAuth: []
+      responses:
+        '200':
+          description: Lista de mensagens
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatMessage'
+    post:
+      tags: [Chat]
+      summary: Envia mensagem
+      security:
+        - userTokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessageInput'
+      responses:
+        '201':
+          description: Mensagem registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatMessage'
+components:
+  securitySchemes:
+    userTokenAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token Supabase padrão emitido para usuários finais
+    adminTokenAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token com role `admin` ou chave de serviço
+  schemas:
+    SignUpPayload:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+    LoginPayload:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [user, admin]
+    Wallet:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        balance:
+          type: number
+          format: double
+    BetRequest:
+      type: object
+      required: [stakes]
+      properties:
+        stakes:
+          type: array
+          minItems: 1
+          maxItems: 2
+          items:
+            type: object
+            required: [amount]
+            properties:
+              amount:
+                type: number
+                minimum: 0.5
+                maximum: 500
+              autoCashout:
+                type: number
+                minimum: 1
+    BetResponse:
+      type: object
+      properties:
+        roundId:
+          type: string
+          format: uuid
+        bets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bet'
+    Bet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        stake:
+          type: number
+        status:
+          type: string
+          enum: [queued, in-progress, won, lost]
+    CashoutResponse:
+      type: object
+      properties:
+        betId:
+          type: string
+          format: uuid
+        multiplier:
+          type: number
+        payout:
+          type: number
+    WithdrawalRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 5
+    Withdrawal:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        amount:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+    BalanceAdjustment:
+      type: object
+      required: [delta]
+      properties:
+        delta:
+          type: number
+          description: Valor positivo ou negativo
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        senderRole:
+          type: string
+          enum: [user, admin]
+        body:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    ChatMessageInput:
+      type: object
+      required: [body]
+      properties:
+        body:
+          type: string
+  responses:
+    Unauthorized:
+      description: Token inválido ou ausente
+    Forbidden:
+      description: Permissão insuficiente
+    ValidationError:
+      description: Payload inválido
+    UserAlreadyExists:
+      description: E-mail já registrado

@@ -1,0 +1,15 @@
+{
+	"name": "TXT_History_V",
+	"plugin-id": "Text",
+	"sid": 171714963452245,
+	"isGlobal": true,
+	"instanceVariables": [],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Tween",
+			"name": "Tween",
+			"sid": 544645201294883
+		}
+	],
+	"effectTypes": []
+}

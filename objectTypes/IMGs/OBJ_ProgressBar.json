@@ -1,0 +1,28 @@
+{
+	"name": "OBJ_ProgressBar",
+	"plugin-id": "TiledBg",
+	"sid": 552178740076416,
+	"isGlobal": false,
+	"instanceVariables": [],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Tween",
+			"name": "Tween",
+			"sid": 710124044001961
+		}
+	],
+	"effectTypes": [],
+	"image": {
+		"width": 364,
+		"height": 76,
+		"originX": 0.5,
+		"originY": 0.5,
+		"originalSource": "",
+		"exportFormat": "lossless",
+		"exportQuality": 0.8,
+		"fileType": "image/png",
+		"imageSpriteId": 675094,
+		"useCollisionPoly": true,
+		"tag": ""
+	}
+}

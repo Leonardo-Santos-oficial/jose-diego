@@ -1,0 +1,28 @@
+{
+	"name": "IMG_Logo_1",
+	"plugin-id": "TiledBg",
+	"sid": 301501860808715,
+	"isGlobal": false,
+	"instanceVariables": [],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Tween",
+			"name": "Tween",
+			"sid": 773499536478872
+		}
+	],
+	"effectTypes": [],
+	"image": {
+		"width": 320,
+		"height": 240,
+		"originX": 0.5,
+		"originY": 0.5,
+		"originalSource": "",
+		"exportFormat": "lossless",
+		"exportQuality": 0.8,
+		"fileType": "image/png",
+		"imageSpriteId": 8847564,
+		"useCollisionPoly": true,
+		"tag": ""
+	}
+}

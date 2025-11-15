@@ -1,0 +1,23 @@
+{
+	"name": "TXT_Play",
+	"plugin-id": "Text",
+	"sid": 128921295541213,
+	"isGlobal": true,
+	"instanceVariables": [
+		{
+			"name": "Local",
+			"type": "number",
+			"desc": "",
+			"show": true,
+			"sid": 910802138407702
+		}
+	],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Tween",
+			"name": "Tween",
+			"sid": 864045075889574
+		}
+	],
+	"effectTypes": []
+}

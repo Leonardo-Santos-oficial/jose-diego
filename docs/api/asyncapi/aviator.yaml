@@ -1,0 +1,292 @@
+asyncapi: '2.6.0'
+info:
+  title: Aviator Demo Realtime API
+  version: 0.2.0
+  description: >-
+    Define os canais WebSocket usados para o loop do jogo (Observer/State/Strategy) e para o
+    chat. Esta versão inclui os comandos de aposta/cashout descritos no plano da Fase 4.
+servers:
+  supabaseRealtime:
+    url: wss://realtime.demo-aviator.supabase.co/realtime/v1
+    protocol: wss
+    description: Canal Supabase Realtime compartilhado (game.state/history)
+    security:
+      - userTokenAuth: []
+  nodeBroadcast:
+    url: wss://node-broadcast.demo-aviator.app
+    protocol: wss
+    description: Serviço Node externo responsável por emitir comandos e overrides
+    security:
+      - adminTokenAuth: []
+channels:
+  game.state:
+    description: Fluxo contínuo com o estado atual do round (State pattern)
+    subscribe:
+      summary: Clientes recebem atualizações do Aviator
+      message:
+        $ref: '#/components/messages/GameStateChanged'
+    publish:
+      summary: Operações administrativas (pausa, retomada, crash forçado)
+      message:
+        $ref: '#/components/messages/GameStateOverride'
+  game.history:
+    description: Histórico de multiplicadores recentes (Observer com retenção curta)
+    subscribe:
+      message:
+        $ref: '#/components/messages/GameHistoryUpdated'
+  commands.bet:
+    description: Canal virtual para comandos de aposta (Command + Strategy)
+    publish:
+      summary: Cliente envia aposta
+      message:
+        $ref: '#/components/messages/BetCommand'
+    subscribe:
+      summary: Serviço responde com aceite/erro e snapshot do saldo
+      message:
+        $ref: '#/components/messages/BetResult'
+  commands.cashout:
+    description: Canal para cashout manual ou automático
+    publish:
+      message:
+        $ref: '#/components/messages/CashoutCommand'
+    subscribe:
+      message:
+        $ref: '#/components/messages/CashoutResult'
+  chat.user.{userId}:
+    description: Canal 1:1 entre usuário e suporte
+    parameters:
+      userId:
+        description: UUID do usuário
+        schema:
+          type: string
+          format: uuid
+    subscribe:
+      message:
+        $ref: '#/components/messages/ChatMessageBroadcast'
+    publish:
+      message:
+        $ref: '#/components/messages/ChatMessagePublish'
+  admin.notifications:
+    description: Alertas de novas mensagens, apostas grandes e saques
+    subscribe:
+      message:
+        $ref: '#/components/messages/AdminNotification'
+components:
+  securitySchemes:
+    userTokenAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    adminTokenAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  messages:
+    GameStateChanged:
+      name: GameStateChanged
+      payload:
+        type: object
+        required: [roundId, state, phaseStartedAt]
+        properties:
+          roundId:
+            type: string
+            format: uuid
+          state:
+            type: string
+            enum: [awaitingBets, flying, crashed]
+          multiplier:
+            type: number
+            description: Multiplicador atual (>=1). Disponível em flying/crashed.
+          phaseStartedAt:
+            type: string
+            format: date-time
+          bettingWindow:
+            type: object
+            properties:
+              closesInMs:
+                type: number
+              minBet:
+                type: number
+              maxBet:
+                type: number
+          autopayouts:
+            type: array
+            items:
+              $ref: '#/components/schemas/CashoutSnapshot'
+          houseEdge:
+            type: number
+            description: Percentual usado pela Strategy atual
+    GameStateOverride:
+      name: GameStateOverride
+      payload:
+        type: object
+        required: [action]
+        properties:
+          action:
+            type: string
+            enum: [pause, resume, forceCrash]
+          roundId:
+            type: string
+            format: uuid
+    GameHistoryUpdated:
+      name: GameHistoryUpdated
+      payload:
+        type: object
+        properties:
+          entries:
+            type: array
+            minItems: 1
+            items:
+              type: object
+              required: [roundId, multiplier, bucket]
+              properties:
+                roundId:
+                  type: string
+                  format: uuid
+                multiplier:
+                  type: number
+                bucket:
+                  type: string
+                  enum: [blue, purple, pink]
+                finishedAt:
+                  type: string
+                  format: date-time
+    BetCommand:
+      name: BetCommand
+      payload:
+        $ref: '#/components/schemas/BetCommandInput'
+    BetResult:
+      name: BetResult
+      payload:
+        type: object
+        required: [roundId, userId, status]
+        properties:
+          roundId:
+            type: string
+            format: uuid
+          userId:
+            type: string
+            format: uuid
+          status:
+            type: string
+            enum: [accepted, rejected]
+          reason:
+            type: string
+            description: Enviado apenas quando status = rejected
+          ticketId:
+            type: string
+            description: Identificador da aposta aceita
+          snapshot:
+            $ref: '#/components/schemas/WalletSnapshot'
+    CashoutCommand:
+      name: CashoutCommand
+      payload:
+        $ref: '#/components/schemas/CashoutCommandInput'
+    CashoutResult:
+      name: CashoutResult
+      payload:
+        type: object
+        required: [ticketId, status]
+        properties:
+          ticketId:
+            type: string
+          status:
+            type: string
+            enum: [credited, rejected]
+          cashoutMultiplier:
+            type: number
+          creditedAmount:
+            type: number
+          reason:
+            type: string
+          snapshot:
+            $ref: '#/components/schemas/WalletSnapshot'
+    ChatMessageBroadcast:
+      name: ChatMessageBroadcast
+      payload:
+        $ref: '#/components/schemas/ChatMessage'
+    ChatMessagePublish:
+      name: ChatMessagePublish
+      payload:
+        type: object
+        required: [body]
+        properties:
+          body:
+            type: string
+    AdminNotification:
+      name: AdminNotification
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum: [chat, withdrawal, bet]
+          payload:
+            type: object
+            description: Estrutura específica definida no PRD
+  schemas:
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+          format: uuid
+        senderRole:
+          type: string
+          enum: [user, admin]
+        body:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    BetCommandInput:
+      type: object
+      required: [roundId, userId, amount]
+      properties:
+        roundId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          minimum: 0.5
+        autopayoutMultiplier:
+          type: number
+          minimum: 1
+        strategyKey:
+          type: string
+          description: Identificador da Strategy ativa (ex.: provablyFair)
+    CashoutCommandInput:
+      type: object
+      required: [ticketId, userId]
+      properties:
+        ticketId:
+          type: string
+        userId:
+          type: string
+          format: uuid
+        kind:
+          type: string
+          enum: [manual, auto]
+    WalletSnapshot:
+      type: object
+      properties:
+        balance:
+          type: number
+        updatedAt:
+          type: string
+          format: date-time
+    CashoutSnapshot:
+      type: object
+      properties:
+        ticketId:
+          type: string
+        userId:
+          type: string
+          format: uuid
+        multiplier:
+          type: number

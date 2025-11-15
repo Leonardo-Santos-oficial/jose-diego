@@ -1,0 +1,478 @@
+{
+	"projectFormatVersion": 1,
+	"savedWithRelease": 41602,
+	"name": "Aviator Paper Bet",
+	"runtime": "c3",
+	"useWorker": "auto",
+	"bundleAddons": false,
+	"usedAddons": [
+		{
+			"type": "plugin",
+			"id": "AdvancedRandom",
+			"name": "Aleatoriedade Avançada",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
+			"id": "Arr",
+			"name": "Matriz",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
+			"id": "Audio",
+			"name": "Áudio",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
+			"id": "Keyboard",
+			"name": "Teclado",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
+			"id": "LocalStorage",
+			"name": "Armazenamento local",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
+			"id": "Mouse",
+			"name": "Mouse",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
+			"id": "Particles",
+			"name": "Partículas",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
+			"id": "Sprite",
+			"name": "Sprite",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
+			"id": "Text",
+			"name": "Texto",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
+			"id": "TiledBg",
+			"name": "Plano de Fundo em Blocos",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "plugin",
+			"id": "Touch",
+			"name": "Toque",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
+			"id": "Bullet",
+			"name": "Projétil",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
+			"id": "Flash",
+			"name": "Piscar",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
+			"id": "Sin",
+			"name": "Senóide",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
+			"id": "Timer",
+			"name": "Cronômetro",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "behavior",
+			"id": "Tween",
+			"name": "Interpolação",
+			"author": "Scirra",
+			"bundled": false
+		},
+		{
+			"type": "effect",
+			"id": "blurhorizontal",
+			"name": "Desfoque horizontal",
+			"author": "Scirra",
+			"bundled": false
+		}
+	],
+	"uniqueId": "tn5xn83y6eq",
+	"objectTypes": {
+		"items": [
+			"TXT",
+			"loading",
+			"Text_error_api"
+		],
+		"subfolders": [
+			{
+				"items": [
+					"TXT_History",
+					"TXT_Info",
+					"TXT_Money",
+					"TXT_xxx",
+					"TXT_Partida",
+					"TXT_History_V",
+					"TXT_History_V2",
+					"TXT_Play"
+				],
+				"subfolders": [],
+				"name": "TxT"
+			},
+			{
+				"items": [
+					"Audio",
+					"Keyboard",
+					"Mouse",
+					"Touch",
+					"AdvancedRandom",
+					"LocalStorage",
+					"0_History_H",
+					"0_History_V"
+				],
+				"subfolders": [],
+				"name": "Plugins"
+			},
+			{
+				"items": [
+					"BTN_Config",
+					"BTN_Play",
+					"BTN_Sound",
+					"IMG_Block"
+				],
+				"subfolders": [],
+				"name": "Buttons"
+			},
+			{
+				"items": [
+					"IMG_xxx",
+					"IMG_Nuvem",
+					"IMG_BG",
+					"IMG_Regua",
+					"IMG_01",
+					"IMG_HudProgressbar",
+					"OBJ_ProgressBar",
+					"IMG_Ref",
+					"IMG_xx",
+					"OBJ_Slid_V",
+					"BG",
+					"HUD_Money",
+					"IMG_History"
+				],
+				"subfolders": [
+					{
+						"items": [
+							"OBJ_History",
+							"Slid_Historic"
+						],
+						"subfolders": [],
+						"name": "History"
+					},
+					{
+						"items": [
+							"IMG_Barr",
+							"OBJ_Player"
+						],
+						"subfolders": [],
+						"name": "Principal"
+					}
+				],
+				"name": "IMGs"
+			},
+			{
+				"items": [
+					"IMG_Logo_0",
+					"IMG_Logo_1",
+					"IMG_Logo_2",
+					"IMG_Logo_3",
+					"IMG_Logo_4",
+					"IMG_Logo_5",
+					"IMG_Logo_6",
+					"Particles_Logo"
+				],
+				"subfolders": [],
+				"name": "z_Load"
+			},
+			{
+				"items": [
+					"Particles",
+					"Particles2",
+					"Particles3"
+				],
+				"subfolders": [],
+				"name": "Particulas"
+			}
+		]
+	},
+	"autosaveData": null,
+	"containers": [],
+	"families": {
+		"items": [
+			"Button"
+		],
+		"subfolders": []
+	},
+	"layouts": {
+		"items": [
+			"Load"
+		],
+		"subfolders": []
+	},
+	"eventSheets": {
+		"items": [],
+		"subfolders": []
+	},
+	"rootFileFolders": {
+		"script": {
+			"items": [],
+			"subfolders": []
+		},
+		"sound": {
+			"items": [
+				{
+					"name": "BTN_Click.webm",
+					"type": "audio/webm; codecs=opus",
+					"sid": 400083712541218,
+					"file-info": {
+						"purpose": "none"
+					}
+				},
+				{
+					"name": "Click.webm",
+					"type": "audio/webm; codecs=opus",
+					"sid": 642640967983391,
+					"file-info": {
+						"purpose": "none"
+					}
+				},
+				{
+					"name": "Click1.webm",
+					"type": "audio/webm; codecs=opus",
+					"sid": 758503384348811,
+					"file-info": {
+						"purpose": "none"
+					}
+				},
+				{
+					"name": "Loser.webm",
+					"type": "audio/webm; codecs=opus",
+					"sid": 436934312893833,
+					"file-info": {
+						"purpose": "none"
+					}
+				},
+				{
+					"name": "Winer.webm",
+					"type": "audio/webm; codecs=opus",
+					"sid": 612704682677339,
+					"file-info": {
+						"purpose": "none"
+					}
+				},
+				{
+					"name": "Bubble.webm",
+					"type": "audio/webm; codecs=opus",
+					"sid": 449000227072057,
+					"file-info": {
+						"purpose": "none"
+					}
+				}
+			],
+			"subfolders": []
+		},
+		"music": {
+			"items": [
+				{
+					"name": "Music.webm",
+					"type": "audio/webm; codecs=opus",
+					"sid": 974917840204982,
+					"file-info": {
+						"purpose": "none"
+					}
+				}
+			],
+			"subfolders": []
+		},
+		"video": {
+			"items": [],
+			"subfolders": []
+		},
+		"font": {
+			"items": [
+				{
+					"name": "RobotoMono-VariableFont_wght.ttf",
+					"type": "application/font-sfnt",
+					"sid": 801081551766116,
+					"file-info": {
+						"purpose": "none"
+					}
+				}
+			],
+			"subfolders": []
+		},
+		"icon": {
+			"items": [
+				{
+					"name": "icon-256.png",
+					"type": "image/png",
+					"sid": 270235738452055,
+					"icon-info": {
+						"purpose": "app-icon"
+					}
+				},
+				{
+					"name": "icon-512.png",
+					"type": "image/png",
+					"sid": 856921042730584,
+					"icon-info": {
+						"purpose": "app-icon"
+					}
+				},
+				{
+					"name": "icon-16.png",
+					"type": "image/png",
+					"sid": 847569900991538,
+					"icon-info": {
+						"purpose": "app-icon"
+					}
+				},
+				{
+					"name": "icon-64.png",
+					"type": "image/png",
+					"sid": 975625043971986,
+					"icon-info": {
+						"purpose": "app-icon"
+					}
+				},
+				{
+					"name": "icon-32.png",
+					"type": "image/png",
+					"sid": 412402348354472,
+					"icon-info": {
+						"purpose": "app-icon"
+					}
+				},
+				{
+					"name": "icon-128.png",
+					"type": "image/png",
+					"sid": 391005129526356,
+					"icon-info": {
+						"purpose": "app-icon"
+					}
+				},
+				{
+					"name": "loading-logo.png",
+					"type": "image/png",
+					"sid": 992552150463536,
+					"icon-info": {
+						"purpose": "loading-logo"
+					}
+				}
+			],
+			"subfolders": []
+		},
+		"general": {
+			"items": [],
+			"subfolders": []
+		}
+	},
+	"timelines": {
+		"items": [
+			"Timeline 1"
+		],
+		"subfolders": [
+			{
+				"items": [],
+				"subfolders": []
+			}
+		]
+	},
+	"flowcharts": {
+		"items": [],
+		"subfolders": []
+	},
+	"properties": {
+		"description": "",
+		"version": "1.0",
+		"author": "Paulo Sestari",
+		"authorEmail": "sestari7games@gmail.com",
+		"authorWebsite": "https://vikings7.com.br/s7games/",
+		"appId": "",
+		"pixelRounding": false,
+		"zAxisScale": "normalized",
+		"fov": 0.7853981633974483,
+		"useLoaderLayout": true,
+		"fullscreenMode": "letterbox-scale",
+		"fullscreenQuality": "high",
+		"viewportFit": "auto",
+		"backgroundColor": [
+			0,
+			0,
+			0,
+			0
+		],
+		"splashColor": [
+			0,
+			0,
+			0,
+			0
+		],
+		"useThemeColor": false,
+		"themeColor": [
+			1,
+			1,
+			1,
+			0
+		],
+		"orientations": "portrait",
+		"webgpu": "auto",
+		"gpuPreference": "high-performance",
+		"scriptsType": "module",
+		"framerateMode": "vsync",
+		"sampling": "trilinear",
+		"downscaling": "medium",
+		"renderingMode": "auto",
+		"anisotropicFiltering": "auto",
+		"zNear": 1,
+		"zFar": 10000,
+		"maxSpriteSheetSize": 2048,
+		"loaderStyle": "percent",
+		"preloadSounds": true,
+		"cordovaiOSScheme": "app",
+		"cordovaAndroidScheme": "https",
+		"exportFileStructure": "folders",
+		"uidAllocationMode": "increment"
+	},
+	"viewportWidth": 720,
+	"viewportHeight": 1280,
+	"firstLayout": "Load"
+}

@@ -1,0 +1,26 @@
+{
+	"name": "Button",
+	"plugin-id": "Sprite",
+	"sid": 561707618972361,
+	"instanceVariables": [
+		{
+			"name": "W",
+			"type": "number",
+			"desc": "",
+			"show": false,
+			"sid": 312849927440899
+		},
+		{
+			"name": "H",
+			"type": "number",
+			"desc": "",
+			"show": false,
+			"sid": 625063850364816
+		}
+	],
+	"behaviorTypes": [],
+	"effectTypes": [],
+	"members": [
+		"BTN_Config"
+	]
+}

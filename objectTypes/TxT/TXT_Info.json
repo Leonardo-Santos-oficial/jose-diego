@@ -1,0 +1,17 @@
+{
+	"name": "TXT_Info",
+	"plugin-id": "Text",
+	"sid": 375500437808362,
+	"isGlobal": false,
+	"instanceVariables": [
+		{
+			"name": "Local",
+			"type": "string",
+			"desc": "",
+			"show": true,
+			"sid": 524984898851851
+		}
+	],
+	"behaviorTypes": [],
+	"effectTypes": []
+}

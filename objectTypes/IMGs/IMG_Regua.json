@@ -1,0 +1,36 @@
+{
+	"name": "IMG_Regua",
+	"plugin-id": "TiledBg",
+	"sid": 847966337555491,
+	"isGlobal": true,
+	"instanceVariables": [
+		{
+			"name": "Ativo",
+			"type": "number",
+			"desc": "",
+			"show": true,
+			"sid": 381589713590826
+		}
+	],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Tween",
+			"name": "Tween",
+			"sid": 951748973572241
+		}
+	],
+	"effectTypes": [],
+	"image": {
+		"width": 238,
+		"height": 29,
+		"originX": 0.5,
+		"originY": 0.5,
+		"originalSource": "",
+		"exportFormat": "lossless",
+		"exportQuality": 0.8,
+		"fileType": "image/png",
+		"imageSpriteId": 6529359,
+		"useCollisionPoly": true,
+		"tag": ""
+	}
+}

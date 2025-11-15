@@ -1,0 +1,20 @@
+{
+	"name": "TXT_Partida",
+	"plugin-id": "Text",
+	"sid": 107811317067281,
+	"isGlobal": false,
+	"instanceVariables": [],
+	"behaviorTypes": [
+		{
+			"behaviorId": "Timer",
+			"name": "Timer",
+			"sid": 715683809153467
+		},
+		{
+			"behaviorId": "Tween",
+			"name": "Tween",
+			"sid": 225996607843538
+		}
+	],
+	"effectTypes": []
+}
