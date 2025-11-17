@@ -1,6 +1,7 @@
 const links = [
   { label: 'Início', href: '/', description: 'Landing e onboarding' },
   { label: 'Jogo Aviator', href: '/app', description: 'Área autenticada' },
+  { label: 'Perfil', href: '/profile', description: 'Atualize dados e Pix' },
   { label: 'Painel Admin', href: '/admin', description: 'Operações internas' },
   {
     label: 'Saques',

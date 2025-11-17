@@ -84,11 +84,11 @@ const renderGame = async (snapshot?: { balance: number; updatedAt: string }) =>
 
 describe('AviatorGameClient', () => {
   beforeAll(() => {
-    useAviatorStore.setState = ((...args) => {
+    useAviatorStore.setState = ((...args: Parameters<typeof originalSetState>) => {
       act(() => {
         originalSetState(...args);
       });
-    }) as typeof useAviatorStore.setState;
+    }) as typeof originalSetState;
   });
 
   afterAll(() => {

@@ -1,10 +1,11 @@
 asyncapi: '2.6.0'
 info:
   title: Aviator Demo Realtime API
-  version: 0.2.0
+  version: 0.3.0
   description: >-
-    Define os canais WebSocket usados para o loop do jogo (Observer/State/Strategy) e para o
-    chat. Esta versão inclui os comandos de aposta/cashout descritos no plano da Fase 4.
+    Define os canais WebSocket usados pelo loop serverless do Aviator (Observer/State/Strategy)
+    e pelo chat. Os eventos são publicados pelas rotas Next.js (`app/api/aviator/*`) usando a
+    service role do Supabase e seguem o plano descrito na Fase 4.
 servers:
   supabaseRealtime:
     url: wss://realtime.demo-aviator.supabase.co/realtime/v1
@@ -12,12 +13,6 @@ servers:
     description: Canal Supabase Realtime compartilhado (game.state/history)
     security:
       - userTokenAuth: []
-  nodeBroadcast:
-    url: wss://node-broadcast.demo-aviator.app
-    protocol: wss
-    description: Serviço Node externo responsável por emitir comandos e overrides
-    security:
-      - adminTokenAuth: []
 channels:
   game.state:
     description: Fluxo contínuo com o estado atual do round (State pattern)
@@ -74,10 +69,6 @@ channels:
 components:
   securitySchemes:
     userTokenAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-    adminTokenAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT

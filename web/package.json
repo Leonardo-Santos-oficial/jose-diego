@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "dev:e2e": "cross-env NEXT_PUBLIC_E2E=1 next dev",
+    "tick:dev": "node scripts/aviator-tick-dev.mjs",
+    "tick:invoke": "node scripts/invoke-aviator-tick.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
@@ -44,6 +46,7 @@
     "@vitejs/plugin-react": "4.3.0",
     "autoprefixer": "^10.4.22",
     "cross-env": "^7.0.3",
+    "dotenv": "^17.2.3",
     "eslint": "9.7.0",
     "eslint-config-next": "16.0.3",
     "eslint-config-prettier": "9.1.0",

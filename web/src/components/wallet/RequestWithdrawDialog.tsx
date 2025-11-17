@@ -58,7 +58,6 @@ export function RequestWithdrawDialog({ userId }: RequestWithdrawDialogProps) {
           <DialogTitle>Solicitar saque</DialogTitle>
         </DialogHeader>
         <form action={formAction} className="space-y-4">
-          <input type="hidden" name="userId" value={userId ?? ''} />
           <div className="space-y-2">
             <Label htmlFor="withdraw-amount">Valor</Label>
             <Input

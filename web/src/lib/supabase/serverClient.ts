@@ -4,7 +4,12 @@ import { createServerClient } from '@supabase/ssr';
 const missingEnvMessage =
   'Configure NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no arquivo .env.local.';
 
-export async function getSupabaseServerClient() {
+type ServerClientOptions = {
+  readOnly?: boolean;
+};
+
+export async function getSupabaseServerClient(options: ServerClientOptions = {}) {
+  const { readOnly = false } = options;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -20,9 +25,15 @@ export async function getSupabaseServerClient() {
         return cookieStore.get(name)?.value;
       },
       set(name, value, options) {
+        if (readOnly) {
+          return;
+        }
         cookieStore.set({ name, value, ...options });
       },
       remove(name, options) {
+        if (readOnly) {
+          return;
+        }
         cookieStore.set({ name, value: '', ...options, maxAge: 0 });
       },
     },

@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { signInAction, signOutAction, signUpAction } from '@/app/actions/auth';
 import { authInitialState } from '@/app/actions/auth-state';

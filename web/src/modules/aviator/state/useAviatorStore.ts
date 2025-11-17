@@ -65,3 +65,13 @@ export const useAviatorStore = create<AviatorStore>((set) => ({
   setMusicEnabled: (enabled) => set({ musicEnabled: enabled }),
   setConnected: (connected) => set({ isConnected: connected }),
 }));
+
+declare global {
+  interface Window {
+    __aviatorStore?: typeof useAviatorStore;
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.__aviatorStore = useAviatorStore;
+}

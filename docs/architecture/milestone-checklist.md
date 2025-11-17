@@ -24,10 +24,10 @@ Cada marco só é liberado após revisão com o proprietário do produto.
 - [x] Fluxo de solicitação de saque + status
 - [ ] Swagger/AsyncAPI atualizados + revisão do proprietário
 
-## M3 – Jogo Aviator e Serviço Node
-- [ ] Serviço Node externo configurado (State/Strategy/Observer)
-- [ ] Canais `game.state` e `game.history` publicando via Supabase Realtime
-- [ ] APIs de apostas/cashout documentadas e implementadas
+## M3 – Jogo Aviator e Loop Serverless
+- [x] Loop serverless (Next.js + Supabase) aplicado com State/Strategy/Observer
+- [x] Canais `game.state` e `game.history` publicando via Supabase Realtime
+- [x] APIs de apostas/cashout documentadas e implementadas
 - [ ] UI do jogo consumindo eventos em tempo real
 - [ ] Testes unitários da lógica do multiplicador
 

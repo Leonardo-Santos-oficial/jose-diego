@@ -1,8 +1,10 @@
 'use server';
 
 import type { AuthFormState } from '@/app/actions/auth-state';
+import { redirect } from 'next/navigation';
 import { AuthConfigurationError, AuthNetworkError } from '@/lib/auth/errors';
 import { supabaseAuthProxy } from '@/lib/auth/supabaseAuthProxy';
+import { getBaseUrl } from '@/lib/url/getBaseUrl';
 
 const validateField = (value: FormDataEntryValue | null) => {
   if (typeof value !== 'string' || value.trim().length === 0) {
@@ -81,4 +83,36 @@ export async function signOutAction(): Promise<AuthFormState> {
   } catch (error) {
     return handleAuthError(error, 'Erro ao encerrar sessão.');
   }
+}
+
+export async function signInWithGoogleAction(_: AuthFormState): Promise<AuthFormState> {
+  let authUrl: string | null = null;
+
+  try {
+    const baseUrl = await getBaseUrl();
+    const successPath = process.env.NEXT_PUBLIC_AUTH_SUCCESS_PATH ?? '/app';
+    const callbackUrl = new URL('/auth/callback', baseUrl);
+    callbackUrl.searchParams.set('next', successPath);
+
+    const { data, error } = await authGateway.signInWithOAuth('google', {
+      redirectTo: callbackUrl.toString(),
+    });
+
+    if (error) {
+      return { status: 'error', message: error.message };
+    }
+
+    authUrl = data?.url ?? null;
+  } catch (error) {
+    return handleAuthError(error, 'Não foi possível iniciar login com Google.');
+  }
+
+  if (!authUrl) {
+    return {
+      status: 'error',
+      message: 'Supabase não retornou a URL de autenticação do Google.',
+    };
+  }
+
+  return redirect(authUrl);
 }

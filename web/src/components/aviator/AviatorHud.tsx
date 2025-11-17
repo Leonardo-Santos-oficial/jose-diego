@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { createElement, type ReactElement } from 'react';
 import type {
   BetResultMessage,
   CashoutResultMessage,
@@ -39,105 +40,129 @@ export function AviatorHud({
   walletSnapshot,
   betResult,
   cashoutResult,
-}: AviatorHudProps) {
+}: AviatorHudProps): ReactElement {
   const autopayoutCount = gameState?.autopayouts?.length ?? 0;
   const bettingWindowMs = gameState?.bettingWindow?.closesInMs;
   const closesIn =
     typeof bettingWindowMs === 'number' ? Math.max(0, bettingWindowMs) : null;
 
-  return (
-    <section className="rounded-2xl border border-white/10 bg-slate-950/70 p-5 text-white">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Telemetria</p>
-          <h3 className="text-2xl font-semibold">HUD do piloto</h3>
-        </div>
-        <span
-          className="rounded-full px-4 py-1 text-sm font-semibold"
-          style={{
+  const el = createElement;
+
+  return el(
+    'section',
+    {
+      className: 'rounded-2xl border border-white/10 bg-slate-950/70 p-5 text-white',
+    },
+    el(
+      'div',
+      { className: 'flex items-center justify-between' },
+      el(
+        'div',
+        undefined,
+        el(
+          'p',
+          { className: 'text-sm uppercase tracking-[0.3em] text-slate-400' },
+          'Telemetria'
+        ),
+        el('h3', { className: 'text-2xl font-semibold' }, 'HUD do piloto')
+      ),
+      el(
+        'span',
+        {
+          className: 'rounded-full px-4 py-1 text-sm font-semibold',
+          style: {
             backgroundColor: isConnected
               ? 'rgba(34,197,94,0.15)'
               : 'rgba(248,113,113,0.15)',
             color: isConnected ? '#4ade80' : '#f87171',
-          }}
-        >
-          {isConnected ? 'Conectado ao loop' : 'Offline'}
-        </span>
-      </div>
-
-      <div className="mt-4 grid gap-3 text-xs font-semibold uppercase tracking-wide text-slate-300 sm:grid-cols-3">
-        <HudIndicator
-          label="Fase atual"
-          value={phaseLabel(gameState?.state)}
-          tone="teal"
-        />
-        <HudIndicator
-          label="Mult x"
-          value={`${(gameState?.multiplier ?? 1).toFixed(2)}x`}
-          tone="violet"
-        />
-        <HudIndicator
-          label="Autopayouts"
-          value={autopayoutCount > 0 ? `${autopayoutCount} ativos` : 'Nenhum ativo'}
-          tone="amber"
-        />
-      </div>
-
-      {closesIn !== null && (
-        <p className="mt-2 text-xs text-slate-400">
-          Janela de apostas encerra em {(closesIn / 1000).toFixed(1)}s
-        </p>
-      )}
-
-      <div className="mt-5 grid gap-4 md:grid-cols-3">
-        <div className="relative overflow-hidden rounded-xl border border-white/5 bg-slate-900/60 p-4">
-          <Image
-            src={aviatorAssets.hudMoney}
-            alt="Decoração de saldo"
-            width={180}
-            height={140}
-            className="pointer-events-none absolute -right-4 bottom-0 opacity-50"
-          />
-          <p className="text-sm text-slate-300">Saldo projetado</p>
-          <p className="text-3xl font-semibold text-emerald-300">
-            {currency.format(walletSnapshot?.balance ?? 0)}
-          </p>
-          <p className="text-xs text-slate-400">
-            Atualizado em {walletSnapshot?.updatedAt ?? '—'}
-          </p>
-        </div>
-
-        <HudCard
-          title="Última aposta"
-          status={
-            betResult?.status === 'accepted' ? 'success' : betResult ? 'error' : 'idle'
-          }
-          description={
-            betResult ? `Ticket ${betResult.ticketId ?? '—'}` : 'Sem apostas recentes'
-          }
-          footer={betResult ? `Usuário ${betResult.userId}` : 'Aguardando'}
-          testId="aviator-hud-last-bet"
-        />
-
-        <HudCard
-          title="Cashout"
-          status={
-            cashoutResult?.status === 'credited'
-              ? 'success'
-              : cashoutResult
-                ? 'error'
-                : 'idle'
-          }
-          description={
-            cashoutResult?.status === 'credited'
-              ? `${currency.format(cashoutResult.creditedAmount ?? 0)} @ ${cashoutResult.cashoutMultiplier ?? 0}x`
-              : cashoutResult?.reason ?? 'Sem cashouts'
-          }
-          footer={cashoutResult ? `Ticket ${cashoutResult.ticketId}` : 'Nenhum registro'}
-          testId="aviator-hud-last-cashout"
-        />
-      </div>
-    </section>
+          },
+        },
+        isConnected ? 'Conectado ao loop' : 'Offline'
+      )
+    ),
+    el(
+      'div',
+      {
+        className:
+          'mt-4 grid gap-3 text-xs font-semibold uppercase tracking-wide text-slate-300 sm:grid-cols-3',
+      },
+      el(HudIndicator, {
+        label: 'Fase atual',
+        value: phaseLabel(gameState?.state),
+        tone: 'teal',
+      }),
+      el(HudIndicator, {
+        label: 'Mult x',
+        value: `${(gameState?.multiplier ?? 1).toFixed(2)}x`,
+        tone: 'violet',
+      }),
+      el(HudIndicator, {
+        label: 'Autopayouts',
+        value: autopayoutCount > 0 ? `${autopayoutCount} ativos` : 'Nenhum ativo',
+        tone: 'amber',
+      })
+    ),
+    closesIn !== null
+      ? el(
+          'p',
+          { className: 'mt-2 text-xs text-slate-400' },
+          `Janela de apostas encerra em ${(closesIn / 1000).toFixed(1)}s`
+        )
+      : null,
+    el(
+      'div',
+      { className: 'mt-5 grid gap-4 md:grid-cols-3' },
+      el(
+        'div',
+        {
+          className:
+            'relative overflow-hidden rounded-xl border border-white/5 bg-slate-900/60 p-4',
+        },
+        el(Image, {
+          src: aviatorAssets.hudMoney,
+          alt: 'Decoração de saldo',
+          width: 180,
+          height: 140,
+          className: 'pointer-events-none absolute -right-4 bottom-0 opacity-50',
+        }),
+        el('p', { className: 'text-sm text-slate-300' }, 'Saldo projetado'),
+        el(
+          'p',
+          { className: 'text-3xl font-semibold text-emerald-300' },
+          currency.format(walletSnapshot?.balance ?? 0)
+        ),
+        el(
+          'p',
+          { className: 'text-xs text-slate-400' },
+          `Atualizado em ${walletSnapshot?.updatedAt ?? '—'}`
+        )
+      ),
+      el(HudCard, {
+        title: 'Última aposta',
+        status:
+          betResult?.status === 'accepted' ? 'success' : betResult ? 'error' : 'idle',
+        description: betResult
+          ? `Ticket ${betResult.ticketId ?? '—'}`
+          : 'Sem apostas recentes',
+        footer: betResult ? `Usuário ${betResult.userId}` : 'Aguardando',
+        testId: 'aviator-hud-last-bet',
+      }),
+      el(HudCard, {
+        title: 'Cashout',
+        status:
+          cashoutResult?.status === 'credited'
+            ? 'success'
+            : cashoutResult
+              ? 'error'
+              : 'idle',
+        description:
+          cashoutResult?.status === 'credited'
+            ? `${currency.format(cashoutResult.creditedAmount ?? 0)} @ ${cashoutResult.cashoutMultiplier ?? 0}x`
+            : cashoutResult?.reason ?? 'Sem cashouts',
+        footer: cashoutResult ? `Ticket ${cashoutResult.ticketId}` : 'Nenhum registro',
+        testId: 'aviator-hud-last-cashout',
+      })
+    )
   );
 }
 
@@ -156,17 +181,19 @@ function HudCard({ title, status, description, footer, testId }: HudCardProps) {
     idle: '#94a3b8',
   };
 
-  return (
-    <div
-      className="rounded-xl border border-white/5 bg-slate-900/60 p-4"
-      data-testid={testId}
-    >
-      <p className="text-sm text-slate-300">{title}</p>
-      <p className="text-lg font-semibold" style={{ color: palette[status] }}>
-        {description}
-      </p>
-      <p className="text-xs text-slate-500">{footer}</p>
-    </div>
+  return createElement(
+    'div',
+    {
+      className: 'rounded-xl border border-white/5 bg-slate-900/60 p-4',
+      'data-testid': testId,
+    },
+    createElement('p', { className: 'text-sm text-slate-300' }, title),
+    createElement(
+      'p',
+      { className: 'text-lg font-semibold', style: { color: palette[status] } },
+      description
+    ),
+    createElement('p', { className: 'text-xs text-slate-500' }, footer)
   );
 }
 
@@ -183,17 +210,26 @@ function HudIndicator({ label, value, tone }: HudIndicatorProps) {
     amber: 'bg-amber-500/10 text-amber-200 border-amber-500/40',
   } as const;
 
-  return (
-    <div
-      className={`rounded-lg border px-3 py-2 text-[11px] leading-tight ${toneMap[tone]}`}
-      data-testid={`aviator-indicator-${tone}`}
-    >
-      <span className="block text-[10px] font-medium uppercase tracking-[0.3em] text-slate-400">
-        {label}
-      </span>
-      <span className="mt-1 block text-base normal-case tracking-normal text-white">
-        {value}
-      </span>
-    </div>
+  return createElement(
+    'div',
+    {
+      className: `rounded-lg border px-3 py-2 text-[11px] leading-tight ${toneMap[tone]}`,
+      'data-testid': `aviator-indicator-${tone}`,
+    },
+    createElement(
+      'span',
+      {
+        className:
+          'block text-[10px] font-medium uppercase tracking-[0.3em] text-slate-400',
+      },
+      label
+    ),
+    createElement(
+      'span',
+      {
+        className: 'mt-1 block text-base normal-case tracking-normal text-white',
+      },
+      value
+    )
   );
 }

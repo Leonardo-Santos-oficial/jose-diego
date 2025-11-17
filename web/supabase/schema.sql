@@ -1,7 +1,11 @@
+create extension if not exists pg_net with schema extensions;
+create extension if not exists pg_cron with schema extensions;
+
 create table if not exists public.user_profiles (
   user_id uuid primary key references auth.users not null,
   display_name text,
   pix_key text,
+  cashout_auto_pref boolean not null default false,
   created_at timestamptz default now()
 );
 
@@ -13,7 +17,7 @@ create table if not exists public.wallets (
 
 create table if not exists public.game_rounds (
   id uuid primary key default gen_random_uuid(),
-  status text not null,
+  status text not null default 'awaitingBets',
   crash_multiplier numeric(10,2),
   started_at timestamptz default now(),
   finished_at timestamptz
@@ -46,6 +50,94 @@ create table if not exists public.withdraw_requests (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+alter table if exists public.wallets enable row level security;
+alter table if exists public.bets enable row level security;
+alter table if exists public.withdraw_requests enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'wallets'
+      and policyname = 'wallets_select_own_or_service'
+  ) then
+    execute 'create policy wallets_select_own_or_service
+      on public.wallets
+      for select
+      using (auth.uid() = user_id or auth.role() = ''service_role'')';
+  end if;
+
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'wallets'
+      and policyname = 'wallets_service_role_write'
+  ) then
+    execute 'create policy wallets_service_role_write
+      on public.wallets
+      for all
+      using (auth.role() = ''service_role'')
+      with check (auth.role() = ''service_role'')';
+  end if;
+end$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'bets'
+      and policyname = 'bets_select_own_or_service'
+  ) then
+    execute 'create policy bets_select_own_or_service
+      on public.bets
+      for select
+      using (auth.uid() = user_id or auth.role() = ''service_role'')';
+  end if;
+
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'bets'
+      and policyname = 'bets_service_role_write'
+  ) then
+    execute 'create policy bets_service_role_write
+      on public.bets
+      for all
+      using (auth.role() = ''service_role'')
+      with check (auth.role() = ''service_role'')';
+  end if;
+end$$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'withdraw_requests'
+      and policyname = 'withdraw_requests_select_own_or_service'
+  ) then
+    execute 'create policy withdraw_requests_select_own_or_service
+      on public.withdraw_requests
+      for select
+      using (auth.uid() = user_id or auth.role() = ''service_role'')';
+  end if;
+
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'withdraw_requests'
+      and policyname = 'withdraw_requests_service_role_write'
+  ) then
+    execute 'create policy withdraw_requests_service_role_write
+      on public.withdraw_requests
+      for all
+      using (auth.role() = ''service_role'')
+      with check (auth.role() = ''service_role'')';
+  end if;
+end$$;
 
 create or replace function public.perform_bet(
   p_round_id uuid,
@@ -87,7 +179,7 @@ begin
   end if;
 
   update wallets
-  set balance = balance - p_amount,
+  set balance = wallets.balance - p_amount,
       updated_at = now()
   where user_id = p_user_id
   returning * into v_wallet;
@@ -148,11 +240,78 @@ begin
   end if;
 
   update wallets
-  set balance = balance + v_credit,
+  set balance = wallets.balance + v_credit,
       updated_at = now()
   where user_id = p_user_id
   returning * into v_wallet;
 
   return query select v_bet.id, v_credit, p_multiplier, v_wallet.balance, v_wallet.updated_at;
+end;
+$$;
+
+create table if not exists public.engine_state (
+  id uuid primary key default gen_random_uuid(),
+  current_round_id uuid references public.game_rounds,
+  phase text not null default 'awaitingBets',
+  phase_started_at timestamptz not null default now(),
+  current_multiplier numeric(10,2) not null default 1,
+  target_multiplier numeric(10,2) not null default 2,
+  settings jsonb default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+create unique index if not exists engine_state_singleton_idx
+  on public.engine_state ((1));
+
+create table if not exists public.aviator_tick_config (
+  id boolean primary key default true,
+  endpoint_url text not null,
+  headers jsonb default '{}'::jsonb,
+  interval_ms integer not null default 700,
+  enabled boolean not null default false,
+  updated_at timestamptz not null default now()
+);
+
+alter table if exists public.aviator_tick_config enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public'
+      and tablename = 'aviator_tick_config'
+      and policyname = 'aviator_tick_config_service_only'
+  ) then
+    execute 'create policy aviator_tick_config_service_only
+      on public.aviator_tick_config
+      for all
+      using (auth.role() = ''service_role'')
+      with check (auth.role() = ''service_role'')';
+  end if;
+end$$;
+
+create or replace function public.invoke_aviator_tick()
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  cfg record;
+begin
+  select endpoint_url, headers, interval_ms
+  into cfg
+  from public.aviator_tick_config
+  where id is true and enabled
+  limit 1;
+
+  if not found then
+    return;
+  end if;
+
+  perform net.http_post(
+    url := cfg.endpoint_url,
+    headers := coalesce(cfg.headers, '{}'::jsonb)
+  );
 end;
 $$;

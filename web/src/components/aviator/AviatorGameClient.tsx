@@ -14,11 +14,13 @@ import type { WalletSnapshot } from '@/types/aviator';
 export type AviatorGameClientProps = {
   userId: string;
   initialWalletSnapshot?: WalletSnapshot | null;
+  initialAutoCashoutPreference?: boolean;
 };
 
 export function AviatorGameClient({
   userId,
   initialWalletSnapshot,
+  initialAutoCashoutPreference,
 }: AviatorGameClientProps) {
   const controller = useAviatorController(userId);
   const state = useAviatorStore((store) => store.state);
@@ -59,10 +61,10 @@ export function AviatorGameClient({
         </div>
         <div className="space-y-6">
           <AviatorBetPanel
-            userId={userId}
             controller={controller}
             currentRoundId={state?.roundId}
             currentPhase={state?.state}
+            initialAutoCashoutPreference={initialAutoCashoutPreference}
           />
           <AviatorSoundtrackToggle
             enabled={musicEnabled}

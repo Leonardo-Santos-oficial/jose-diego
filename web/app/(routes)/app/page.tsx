@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { AviatorGameClient } from '@/components/aviator/AviatorGameClient';
 import { getCurrentSession } from '@/lib/auth/session';
 import { getWalletSnapshot } from '@/modules/wallet/server/getWalletSnapshot';
+import { getCashoutPreference } from '@/modules/preferences/server/getCashoutPreference';
 
 export const metadata: Metadata = {
   title: 'Aviator - Demo',
@@ -18,9 +19,18 @@ export default async function AviatorAppPage() {
   }
 
   let walletSnapshot: Awaited<ReturnType<typeof getWalletSnapshot>>;
+  let autoCashoutPreference = false;
 
   try {
-    walletSnapshot = await getWalletSnapshot(session.user.id);
+    const [snapshot, preference] = await Promise.all([
+      getWalletSnapshot(session.user.id),
+      getCashoutPreference(session.user.id).catch((error) => {
+        console.error('Falha ao buscar preferência de cashout:', error);
+        return false;
+      }),
+    ]);
+    walletSnapshot = snapshot;
+    autoCashoutPreference = preference;
   } catch (error) {
     console.error('Falha ao buscar carteira inicial do Aviator:', error);
     walletSnapshot = null;
@@ -31,6 +41,7 @@ export default async function AviatorAppPage() {
       <AviatorGameClient
         userId={session.user.id}
         initialWalletSnapshot={walletSnapshot}
+        initialAutoCashoutPreference={autoCashoutPreference}
       />
     </div>
   );

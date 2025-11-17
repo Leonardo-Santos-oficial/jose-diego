@@ -3,7 +3,7 @@ import { getSupabaseServerClient } from '@/lib/supabase/serverClient';
 
 export async function getCurrentSession(): Promise<Session | null> {
   try {
-    const supabase = await getSupabaseServerClient();
+    const supabase = await getSupabaseServerClient({ readOnly: true });
     const { data } = await supabase.auth.getSession();
     return data.session ?? null;
   } catch (error) {

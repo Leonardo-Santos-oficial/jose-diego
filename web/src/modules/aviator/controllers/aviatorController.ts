@@ -14,6 +14,10 @@ export class AviatorController {
   private readonly audio: AviatorAudioEngine;
   private readonly userId: string;
   private static readonly MUSIC_STORAGE_KEY = 'aviator:music-enabled';
+  private static readonly CLIENT_TICK_INTERVAL_MS = 750;
+  private static readonly ENABLE_CLIENT_TICK =
+    process.env.NEXT_PUBLIC_AVIATOR_ENABLE_CLIENT_TICK !== '0';
+  private tickTimer?: number;
 
   constructor(
     userId: string,
@@ -38,12 +42,14 @@ export class AviatorController {
     );
 
     useAviatorStore.getState().setConnected(true);
+    this.startClientTickLoop();
     return () => this.disconnect();
   }
 
   disconnect() {
     this.client.unsubscribe();
     useAviatorStore.getState().setConnected(false);
+    this.stopClientTickLoop();
   }
 
   toggleMusic(enabled: boolean) {
@@ -87,6 +93,29 @@ export class AviatorController {
 
   private handleWalletSnapshot(payload: WalletSnapshot) {
     useAviatorStore.getState().syncWalletSnapshot(payload);
+  }
+
+  private startClientTickLoop() {
+    if (!AviatorController.ENABLE_CLIENT_TICK || typeof window === 'undefined') {
+      return;
+    }
+
+    if (this.tickTimer) {
+      return;
+    }
+
+    this.tickTimer = window.setInterval(() => {
+      fetch('/api/aviator/tick', { method: 'POST' }).catch(() => {
+        /* ignora erros transitórios */
+      });
+    }, AviatorController.CLIENT_TICK_INTERVAL_MS);
+  }
+
+  private stopClientTickLoop() {
+    if (this.tickTimer) {
+      window.clearInterval(this.tickTimer);
+      this.tickTimer = undefined;
+    }
   }
 
   private applyMusicPreference(enabled: boolean, persist: boolean) {

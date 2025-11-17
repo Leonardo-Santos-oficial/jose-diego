@@ -8,6 +8,8 @@ export interface AviatorActionState<TData = unknown> {
 
 export const initialAviatorActionState: AviatorActionState = { status: 'idle' };
 
-export function createInitialAviatorActionState<TData = unknown>(): AviatorActionState<TData> {
+export function createInitialAviatorActionState<
+  TData = unknown,
+>(): AviatorActionState<TData> {
   return { status: 'idle' };
 }

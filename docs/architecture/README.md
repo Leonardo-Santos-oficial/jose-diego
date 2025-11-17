@@ -1,6 +1,8 @@
 # Documentação Arquitetural
 
 - `node-service.md`: responsabilidades e requisitos operacionais do serviço Node externo.
+- `aviator-serverless.md`: nova proposta para rodar o Aviator como funções serverless dentro do
+  mesmo deploy Vercel (Observer + State + Strategy + Command + Template Method).
 - `node-realtime-flow.excalidraw` / `.svg`: diagrama do fluxo Node → Supabase Realtime →
   clientes Next.js.
 - `milestone-checklist.md`: lista de verificação por milestone com caixas de seleção.
@@ -18,19 +20,14 @@ Todos os arquivos devem ser atualizados antes de cada revisão oficial.
 
 ## Plano Fase 4 – Loop do Aviator
 
-- **Padrões principais:**
-  - **Observer** para distribuição dos eventos de rodada (`game.state`, `game.history`) via Supabase Realtime; o serviço Node publica como *subject* e clientes Next/Admin consomem como *observers*.
-  - **State** para o ciclo do jogo (`awaitingBets`, `flying`, `crashed`), garantindo regras claras para entrada/saída e habilitando simulações no backend.
-  - **Strategy** para o cálculo do multiplicador/cashout (permite alternar entre RNG provably-fair e seeds controladas pelo admin sem modificar o restante do loop).
-  - **Command** para apostas/cashouts: cada requisição vira um comando validado no servidor, aplicando SRP e deixando fácil auditar/registrar.
-- **Serviço Node (supabase/functions ou worker dedicado):** expõe APIs `POST /bets` e `POST /cashout` que instanciam os comandos, validam saldo (Reuse `WalletRepository`) e emitem eventos no canal observer.
-- **Integração com Next.js:**
-  - Server Actions `placeBetAction` e `cashoutAction` atuam como fachada, chamando o serviço Node (ou Supabase Edge Function) e revalidando o saldo.
-  - UI do jogo consome os canais `game.state` e `game.history` através de um adapter em `src/lib/realtime`, mantendo hooks finos no cliente.
+- Consulte `aviator-serverless.md` para o desenho atualizado que substitui o serviço Node por
+  funções serverless dentro do Next.js. O documento mantém os padrões originais (Observer, State,
+  Strategy, Command) e adiciona Template Method + Facade para simplificar o tick loop.
+
 - **Testes e e2e:**
   - Vitest cobre multiplicador (`Strategy`) e máquina de estados do loop.
   - Playwright (nova suíte `tests/e2e/aviator.spec.ts`) verifica “apostar → cashout → atualizar saldo”.
 - **Próximos passos imediatos:**
   1. Especificar contratos (`BetCommand`, `CashoutCommand`, payloads Realtime) em `docs/api/asyncapi/aviator.yaml`.
-  2. Prototipar o serviço Node com *Observer + State + Strategy* e hooks de auditoria.
+  2. Implementar o engine serverless descrito no novo documento e publicar eventos via Supabase.
   3. Criar o adapter Realtime no front e componentes básicos do jogo.

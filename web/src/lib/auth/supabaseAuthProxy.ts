@@ -11,6 +11,12 @@ type Credentials = {
   password: string;
 };
 
+type OAuthProvider = 'google';
+
+type OAuthOptions = {
+  redirectTo?: string;
+};
+
 type SupabaseServerClient = Awaited<ReturnType<typeof getSupabaseServerClient>>;
 
 type ClientFactory = () => Promise<SupabaseServerClient>;
@@ -49,7 +55,8 @@ async function ensureSupabaseReachable(url?: string) {
   }
 }
 
-const defaultProbe: ConnectivityProbe = () => ensureSupabaseReachable(process.env.NEXT_PUBLIC_SUPABASE_URL);
+const defaultProbe: ConnectivityProbe = () =>
+  ensureSupabaseReachable(process.env.NEXT_PUBLIC_SUPABASE_URL);
 
 export class SupabaseAuthProxy {
   constructor(
@@ -75,6 +82,19 @@ export class SupabaseAuthProxy {
   async signOut() {
     const client = await this.getClient();
     return client.auth.signOut();
+  }
+
+  async signInWithOAuth(provider: OAuthProvider, options?: OAuthOptions) {
+    const client = await this.getClient();
+    return client.auth.signInWithOAuth({
+      provider,
+      options,
+    });
+  }
+
+  async exchangeCodeForSession(code: string) {
+    const client = await this.getClient();
+    return client.auth.exchangeCodeForSession(code);
   }
 }
 

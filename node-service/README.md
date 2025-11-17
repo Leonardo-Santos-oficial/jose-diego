@@ -1,5 +1,9 @@
 # Aviator Node Service
 
+> Importante: o loop do Aviator agora roda como funções serverless dentro do projeto Next.js
+> (`web/src/modules/aviator/serverless`). Este diretório permanece apenas como referência
+> histórica e não é mais utilizado nos ambientes atuais.
+
 Serviço responsável por executar o loop do jogo Aviator, publicar eventos no Supabase Realtime e receber comandos de aposta/cashout.
 
 ## Requisitos

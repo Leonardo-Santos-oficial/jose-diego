@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { WithdrawService } from '@/modules/withdraw/services/withdrawService';
 import type { WithdrawActionState } from '@/app/actions/withdraw-state';
+import { getCurrentSession } from '@/lib/auth/session';
 
 const withdrawService = new WithdrawService();
 
@@ -12,7 +13,8 @@ export async function requestWithdrawAction(
 ): Promise<WithdrawActionState> {
   'use server';
 
-  const userId = safeString(formData.get('userId'));
+  const session = await getCurrentSession();
+  const userId = session?.user.id;
   const amount = Number(formData.get('amount'));
 
   if (!userId) {
