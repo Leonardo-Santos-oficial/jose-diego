@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { getSupabaseMiddlewareClient } from '@/lib/supabase/middlewareClient';
+import { isAdminSession } from '@/lib/auth/roles';
 
 const ADMIN_PATH = '/admin';
 const APP_PATH = '/app';
@@ -9,30 +10,15 @@ const E2E_BYPASS_PATHS = ['/admin/realtime-e2e'];
 
 export async function proxy(request: NextRequest) {
   const response = NextResponse.next();
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!url || !anonKey) {
-    console.warn('Supabase env vars ausentes para proxy.');
-    return response;
+  let session = null;
+  try {
+    const supabase = getSupabaseMiddlewareClient(request, response);
+    const { data } = await supabase.auth.getSession();
+    session = data.session ?? null;
+  } catch (error) {
+    console.warn('[proxy] Supabase não configurado corretamente:', error);
   }
-
-  const supabase = await createServerClient(url, anonKey, {
-    cookies: {
-      get(name) {
-        return request.cookies.get(name)?.value;
-      },
-      set(name, value, options) {
-        response.cookies.set({ name, value, ...options });
-      },
-      remove(name, options) {
-        response.cookies.set({ name, value: '', ...options, maxAge: 0 });
-      },
-    },
-  });
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
 
   const pathname = request.nextUrl.pathname;
   if (isE2EEnabled && E2E_BYPASS_PATHS.some((route) => pathname.startsWith(route))) {
@@ -45,14 +31,15 @@ export async function proxy(request: NextRequest) {
   if (!session && (requiresAuth || requiresAdmin)) {
     const url = request.nextUrl.clone();
     url.pathname = PUBLIC_REDIRECT;
+    url.searchParams.set('unauthorized', '1');
     return NextResponse.redirect(url);
   }
 
   if (requiresAdmin) {
-    const role = session?.user.app_metadata?.role;
-    if (role !== 'admin') {
+    if (!session || !isAdminSession(session)) {
       const url = request.nextUrl.clone();
-      url.pathname = APP_PATH;
+      url.pathname = PUBLIC_REDIRECT;
+      url.searchParams.set('unauthorized', '1');
       return NextResponse.redirect(url);
     }
   }

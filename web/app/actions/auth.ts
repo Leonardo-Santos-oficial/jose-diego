@@ -79,10 +79,10 @@ export async function signInAction(
 export async function signOutAction(): Promise<AuthFormState> {
   try {
     await authGateway.signOut();
-    return { status: 'success', message: 'Sessão encerrada.' };
   } catch (error) {
     return handleAuthError(error, 'Erro ao encerrar sessão.');
   }
+  redirect('/');
 }
 
 export async function signInWithGoogleAction(_: AuthFormState): Promise<AuthFormState> {

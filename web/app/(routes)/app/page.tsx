@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { AviatorGameClient } from '@/components/aviator/AviatorGameClient';
-import { getCurrentSession } from '@/lib/auth/session';
+import { UserChatWidgetServer } from '@/components/chat/UserChatWidgetServer';
+import { getCurrentSession, getDisplayName } from '@/lib/auth/session';
 import { getWalletSnapshot } from '@/modules/wallet/server/getWalletSnapshot';
 import { getCashoutPreference } from '@/modules/preferences/server/getCashoutPreference';
 
@@ -17,6 +18,8 @@ export default async function AviatorAppPage() {
   if (!session) {
     redirect('/');
   }
+
+  const displayName = getDisplayName(session);
 
   let walletSnapshot: Awaited<ReturnType<typeof getWalletSnapshot>>;
   let autoCashoutPreference = false;
@@ -37,12 +40,13 @@ export default async function AviatorAppPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto flex max-w-6xl flex-col gap-6 p-4 md:p-6">
       <AviatorGameClient
         userId={session.user.id}
         initialWalletSnapshot={walletSnapshot}
         initialAutoCashoutPreference={autoCashoutPreference}
       />
+      <UserChatWidgetServer userId={session.user.id} userName={displayName} />
     </div>
   );
 }

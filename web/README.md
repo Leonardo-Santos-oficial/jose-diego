@@ -20,6 +20,7 @@ npm run lint        # roda lint do Next.js
 npm run typecheck   # verifica tipos TypeScript
 npm run test        # executa vitest
 npm run test:e2e    # roda Playwright
+npm run lighthouse:landing # roda Lighthouse contra http://localhost:3000 e salva relatório
 ```
 
 ## Variáveis de ambiente
@@ -44,6 +45,10 @@ E2E_PLAYER_BALANCE=500           # opcional (default 500)
 ```
 
 Essas chaves são necessárias para o cliente Supabase e futuras server actions.
+
+## Setup do banco Supabase
+
+O app espera as tabelas/funções descritas em `supabase/schema.sql`. Rode esse arquivo no SQL Editor do Supabase ou via CLI/psql sempre que subir o backend em um projeto novo. Patches adicionais ficam em `supabase/sql/patches`. Se o login travar com `Falha ao buscar preferências de cashout: column user_profiles.cashout_auto_pref does not exist`, execute o patch `supabase/sql/patches/20251118_add_cashout_auto_pref.sql` na instância para criar a coluna `cashout_auto_pref`.
 
 ## Fluxo E2E (Admin Realtime)
 
@@ -76,6 +81,12 @@ As rotas `/api/tests/*` e a página `/admin/realtime-e2e` só respondem quando `
 
 O helper `/api/tests/player-session/login` cria a sessão via Supabase Auth e `/api/tests/wallet/topup`
 garante saldo consistente antes de cada teste. Ambos só funcionam quando `NEXT_PUBLIC_E2E=1` e `AVIATOR_E2E=1`.
+
+## Checklist de Performance/SEO
+
+- **Metadata completa:** `app/layout.tsx` define Open Graph, Twitter Card, canonical e palavras-chave.
+- **Imagens otimizadas:** hero usa `poster` local em `/aviator/images/*` e componentes institucionais usam `next/image`.
+- **Auditoria automatizada:** `npm run lighthouse:landing` (dev server rodando) gera `test-results/lighthouse-report.html` com as quatro categorias principais.
 
 ## Testes de integração com Supabase
 

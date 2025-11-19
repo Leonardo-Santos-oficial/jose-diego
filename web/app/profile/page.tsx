@@ -19,7 +19,7 @@ export default async function ProfilePage() {
   const profile = await getUserProfile(session.user.id);
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6">
+    <div className="mx-auto flex max-w-4xl flex-col gap-6 p-4 md:p-8">
       <ProfileForm
         initialDisplayName={profile.displayName}
         initialPixKey={profile.pixKey}

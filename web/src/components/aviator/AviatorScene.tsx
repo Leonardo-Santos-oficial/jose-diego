@@ -25,17 +25,17 @@ export function AviatorScene({ state, history }: AviatorSceneProps) {
   const recentHistory = history.slice(-5).reverse();
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950/80 p-6 text-white">
+    <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-950/80 p-4 text-white md:p-6">
       <div
         className="aviator-particles pointer-events-none absolute inset-0"
         aria-hidden="true"
       />
-      <div className="relative z-10 flex items-start justify-between gap-4">
+      <div className="relative z-10 flex flex-col items-start justify-between gap-4 md:flex-row">
         <div>
           <p className="text-sm uppercase tracking-[0.35em] text-teal-200">
             Aviator Paper
           </p>
-          <h2 className="text-3xl font-semibold text-white">Loop em tempo real</h2>
+          <h2 className="text-2xl font-semibold text-white md:text-3xl">Loop em tempo real</h2>
           <p className="text-sm text-slate-300">
             Canal `game.state` sincroniza HUD e histórico enquanto o node-service publica
             mudanças via Observer.

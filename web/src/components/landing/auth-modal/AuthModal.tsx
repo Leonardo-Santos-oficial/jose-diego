@@ -216,7 +216,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
               </p>
             ) : null}
             <div
-              className="rounded-2xl border border-white/5 bg-slate-900/40 p-3 text-xs text-slate-400 sm:text-sm"
+              className="rounded-2xl border border-white/5 bg-slate-900/40 p-3 text-xs text-slate-300 sm:text-sm"
               aria-live="polite"
             >
               <p className="sm:hidden">

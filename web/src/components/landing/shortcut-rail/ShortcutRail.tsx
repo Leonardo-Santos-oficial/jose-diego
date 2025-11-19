@@ -5,6 +5,7 @@ type Shortcut = {
   description: string;
   status: string;
   href: string;
+  action?: 'auth-required';
 };
 
 const shortcuts: Shortcut[] = [
@@ -13,13 +14,27 @@ const shortcuts: Shortcut[] = [
     label: 'Carteira',
     description: 'Saldo virtual',
     status: 'Em construção',
-    href: '#wallet',
+    href: '/app',
+    action: 'auth-required',
   },
-  { label: 'Admin', description: 'Controle total', status: 'Protegido', href: '#admin' },
+  { label: 'Admin', description: 'Controle total', status: 'Protegido', href: '/admin' },
 ];
 
-function ShortcutCard({ label, description, status, href }: Shortcut) {
-  const card = (
+type ShortcutRailProps = {
+  isAuthenticated: boolean;
+  onAuthRequest: () => void;
+};
+
+function ShortcutCard({
+  label,
+  description,
+  status,
+  href,
+  action,
+  isAuthenticated,
+  onAuthRequest,
+}: Shortcut & ShortcutRailProps) {
+  const cardContent = (
     <>
       <span className="text-base font-semibold">{label}</span>
       <span className="text-sm text-slate-300">{description}</span>
@@ -30,31 +45,37 @@ function ShortcutCard({ label, description, status, href }: Shortcut) {
   );
 
   const className =
-    'group flex flex-col gap-1 rounded-2xl border border-transparent bg-slate-900/70 px-5 py-4 text-slate-100 transition duration-150 hover:-translate-y-0.5 hover:border-rose-300/60 focus-visible:border-rose-300/60 focus-visible:outline-none';
+    'group flex min-w-[160px] flex-col gap-1 rounded-2xl border border-transparent bg-slate-900/70 px-5 py-4 text-slate-100 transition duration-150 hover:-translate-y-0.5 hover:border-rose-300/60 focus-visible:border-rose-300/60 focus-visible:outline-none sm:min-w-0';
 
-  if (href.startsWith('/')) {
+  if (action === 'auth-required' && !isAuthenticated) {
     return (
-      <Link href={href} className={className} prefetch={false}>
-        {card}
-      </Link>
+      <button type="button" onClick={onAuthRequest} className={className}>
+        {cardContent}
+      </button>
     );
   }
 
   return (
-    <a href={href} className={className}>
-      {card}
-    </a>
+    <Link href={href} className={className} prefetch={false}>
+      {cardContent}
+    </Link>
   );
 }
 
-export function ShortcutRail() {
+export function ShortcutRail({ isAuthenticated, onAuthRequest }: ShortcutRailProps) {
   return (
     <aside
       aria-label="Atalhos para módulos"
-      className="flex min-w-0 flex-col gap-4 border-r border-slate-700/30 bg-slate-950/80 px-6 py-8 backdrop-blur-2xl lg:sticky lg:top-0"
+      className="flex snap-x snap-mandatory gap-4 overflow-x-auto border-b border-slate-700/30 bg-slate-950/80 px-4 py-6 backdrop-blur-2xl scrollbar-hide md:sticky md:top-4 md:grid md:grid-cols-1 md:border-b-0 md:border-r md:px-6 md:py-8"
     >
       {shortcuts.map((shortcut) => (
-        <ShortcutCard key={shortcut.label} {...shortcut} />
+        <div key={shortcut.label} className="snap-start">
+          <ShortcutCard
+            {...shortcut}
+            isAuthenticated={isAuthenticated}
+            onAuthRequest={onAuthRequest}
+          />
+        </div>
       ))}
     </aside>
   );

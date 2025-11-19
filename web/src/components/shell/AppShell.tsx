@@ -17,7 +17,9 @@ export function AppShell({ session, children }: AppShellProps) {
 
   return (
     <div className="flex min-h-screen bg-slate-950">
-      <SidebarNav isAuthenticated={Boolean(session)} />
+      <div className="hidden lg:block">
+        <SidebarNav isAuthenticated={Boolean(session)} />
+      </div>
       <div className="flex flex-1 flex-col">
         <AppHeader
           isAuthenticated={Boolean(session)}
@@ -26,7 +28,7 @@ export function AppShell({ session, children }: AppShellProps) {
           balance={session ? PLACEHOLDER_BALANCE : '—'}
           userId={session?.user.id}
         />
-        <main className="flex-1 bg-slate-950 px-6 py-8">{children}</main>
+        <main className="flex-1 bg-slate-950">{children}</main>
       </div>
     </div>
   );

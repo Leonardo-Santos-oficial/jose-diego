@@ -23,7 +23,7 @@ export function AdminUserTable({ users }: AdminUserTableProps) {
   );
 
   return (
-    <section className="rounded-3xl border border-slate-800/60 bg-slate-950/80 p-6 shadow-[0_25px_80px_rgba(2,6,23,0.35)]">
+    <section className="rounded-3xl border border-slate-800/60 bg-slate-950/80 p-4 shadow-[0_25px_80px_rgba(2,6,23,0.35)] md:p-6">
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-slate-50">

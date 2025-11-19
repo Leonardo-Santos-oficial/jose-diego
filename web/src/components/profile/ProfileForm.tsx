@@ -27,7 +27,7 @@ export function ProfileForm({
   return (
     <form
       action={formAction}
-      className="space-y-6 rounded-3xl border border-white/10 bg-slate-950/80 p-6 shadow-[0_0_40px_rgba(15,118,110,0.2)]"
+      className="space-y-6 rounded-3xl border border-white/10 bg-slate-950/80 p-4 shadow-[0_0_40px_rgba(15,118,110,0.2)] md:p-6"
     >
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-teal-300">

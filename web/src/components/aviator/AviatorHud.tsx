@@ -51,11 +51,11 @@ export function AviatorHud({
   return el(
     'section',
     {
-      className: 'rounded-2xl border border-white/10 bg-slate-950/70 p-5 text-white',
+      className: 'rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-white md:p-5',
     },
     el(
       'div',
-      { className: 'flex items-center justify-between' },
+      { className: 'flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between' },
       el(
         'div',
         undefined,
@@ -69,7 +69,7 @@ export function AviatorHud({
       el(
         'span',
         {
-          className: 'rounded-full px-4 py-1 text-sm font-semibold',
+          className: 'w-fit rounded-full px-4 py-1 text-sm font-semibold',
           style: {
             backgroundColor: isConnected
               ? 'rgba(34,197,94,0.15)'

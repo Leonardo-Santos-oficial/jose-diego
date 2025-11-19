@@ -1,14 +1,6 @@
 'use client';
 
-import {
-  startTransition,
-  useActionState,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from 'react';
+import { useActionState, useMemo, useState, useTransition } from 'react';
 
 import type { AviatorController } from '@/modules/aviator/controllers/aviatorController';
 import { placeBetAction, cashoutAction } from '@/app/actions/aviator';
@@ -52,7 +44,6 @@ export function AviatorBetPanel({
     initialAutoCashoutPreference ? 'auto' : 'manual'
   );
   const lastBetResult = useAviatorStore((state) => state.betResult);
-  const lastTicketIdRef = useRef<string | undefined>(undefined);
   const [, startPreferenceTransition] = useTransition();
 
   const parsedAmount = useMemo(() => Number(amount.replace(',', '.')), [amount]);
@@ -60,22 +51,6 @@ export function AviatorBetPanel({
 
   const isPhaseBlocked = !currentRoundId || currentPhase !== 'awaitingBets';
   const isBetDisabled = betPending || isPhaseBlocked || !amountValidation.ok;
-
-  useEffect(() => {
-    const lastTicketId = lastBetResult?.ticketId;
-    if (!lastTicketId || lastBetResult?.status !== 'accepted') {
-      return;
-    }
-
-    if (lastTicketIdRef.current === lastTicketId) {
-      return;
-    }
-
-    startTransition(() => {
-      setTicketId(lastTicketId);
-      lastTicketIdRef.current = lastTicketId;
-    });
-  }, [lastBetResult]);
 
   const betAction = useMemo(
     () => async (formData: FormData) => {
@@ -136,7 +111,7 @@ export function AviatorBetPanel({
               step={0.5}
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
-              className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/50 px-3 py-2 text-white focus:border-teal-400 focus:outline-none"
+              className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900/50 px-4 py-3 text-lg text-white focus:border-teal-400 focus:outline-none"
               disabled={betPending || isPhaseBlocked}
             />
             {!amountValidation.ok ? (
@@ -157,7 +132,7 @@ export function AviatorBetPanel({
               step={0.5}
               value={autopayout}
               onChange={(event) => setAutopayout(event.target.value)}
-              className="mt-2 w-full accent-teal-400"
+              className="mt-4 w-full accent-teal-400 h-6"
               disabled={betPending || isPhaseBlocked}
             />
           </div>
@@ -166,7 +141,7 @@ export function AviatorBetPanel({
             type="submit"
             disabled={isBetDisabled}
             className={cn(
-              'w-full rounded-xl border border-teal-400/40 bg-teal-500/80 px-4 py-2 font-semibold text-slate-900 transition',
+              'w-full rounded-xl border border-teal-400/40 bg-teal-500/80 px-4 py-4 text-lg font-bold text-slate-900 transition active:scale-[0.98]',
               isBetDisabled && 'cursor-not-allowed opacity-50'
             )}
           >
@@ -218,7 +193,7 @@ export function AviatorBetPanel({
               type="text"
               value={ticketId}
               onChange={(event) => setTicketId(event.target.value)}
-              className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900/50 px-3 py-2 text-white focus:border-teal-400 focus:outline-none"
+              className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900/50 px-4 py-3 text-white focus:border-teal-400 focus:outline-none"
               placeholder="Cole o UUID do ticket"
               disabled={cashoutPending}
               required
@@ -226,12 +201,12 @@ export function AviatorBetPanel({
           </div>
 
           <input type="hidden" name="kind" value={cashoutKind} />
-          <div className="flex items-center justify-between rounded-lg border border-white/10 bg-slate-900/40 px-3 py-2 text-sm text-slate-200">
+          <div className="flex items-center justify-between rounded-xl border border-white/10 bg-slate-900/40 px-4 py-3 text-sm text-slate-200">
             <div>
               <p className="font-semibold">Auto cashout</p>
               <p className="text-xs text-slate-400">
                 {cashoutKind === 'auto'
-                  ? 'Ativo: o servidor encerrará automaticamente quando disponível.'
+                  ? 'Ativo: o servidor encerrará automaticamente.'
                   : 'Manual: use o botão principal para encerrar.'}
               </p>
             </div>
@@ -239,7 +214,7 @@ export function AviatorBetPanel({
               type="button"
               onClick={toggleAutoCashout}
               className={cn(
-                'rounded-full border px-4 py-1 text-xs font-semibold uppercase tracking-wide transition',
+                'rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-wide transition',
                 cashoutKind === 'auto'
                   ? 'border-emerald-400/50 bg-emerald-500/20 text-emerald-200'
                   : 'border-white/20 bg-transparent text-slate-300'
@@ -253,7 +228,7 @@ export function AviatorBetPanel({
             type="submit"
             disabled={cashoutPending}
             className={cn(
-              'w-full rounded-xl border border-fuchsia-400/40 bg-fuchsia-500/80 px-4 py-2 font-semibold text-slate-900 transition',
+              'w-full rounded-xl border border-fuchsia-400/40 bg-fuchsia-500/80 px-4 py-4 text-lg font-bold text-slate-900 transition active:scale-[0.98]',
               cashoutPending && 'cursor-not-allowed opacity-50'
             )}
           >

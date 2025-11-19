@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "lighthouse:landing": "lighthouse http://localhost:3000 --only-categories=performance,accessibility,best-practices,seo --preset=desktop --enable-error-reporting=false --output html --output-path ./test-results/lighthouse-report.html"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -53,6 +54,7 @@
     "eslint-plugin-prettier": "5.1.3",
     "husky": "9.1.0",
     "jsdom": "^24.0.0",
+    "lighthouse": "^12.2.0",
     "lint-staged": "15.5.2",
     "msw": "2.3.5",
     "playwright": "1.56.1",

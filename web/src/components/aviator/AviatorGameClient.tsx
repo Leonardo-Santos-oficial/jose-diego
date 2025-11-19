@@ -48,7 +48,7 @@ export function AviatorGameClient({
         style={{ backgroundImage: `url(${aviatorAssets.background})` }}
         aria-hidden="true"
       />
-      <div className="relative grid gap-6 p-6 lg:grid-cols-[1.6fr_1fr]">
+      <div className="relative flex flex-col gap-6 p-4 lg:grid lg:grid-cols-[1.6fr_1fr] lg:p-6">
         <div className="space-y-6">
           <AviatorScene state={state} history={history} />
           <AviatorHud
