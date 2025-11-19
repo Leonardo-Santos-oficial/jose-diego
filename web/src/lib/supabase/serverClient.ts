@@ -21,20 +21,20 @@ export async function getSupabaseServerClient(options: ServerClientOptions = {})
 
   return createServerClient(url, anonKey, {
     cookies: {
-      get(name) {
-        return cookieStore.get(name)?.value;
+      getAll() {
+        return cookieStore.getAll();
       },
-      set(name, value, options) {
+      setAll(cookiesToSet) {
         if (readOnly) {
           return;
         }
-        cookieStore.set({ name, value, ...options });
-      },
-      remove(name, options) {
-        if (readOnly) {
-          return;
+        try {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        } catch {
+          // Ignorar erro se chamado de Server Component
         }
-        cookieStore.set({ name, value: '', ...options, maxAge: 0 });
       },
     },
   });

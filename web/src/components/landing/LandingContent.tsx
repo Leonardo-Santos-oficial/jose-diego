@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useMemo, useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signOutAction } from '@/app/actions/auth';
 import { Button } from '@/components/components/ui/button';
 import { AuthModal } from './auth-modal/AuthModal';
@@ -21,7 +21,17 @@ export function LandingContent({ isAuthenticated, displayName }: LandingContentP
   const [modalRequested, setModalRequested] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isSigningOut, startSignOut] = useTransition();
+
+  useEffect(() => {
+    const authError = searchParams.get('authError');
+    if (authError) {
+      // Exibir erro vindo do callback OAuth (ex: cancelado, falha de troca de token)
+      console.error('Erro de login social:', authError);
+      setLogoutError(authError);
+    }
+  }, [searchParams]);
 
   const modalOpen = useMemo(
     () => !isAuthenticated && modalRequested,
@@ -61,6 +71,11 @@ export function LandingContent({ isAuthenticated, displayName }: LandingContentP
             onAuthRequest={handleAuthRequest}
             isAuthenticated={isAuthenticated}
           />
+          {logoutError && (
+            <div className="rounded-xl border border-rose-500/50 bg-rose-500/10 p-4 text-center text-sm text-rose-200">
+              {logoutError}
+            </div>
+          )}
           <InstitutionalShowcase />
           <FeatureHighlights />
           <PerformanceChecklist />
