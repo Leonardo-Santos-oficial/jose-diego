@@ -25,6 +25,15 @@ export function LandingContent({ isAuthenticated, displayName }: LandingContentP
   const [isSigningOut, startSignOut] = useTransition();
 
   useEffect(() => {
+    const code = searchParams.get('code');
+    if (code) {
+      // Fallback: Se o Supabase redirecionar para a raiz com o código (Site URL),
+      // forçamos o redirecionamento para o handler de callback correto.
+      const next = searchParams.get('next') ?? '/app';
+      window.location.href = `/auth/callback?code=${code}&next=${next}`;
+      return;
+    }
+
     const authError = searchParams.get('authError');
     if (authError) {
       // Exibir erro vindo do callback OAuth (ex: cancelado, falha de troca de token)
