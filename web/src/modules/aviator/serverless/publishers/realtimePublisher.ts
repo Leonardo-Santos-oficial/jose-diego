@@ -60,6 +60,16 @@ export class SupabaseRealtimePublisher implements AviatorRealtimePublisher {
     event: string,
     payload: unknown
   ): Promise<void> {
+    const body = {
+      messages: [
+        {
+          topic,
+          event,
+          payload,
+        },
+      ],
+    };
+
     const response = await fetch(`${this.realtimeUrl}/api/broadcast`, {
       method: 'POST',
       headers: {
@@ -67,7 +77,7 @@ export class SupabaseRealtimePublisher implements AviatorRealtimePublisher {
         Authorization: `Bearer ${this.serviceRoleKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ topic, event, payload }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {

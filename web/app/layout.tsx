@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AppShell } from '@/components/shell/AppShell';
 import { getCurrentSession } from '@/lib/auth/session';
+import { getWalletSnapshot } from '@/modules/wallet/server/getWalletSnapshot';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -56,11 +57,26 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getCurrentSession();
+  let walletBalance = 'R$ 0,00';
+
+  if (session) {
+    try {
+      const snapshot = await getWalletSnapshot(session.id);
+      if (snapshot) {
+        walletBalance = new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        }).format(snapshot.balance);
+      }
+    } catch (error) {
+      console.error('Failed to fetch wallet for layout:', error);
+    }
+  }
 
   return (
     <html lang="pt-BR" className="dark">
       <body>
-        <AppShell session={session}>{children}</AppShell>
+        <AppShell session={session} walletBalance={walletBalance}>{children}</AppShell>
       </body>
     </html>
   );

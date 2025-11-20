@@ -26,10 +26,11 @@ export function RequestWithdrawDialogClient({
       <Button
         type="button"
         variant="secondary"
-        className="rounded-full border border-slate-700 px-5"
+        className="rounded-full border border-slate-700 px-3 lg:px-5"
         disabled
       >
-        Solicitar Saque
+        <span className="lg:hidden">Saque</span>
+        <span className="hidden lg:inline">Solicitar Saque</span>
       </Button>
     );
   }

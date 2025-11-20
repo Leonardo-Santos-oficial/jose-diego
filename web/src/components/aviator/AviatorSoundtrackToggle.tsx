@@ -1,7 +1,6 @@
 'use client';
 
-import Image from 'next/image';
-import { aviatorAssets } from '@/modules/aviator/config/sceneConfig';
+import { Volume2, VolumeX } from 'lucide-react';
 
 export type AviatorSoundtrackToggleProps = {
   enabled: boolean;
@@ -17,22 +16,14 @@ export function AviatorSoundtrackToggle({
       type="button"
       aria-pressed={enabled}
       onClick={() => onToggle(!enabled)}
-      className={`flex w-full items-center justify-between rounded-2xl border border-white/10 bg-slate-950/70 px-5 py-3 text-left text-white transition ${enabled ? 'border-teal-300/70 shadow-[0_0_35px_rgba(45,212,191,0.35)]' : 'hover:border-white/20'}`}
+      className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
+        enabled 
+          ? 'bg-teal-500/20 text-teal-400 hover:bg-teal-500/30' 
+          : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+      }`}
+      title={enabled ? 'Silenciar' : 'Ativar som'}
     >
-      <div>
-        <p className="text-sm uppercase tracking-[0.4em] text-slate-400">Trilha</p>
-        <p className="text-lg font-semibold">{enabled ? 'Ligada' : 'Silenciada'}</p>
-        <small className="text-xs text-slate-400">
-          Music.webm + efeitos Btn/Winer/Loser
-        </small>
-      </div>
-      <Image
-        src={aviatorAssets.logo}
-        alt="Ícone musical"
-        width={72}
-        height={32}
-        className="opacity-80"
-      />
+      {enabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
     </button>
   );
 }

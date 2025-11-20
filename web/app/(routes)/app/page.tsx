@@ -12,6 +12,8 @@ export const metadata: Metadata = {
     'Participe do loop em tempo real com apostas fictícias e HUD inspirado nos assets originais.',
 };
 
+import { ChatWrapper } from '@/components/chat/ChatWrapper';
+
 export default async function AviatorAppPage() {
   const session = await getCurrentSession();
 
@@ -26,8 +28,8 @@ export default async function AviatorAppPage() {
 
   try {
     const [snapshot, preference] = await Promise.all([
-      getWalletSnapshot(session.user.id),
-      getCashoutPreference(session.user.id).catch((error) => {
+      getWalletSnapshot(session.id),
+      getCashoutPreference(session.id).catch((error) => {
         console.error('Falha ao buscar preferência de cashout:', error);
         return false;
       }),
@@ -40,13 +42,15 @@ export default async function AviatorAppPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 p-4 md:p-6">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       <AviatorGameClient
-        userId={session.user.id}
+        userId={session.id}
         initialWalletSnapshot={walletSnapshot}
         initialAutoCashoutPreference={autoCashoutPreference}
       />
-      <UserChatWidgetServer userId={session.user.id} userName={displayName} />
+      <ChatWrapper>
+        <UserChatWidgetServer userId={session.id} userName={displayName} />
+      </ChatWrapper>
     </div>
   );
 }

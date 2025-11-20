@@ -35,7 +35,13 @@ export function AdminUserTable({ users }: AdminUserTableProps) {
         </div>
       </div>
 
-      <div className="mt-6 overflow-x-auto">
+      <div className="mt-6 space-y-4 md:hidden">
+        {orderedUsers.map((user) => (
+          <UserCard key={user.id} user={user} />
+        ))}
+      </div>
+
+      <div className="mt-6 hidden overflow-x-auto md:block">
         <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
           <thead className="text-xs uppercase tracking-[0.2em] text-slate-400">
             <tr>
@@ -91,13 +97,13 @@ function UserRow({ user }: UserRowProps) {
             name="delta"
             placeholder="± R$"
             required
-            className="w-28"
+            className="w-24"
           />
           <Input
             type="text"
             name="reason"
             placeholder="Motivo (opcional)"
-            className="min-w-[220px] flex-1"
+            className="min-w-[160px] flex-1"
           />
           <Button type="submit" className="px-5">
             Executar
@@ -114,5 +120,63 @@ function UserRow({ user }: UserRowProps) {
         )}
       </td>
     </tr>
+  );
+}
+
+function UserCard({ user }: UserRowProps) {
+  const [state, formAction] = useActionState(
+    adjustBalanceAction,
+    adminActionInitialState
+  );
+
+  return (
+    <div className="rounded-2xl border border-slate-800/40 bg-slate-900/40 p-4">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="flex flex-col overflow-hidden">
+          <strong className="truncate text-sm text-slate-50">{user.email}</strong>
+          <span className="text-xs uppercase tracking-wider text-slate-500">
+            {user.role}
+          </span>
+        </div>
+        <div className="shrink-0 text-right">
+          <div className="text-base font-semibold text-emerald-300">
+            {currency.format(user.balance)}
+          </div>
+          <div className="text-xs text-slate-400">{user.displayName ?? '—'}</div>
+        </div>
+      </div>
+
+      <form className="flex flex-col gap-3" action={formAction}>
+        <input type="hidden" name="userId" value={user.id} />
+        <div className="flex gap-2">
+          <Input
+            type="number"
+            step="0.01"
+            name="delta"
+            placeholder="± R$"
+            required
+            className="w-1/3"
+          />
+          <Input
+            type="text"
+            name="reason"
+            placeholder="Motivo"
+            className="flex-1"
+          />
+        </div>
+        <Button type="submit" className="w-full">
+          Executar
+        </Button>
+      </form>
+      {state.status !== 'idle' && (
+        <p
+          className={`mt-2 text-xs ${
+            state.status === 'success' ? 'text-emerald-300' : 'text-rose-300'
+          }`}
+        >
+          {state.message}
+        </p>
+      )}
+    </div>
   );
 }

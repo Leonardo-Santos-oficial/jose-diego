@@ -3,7 +3,7 @@
 import { useEffect, useTransition } from 'react';
 import { AviatorScene } from '@/components/aviator/AviatorScene';
 import { AviatorHud } from '@/components/aviator/AviatorHud';
-import { AviatorBetPanel } from '@/components/aviator/AviatorBetPanel';
+import { AviatorBettingArea } from '@/components/aviator/AviatorBettingArea';
 import { AviatorHistoryRail } from '@/components/aviator/AviatorHistoryRail';
 import { AviatorSoundtrackToggle } from '@/components/aviator/AviatorSoundtrackToggle';
 import { useAviatorController } from '@/modules/aviator/hooks/useAviatorController';
@@ -16,6 +16,8 @@ export type AviatorGameClientProps = {
   initialWalletSnapshot?: WalletSnapshot | null;
   initialAutoCashoutPreference?: boolean;
 };
+
+import { AviatorHeader } from '@/components/aviator/AviatorHeader';
 
 export function AviatorGameClient({
   userId,
@@ -42,37 +44,60 @@ export function AviatorGameClient({
   }, [initialWalletSnapshot, startSyncTransition, syncWalletSnapshot]);
 
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/80 shadow-[0_0_120px_rgba(15,118,110,0.2)]">
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-70"
-        style={{ backgroundImage: `url(${aviatorAssets.background})` }}
-        aria-hidden="true"
-      />
-      <div className="relative flex flex-col gap-6 p-4 lg:grid lg:grid-cols-[1.6fr_1fr] lg:p-6">
-        <div className="space-y-6">
-          <AviatorScene state={state} history={history} />
-          <AviatorHud
-            isConnected={isConnected}
-            gameState={state}
-            walletSnapshot={walletSnapshot}
-            betResult={betResult}
-            cashoutResult={cashoutResult}
-          />
-        </div>
-        <div className="space-y-6">
-          <AviatorBetPanel
+    <div className="flex h-[100dvh] flex-col bg-slate-950 overflow-hidden">
+      <AviatorHeader userId={userId} />
+      
+      <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
+        {/* Left Panel: Betting Controls */}
+        <div className="order-2 flex flex-1 flex-col overflow-y-auto border-t border-white/10 bg-slate-900 p-2 lg:order-1 lg:w-[320px] lg:flex-none lg:border-r lg:border-t-0 lg:p-4">
+          <AviatorBettingArea
             controller={controller}
             currentRoundId={state?.roundId}
             currentPhase={state?.state}
             initialAutoCashoutPreference={initialAutoCashoutPreference}
           />
-          <AviatorSoundtrackToggle
-            enabled={musicEnabled}
-            onToggle={(value) => controller.toggleMusic(value)}
-          />
-          <AviatorHistoryRail history={history} />
+        </div>
+
+        {/* Right Panel: Game Stage & History */}
+        <div className="order-1 flex h-[28vh] min-h-[180px] flex-col bg-black lg:order-2 lg:h-auto lg:flex-1">
+          {/* Top Bar: History & Tools */}
+          <div className="grid h-12 w-full grid-cols-[1fr_auto] items-center border-b border-white/10 bg-slate-900/50 px-4 backdrop-blur-sm">
+            <div className="min-w-0 overflow-hidden">
+               <AviatorHistoryRail history={history} />
+            </div>
+            <div className="ml-4">
+              <AviatorSoundtrackToggle
+                enabled={musicEnabled}
+                onToggle={(value) => controller.toggleMusic(value)}
+              />
+            </div>
+          </div>
+
+          {/* Game Canvas Area */}
+          <div className="relative flex-1 overflow-hidden">
+            <div
+              className="absolute inset-0 bg-cover bg-center opacity-30"
+              style={{ backgroundImage: `url(${aviatorAssets.background})` }}
+              aria-hidden="true"
+            />
+            
+            <div className="relative z-10 h-full w-full">
+               <AviatorScene state={state} history={history} />
+            </div>
+
+            {/* HUD Overlay */}
+            <div className="absolute right-4 top-4 z-20">
+              <AviatorHud
+                isConnected={isConnected}
+                gameState={state}
+                walletSnapshot={walletSnapshot}
+                betResult={betResult}
+                cashoutResult={cashoutResult}
+              />
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

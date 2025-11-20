@@ -1,4 +1,4 @@
-import type { Session } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 import type { BetResultMessage, CashoutResultMessage } from '@/types/aviator';
 import {
   createAviatorEngineFacade,
@@ -26,8 +26,8 @@ type PlayerCommandServiceDeps = {
 };
 
 type PlayerCommandServiceOptions = PlayerCommandServiceDeps & {
-  session?: Session | null;
-  getSession?: () => Promise<Session | null>;
+  session?: User | null;
+  getSession?: () => Promise<User | null>;
 };
 
 type PlayerCommandContext = {
@@ -61,7 +61,7 @@ export class PlayerCommandService {
   ): Promise<PlayerCommandService> {
     const session =
       options.session ?? (await (options.getSession ?? getCurrentSession)());
-    const userId = session?.user?.id?.trim();
+    const userId = session?.id?.trim();
 
     if (!userId) {
       throw new PlayerCommandError('UNAUTHENTICATED', 'Faça login para enviar comandos.');

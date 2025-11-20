@@ -25,7 +25,7 @@ export async function updateProfileAction(
   'use server';
 
   const session = await getCurrentSession();
-  const userId = session?.user.id;
+  const userId = session?.id;
 
   if (!userId) {
     return { status: 'error', message: 'Faça login para atualizar seu perfil.' };

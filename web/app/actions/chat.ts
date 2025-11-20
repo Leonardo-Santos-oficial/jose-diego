@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import DOMPurify from 'isomorphic-dompurify';
 import { getCurrentSession } from '@/lib/auth/session';
 import { isAdminSession } from '@/lib/auth/roles';
 import type { ChatActionState } from '@/app/actions/chat-state';
@@ -38,7 +39,7 @@ export async function sendChatMessageAction(
   'use server';
 
   const session = await getCurrentSession();
-  const userId = session?.user?.id;
+  const userId = session?.id;
 
   if (!userId) {
     return { status: 'error', message: 'Faça login para usar o chat.' };
@@ -51,10 +52,12 @@ export async function sendChatMessageAction(
     return { status: 'error', message: firstIssue };
   }
 
+  const sanitizedBody = DOMPurify.sanitize(parsed.data.body);
+
   try {
     const result = await userCommand.executeForUser({
       userId,
-      body: parsed.data.body,
+      body: sanitizedBody,
     });
 
     return {
@@ -80,11 +83,11 @@ export async function sendAdminMessageAction(
 
   const session = await getCurrentSession();
 
-  if (!isAdminSession(session) || !session?.user) {
+  if (!isAdminSession(session) || !session) {
     return { status: 'error', message: 'Acesso não autorizado.' };
   }
 
-  const adminUser = session.user;
+  const adminUser = session;
 
   const threadId = String(formData.get('threadId') ?? '').trim();
 
@@ -99,10 +102,12 @@ export async function sendAdminMessageAction(
     return { status: 'error', message: firstIssue, threadId };
   }
 
+  const sanitizedBody = DOMPurify.sanitize(parsed.data.body);
+
   try {
     const result = await adminCommand.executeForAdmin({
       threadId,
-      body: parsed.data.body,
+      body: sanitizedBody,
     });
 
     try {
@@ -144,11 +149,11 @@ export async function closeChatThreadAction(
 
   const session = await getCurrentSession();
 
-  if (!isAdminSession(session) || !session?.user) {
+  if (!isAdminSession(session) || !session) {
     return { ok: false };
   }
 
-  const adminUser = session.user;
+  const adminUser = session;
 
   const threadId = String(formData.get('threadId') ?? '').trim();
 
@@ -185,11 +190,11 @@ export async function updateChatThreadMetadataAction(formData: FormData) {
 
   const session = await getCurrentSession();
 
-  if (!isAdminSession(session) || !session?.user) {
+  if (!isAdminSession(session) || !session) {
     return { ok: false, message: 'Acesso não autorizado.' } as const;
   }
 
-  const adminUser = session.user;
+  const adminUser = session;
 
   const raw = {
     threadId: formData.get('threadId') ?? '',

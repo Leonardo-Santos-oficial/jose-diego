@@ -8,6 +8,7 @@ import {
   useState,
   useTransition,
 } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import type { ChatMessage, ChatThread } from '@/modules/chat/types';
 import {
   sendAdminMessageAction,
@@ -44,6 +45,7 @@ const sortThreads = (list: ThreadWithMessages[]) =>
 export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
   const [threads, setThreads] = useState(sortThreads(initialThreads));
   const [selectedThreadId, setSelectedThreadId] = useState(initialThreads[0]?.id ?? null);
+  const [showMobileList, setShowMobileList] = useState(true);
   const [isClosing, startClosing] = useTransition();
 
   const selectedThread = useMemo(() => {
@@ -153,14 +155,21 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
 
   return (
     <section className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-slate-950/80 p-4 shadow-[0_0_70px_rgba(15,118,110,0.15)] md:p-6 lg:flex-row">
-      <aside className="w-full max-w-sm space-y-3 border-b border-slate-800/60 pb-4 lg:border-b-0 lg:border-r lg:pr-4">
+      <aside
+        className={`w-full max-w-sm space-y-3 border-b border-slate-800/60 pb-4 lg:border-b-0 lg:border-r lg:pr-4 ${
+          showMobileList ? 'block' : 'hidden'
+        } lg:block`}
+      >
         <h2 className="text-base font-semibold text-white">Threads em aberto</h2>
         <ul className="space-y-2">
           {threads.map((thread) => (
             <li key={thread.id}>
               <button
                 type="button"
-                onClick={() => setSelectedThreadId(thread.id)}
+                onClick={() => {
+                  setSelectedThreadId(thread.id);
+                  setShowMobileList(false);
+                }}
                 className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
                   thread.id === selectedThreadId
                     ? 'border-teal-400/60 bg-teal-500/10 text-white'
@@ -184,18 +193,36 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
         </ul>
       </aside>
       {selectedThread ? (
-        <div className="flex-1 space-y-4">
+        <div
+          className={`flex-1 space-y-4 ${
+            showMobileList ? 'hidden' : 'block'
+          } lg:block`}
+        >
           <header className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Thread</p>
-              <h3 className="text-xl font-semibold text-white">{selectedThread.id}</h3>
-              <p className="text-sm text-slate-400">
-                Usuário associado: {selectedThread.userId ?? '—'}
-              </p>
-              <p className="text-xs text-slate-500">
-                Responsável atual:{' '}
-                {selectedThread.metadata.lastAgentName ?? 'Não atribuído'}
-              </p>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden -ml-2"
+                onClick={() => setShowMobileList(true)}
+              >
+                <ArrowLeft className="size-5 text-slate-400" />
+              </Button>
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
+                  Thread
+                </p>
+                <h3 className="text-xl font-semibold text-white">
+                  {selectedThread.id}
+                </h3>
+                <p className="text-sm text-slate-400">
+                  Usuário associado: {selectedThread.userId ?? '—'}
+                </p>
+                <p className="text-xs text-slate-500">
+                  Responsável atual:{' '}
+                  {selectedThread.metadata.lastAgentName ?? 'Não atribuído'}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <Button

@@ -6,36 +6,38 @@ export type AviatorHistoryRailProps = {
 };
 
 export function AviatorHistoryRail({ history }: AviatorHistoryRailProps) {
-  const items = history.slice(-12).reverse();
+  const items = history.slice(-20).reverse();
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-slate-950/70 p-4 text-white">
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-300">Últimos resultados</p>
-        <span className="text-xs uppercase tracking-[0.3em] text-slate-500">
-          Crash feed
-        </span>
+    <div className="relative h-full w-full overflow-hidden">
+      <div 
+        className="flex h-full items-center gap-2 overflow-x-auto pr-8"
+        style={{ 
+          whiteSpace: 'nowrap', 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch'
+        }}
+      >
+        <style jsx>{`
+          div::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+        {items.map((entry) => (
+          <div
+            key={entry.roundId}
+            className="inline-flex shrink-0 items-center justify-center rounded-full bg-slate-800 px-2 py-1 text-[10px] font-bold lg:px-3 lg:text-xs"
+            style={{
+              color: bucketPalette[entry.bucket],
+              backgroundColor: `${bucketPalette[entry.bucket]}20`,
+            }}
+          >
+            {entry.multiplier.toFixed(2)}x
+          </div>
+        ))}
       </div>
-      <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
-        {items.length === 0 ? (
-          <p className="text-xs text-slate-400">Sem histórico disponível.</p>
-        ) : (
-          items.map((entry) => (
-            <div
-              key={entry.roundId}
-              className="flex min-w-[72px] flex-col items-center rounded-xl border border-white/5 bg-slate-900/60 px-3 py-2"
-            >
-              <span className="text-xs text-slate-500">{entry.roundId.slice(0, 4)}</span>
-              <span
-                className="text-lg font-semibold"
-                style={{ color: bucketPalette[entry.bucket] }}
-              >
-                {entry.multiplier.toFixed(2)}x
-              </span>
-            </div>
-          ))
-        )}
-      </div>
-    </section>
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-slate-900/80 to-transparent" />
+    </div>
   );
 }

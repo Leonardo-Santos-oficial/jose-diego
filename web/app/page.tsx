@@ -5,5 +5,10 @@ export default async function HomePage() {
   const session = await getCurrentSession();
   const displayName = getDisplayName(session);
 
-  return <LandingContent isAuthenticated={Boolean(session)} displayName={displayName} />;
+  return (
+    <LandingContent
+      isAuthenticated={Boolean(session)}
+      displayName={displayName}
+    />
+  );
 }

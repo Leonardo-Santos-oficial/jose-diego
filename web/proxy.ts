@@ -14,8 +14,8 @@ export async function proxy(request: NextRequest) {
   let session = null;
   try {
     const supabase = getSupabaseMiddlewareClient(request, response);
-    const { data } = await supabase.auth.getSession();
-    session = data.session ?? null;
+    const { data } = await supabase.auth.getUser();
+    session = data.user ?? null;
   } catch (error) {
     console.warn('[proxy] Supabase não configurado corretamente:', error);
   }

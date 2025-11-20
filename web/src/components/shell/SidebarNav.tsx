@@ -4,6 +4,11 @@ const links = [
   { label: 'Perfil', href: '/profile', description: 'Atualize dados e Pix' },
   { label: 'Painel Admin', href: '/admin', description: 'Operações internas' },
   {
+    label: 'Apostas',
+    href: '/admin/bets',
+    description: 'Histórico global',
+  },
+  {
     label: 'Saques',
     href: '/admin/withdrawals',
     description: 'Aprovação de solicitações',

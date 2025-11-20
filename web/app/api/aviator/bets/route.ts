@@ -24,12 +24,12 @@ export async function POST(request: Request) {
   const adminBearer = process.env.AVIATOR_ADMIN_BEARER?.trim();
   const isAdminRequest = Boolean(adminBearer && bearer && bearer === adminBearer);
 
-  if (!session?.user?.id && !isAdminRequest) {
+  if (!session?.id && !isAdminRequest) {
     return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
   }
 
   try {
-    const service = session?.user?.id
+    const service = session?.id
       ? await PlayerCommandService.forCurrentUser({ session })
       : PlayerCommandService.forUser(String(payload.userId ?? '').trim());
 

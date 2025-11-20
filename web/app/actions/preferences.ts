@@ -26,7 +26,7 @@ export async function updateAutoCashoutPreferenceAction(input: {
   try {
     const supabase = await getSupabaseServerClient();
     const { error } = await supabase.from('user_profiles').upsert({
-      user_id: session.user.id,
+      user_id: session.id,
       cashout_auto_pref: parsed.data.autoCashoutEnabled,
     });
 

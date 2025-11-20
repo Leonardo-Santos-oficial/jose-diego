@@ -1,12 +1,12 @@
-import type { Session } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 
-function extractRole(session: Session | null): string {
-  if (!session?.user) {
+function extractRole(user: User | null): string {
+  if (!user) {
     return '';
   }
 
   const metadataRole =
-    session.user.app_metadata?.role ?? session.user.user_metadata?.role;
+    user.app_metadata?.role ?? user.user_metadata?.role;
   if (typeof metadataRole === 'string') {
     return metadataRole.toLowerCase();
   }
@@ -14,6 +14,6 @@ function extractRole(session: Session | null): string {
   return '';
 }
 
-export function isAdminSession(session: Session | null): boolean {
-  return extractRole(session) === 'admin';
+export function isAdminSession(user: User | null): boolean {
+  return extractRole(user) === 'admin';
 }

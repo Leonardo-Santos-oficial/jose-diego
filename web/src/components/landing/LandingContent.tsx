@@ -17,7 +17,10 @@ type LandingContentProps = {
   displayName: string;
 };
 
-export function LandingContent({ isAuthenticated, displayName }: LandingContentProps) {
+export function LandingContent({
+  isAuthenticated,
+  displayName,
+}: LandingContentProps) {
   const [modalRequested, setModalRequested] = useState(false);
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const router = useRouter();

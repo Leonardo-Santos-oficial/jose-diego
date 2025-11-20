@@ -16,14 +16,14 @@ export default async function ProfilePage() {
     redirect('/');
   }
 
-  const profile = await getUserProfile(session.user.id);
+  const profile = await getUserProfile(session.id);
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6 p-4 md:p-8">
       <ProfileForm
         initialDisplayName={profile.displayName}
         initialPixKey={profile.pixKey}
-        userEmail={session.user.email ?? ''}
+        userEmail={session.email ?? ''}
       />
     </div>
   );

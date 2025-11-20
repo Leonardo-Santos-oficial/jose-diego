@@ -14,7 +14,7 @@ export async function requestWithdrawAction(
   'use server';
 
   const session = await getCurrentSession();
-  const userId = session?.user.id;
+  const userId = session?.id;
   const amount = Number(formData.get('amount'));
 
   if (!userId) {

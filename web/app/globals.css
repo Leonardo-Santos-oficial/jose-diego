@@ -30,6 +30,16 @@
   --radius: 0.65rem;
 }
 
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 .dark {
   --background: 224 35% 4%;
   --foreground: 210 40% 98%;
