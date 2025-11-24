@@ -10,14 +10,13 @@ export function CallToActionStrip({ onAuthRequest }: CallToActionStripProps) {
       <div className="flex flex-col gap-6 text-slate-50 md:flex-row md:items-center md:justify-between">
         <div className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-rose-200">
-            Pronto para testar?
+            Pronto para Lucrar?
           </p>
           <h2 className="text-2xl font-semibold">
-            Reabra o modal de autenticação e gere um saldo demo em segundos.
+            Crie sua conta em segundos e aproveite o melhor jogo do momento.
           </h2>
           <p className="text-sm text-slate-100/80">
-            O mesmo CTA é usado em todo o site para garantir consistência visual e de
-            métricas.
+            Junte-se a milhares de vencedores agora mesmo e comece a multiplicar.
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -26,7 +25,7 @@ export function CallToActionStrip({ onAuthRequest }: CallToActionStripProps) {
             className="w-full rounded-full bg-slate-950 px-6 py-3 text-base sm:w-auto"
             onClick={onAuthRequest}
           >
-            Abrir modal
+            Criar Conta Grátis
           </Button>
           <Button
             size="lg"
@@ -34,7 +33,7 @@ export function CallToActionStrip({ onAuthRequest }: CallToActionStripProps) {
             asChild
             className="w-full rounded-full border-white/10 bg-white/5 px-6 py-3 text-base text-slate-100 hover:bg-white/10 hover:text-white sm:w-auto"
           >
-            <a href="#performance">Checklist Lighthouse</a>
+            <a href="/beneficios">Ver Benefícios</a>
           </Button>
         </div>
       </div>

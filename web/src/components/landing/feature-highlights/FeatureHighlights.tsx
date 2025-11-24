@@ -8,19 +8,19 @@ import {
 
 const highlights = [
   {
-    title: 'Saldo em tempo real',
-    body: 'Wallet virtual sincronizada com Supabase usando ações de servidor e RLS.',
-    tag: 'US-201 · REQ-SEC-11',
+    title: 'Controle Total',
+    body: 'Você decide quando parar. Retire seus ganhos a qualquer momento antes do avião voar para longe.',
+    tag: 'ESTRATÉGIA',
   },
   {
-    title: 'RTP controlado',
-    body: 'Loop do Aviator com algoritmo configurável e histórico colorido (US-307).',
-    tag: 'US-304/307',
+    title: 'Multiplicadores Altos',
+    body: 'O céu é o limite! Veja sua aposta multiplicar 10x, 100x ou até mais em questão de segundos.',
+    tag: 'LUCRO',
   },
   {
-    title: 'Chat WSS',
-    body: 'Suporte administrador/usuário com persistência e notificações em WSS seguro.',
-    tag: 'US-401 · REQ-SEC-07',
+    title: 'Chat Ao Vivo',
+    body: 'Converse com outros jogadores, compartilhe estratégias e celebre as grandes vitórias juntos.',
+    tag: 'SOCIAL',
   },
 ];
 
@@ -28,18 +28,18 @@ export function FeatureHighlights() {
   return (
     <section id="como-funciona" className="flex flex-col gap-8">
       <header className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-sky-300">
-          Como o demo funciona
+        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-rose-400">
+          Por que jogar Aviator?
         </p>
         <h2 className="text-2xl font-semibold text-slate-50 sm:text-3xl">
-          Arquitetura pensada para Clean Code e SOLID.
+          Mais do que um jogo, uma experiência de pura emoção.
         </h2>
       </header>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {highlights.map((item) => (
-          <Card key={item.title} className="border-slate-700/60 bg-slate-900/70">
+          <Card key={item.title} className="border-slate-700/60 bg-slate-900/70 hover:border-rose-500/30 transition-colors">
             <CardHeader>
-              <span className="text-xs font-semibold uppercase tracking-[0.28em] text-rose-300">
+              <span className="text-xs font-semibold uppercase tracking-[0.28em] text-rose-500">
                 {item.tag}
               </span>
               <CardTitle className="mt-2 text-lg text-slate-50">{item.title}</CardTitle>

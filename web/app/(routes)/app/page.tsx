@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { AviatorGameClient } from '@/components/aviator/AviatorGameClient';
-import { UserChatWidgetServer } from '@/components/chat/UserChatWidgetServer';
 import { getCurrentSession, getDisplayName } from '@/lib/auth/session';
 import { getWalletSnapshot } from '@/modules/wallet/server/getWalletSnapshot';
 import { getCashoutPreference } from '@/modules/preferences/server/getCashoutPreference';
@@ -11,8 +10,6 @@ export const metadata: Metadata = {
   description:
     'Participe do loop em tempo real com apostas fictícias e HUD inspirado nos assets originais.',
 };
-
-import { ChatWrapper } from '@/components/chat/ChatWrapper';
 
 export default async function AviatorAppPage() {
   const session = await getCurrentSession();
@@ -48,9 +45,6 @@ export default async function AviatorAppPage() {
         initialWalletSnapshot={walletSnapshot}
         initialAutoCashoutPreference={autoCashoutPreference}
       />
-      <ChatWrapper>
-        <UserChatWidgetServer userId={session.id} userName={displayName} />
-      </ChatWrapper>
     </div>
   );
 }

@@ -8,8 +8,8 @@ import { AuthModal } from './auth-modal/AuthModal';
 import { CallToActionStrip } from './cta/CallToActionStrip';
 import { FeatureHighlights } from './feature-highlights/FeatureHighlights';
 import { HeroSection } from './hero/HeroSection';
+import { HowToPlay } from './how-to-play/HowToPlay';
 import { InstitutionalShowcase } from './institutional/InstitutionalShowcase';
-import { PerformanceChecklist } from './performance/PerformanceChecklist';
 import { ShortcutRail } from './shortcut-rail/ShortcutRail';
 
 type LandingContentProps = {
@@ -83,6 +83,7 @@ export function LandingContent({
             onAuthRequest={handleAuthRequest}
             isAuthenticated={isAuthenticated}
           />
+          <HowToPlay />
           {logoutError && (
             <div className="rounded-xl border border-rose-500/50 bg-rose-500/10 p-4 text-center text-sm text-rose-200">
               {logoutError}
@@ -90,7 +91,6 @@ export function LandingContent({
           )}
           <InstitutionalShowcase />
           <FeatureHighlights />
-          <PerformanceChecklist />
           <CallToActionStrip onAuthRequest={handleAuthRequest} />
         </main>
       </div>

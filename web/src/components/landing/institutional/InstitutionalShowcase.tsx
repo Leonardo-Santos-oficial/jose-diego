@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import type { LucideIcon } from 'lucide-react';
-import { ShieldCheck, Cpu, Headphones } from 'lucide-react';
+import { ShieldCheck, Cpu, Headphones, Users, Banknote, TrendingUp } from 'lucide-react';
 
 const clusters: Array<{
   title: string;
@@ -11,51 +11,51 @@ const clusters: Array<{
   bullets: string[];
 }> = [
   {
-    title: 'Governança e Compliance',
+    title: 'Dinheiro Virtual',
     description:
-      'Fluxos de saque aprovados apenas por sessões com papel admin e auditoria Supabase.',
-    stat: 'RLS 100%',
-    caption: 'Cobertura de políticas',
+      'Comece com saldo fictício para treinar suas habilidades sem arriscar seu bolso.',
+    stat: 'Grátis',
+    caption: 'Modo Demo',
     icon: ShieldCheck,
-    bullets: ['RLS em wallets/withdraw', 'Alertas Slack pg_net', 'Auditoria por trigger'],
+    bullets: ['Sem depósito real', 'Recarregue quando quiser', 'Treine estratégias'],
   },
   {
-    title: 'Resiliência e Infraestrutura',
+    title: 'Tecnologia de Ponta',
     description:
-      'Proxy Edge + Next.js 16 com Supabase Realtime configurado para baixa latência.',
-    stat: '99.95%',
-    caption: 'Objetivo de uptime',
+      'Jogue sem travamentos, com gráficos leves e resposta instantânea em qualquer dispositivo.',
+    stat: '100%',
+    caption: 'Fluidez',
     icon: Cpu,
-    bullets: ['Proxy consolidado', 'Cache controlado', 'Loop Aviator serverless'],
+    bullets: ['Roda no celular', 'Baixo consumo de dados', 'Carregamento rápido'],
   },
   {
-    title: 'Suporte e Operações',
-    description: 'Inbox admin com chat WSS, status de saques e telemetria de jogadores.',
-    stat: '3 canais',
-    caption: 'Chat, saldo, auditoria',
+    title: 'Suporte Dedicado',
+    description: 'Dúvidas sobre como jogar? Nossa equipe está pronta para ajudar no chat.',
+    stat: '24/7',
+    caption: 'Atendimento',
     icon: Headphones,
-    bullets: ['Chat admin/user', 'Timeline realtime', 'Playwright E2E'],
+    bullets: ['Chat ao vivo', 'Dicas de jogo', 'Comunidade ativa'],
   },
 ];
 
-const partners = [
+const liveStats = [
   {
-    name: 'HUD demo',
-    src: '/aviator/images/img_logo_3-default-000.png',
-    width: 140,
-    height: 36,
+    label: 'Jogadores Online',
+    value: '+5.2k',
+    icon: Users,
+    color: 'text-blue-400',
   },
   {
-    name: 'HUD progress',
-    src: '/aviator/images/img_hudprogressbar-default-001.png',
-    width: 120,
-    height: 32,
+    label: 'Pago em 24h',
+    value: 'R$ 1.2M+',
+    icon: Banknote,
+    color: 'text-emerald-400',
   },
   {
-    name: 'Plane',
-    src: '/aviator/images/plane.png',
-    width: 90,
-    height: 36,
+    label: 'Maior Vela Hoje',
+    value: '1.500x',
+    icon: TrendingUp,
+    color: 'text-rose-400',
   },
 ];
 
@@ -63,29 +63,28 @@ export function InstitutionalShowcase() {
   return (
     <section id="institucional" className="flex flex-col gap-10">
       <header className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-emerald-200">
-          Institucional
+        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-emerald-400">
+          Recursos Exclusivos
         </p>
         <h2 className="text-2xl font-semibold text-slate-50 sm:text-3xl">
-          Infra pronta para demos executivas e due diligence.
+          Tudo o que você precisa para se divertir com segurança.
         </h2>
         <p className="max-w-3xl text-sm text-slate-300 sm:text-base">
-          Cada pilar reutiliza os mesmos componentes de autenticação, modal e Supabase
-          client, mostrando como o PRD mantém consistência visual e operacional.
+          Nossa plataforma foi desenhada para oferecer a melhor experiência de jogo possível, focada na diversão e na comunidade.
         </p>
       </header>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {clusters.map(({ icon: Icon, ...cluster }) => (
           <article
             key={cluster.title}
-            className="flex h-full flex-col gap-4 rounded-3xl border border-white/5 bg-slate-900/60 p-6"
+            className="flex h-full flex-col gap-4 rounded-3xl border border-white/5 bg-slate-900/60 p-6 hover:bg-slate-900/80 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <span className="rounded-2xl bg-slate-800/70 p-3 text-emerald-200">
+              <span className="rounded-2xl bg-slate-800/70 p-3 text-emerald-400">
                 <Icon className="size-5" aria-hidden />
               </span>
               <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-300">
+                <p className="text-xs uppercase tracking-[0.28em] text-slate-400">
                   {cluster.caption}
                 </p>
                 <p className="text-2xl font-semibold text-slate-50">{cluster.stat}</p>
@@ -106,21 +105,23 @@ export function InstitutionalShowcase() {
           </article>
         ))}
       </div>
-      <div className="flex flex-wrap items-center gap-6 rounded-3xl border border-white/5 bg-slate-950/60 px-6 py-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300">
-          Assets otimizados
+      <div className="flex flex-wrap items-center gap-8 rounded-3xl border border-white/5 bg-slate-950/60 px-8 py-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+          Ao Vivo
         </p>
-        {partners.map((partner) => (
-          <Image
-            key={partner.name}
-            src={partner.src}
-            alt={partner.name}
-            width={partner.width}
-            height={partner.height}
-            className="h-auto w-auto opacity-80 drop-shadow"
-            priority={partner.name === 'HUD demo'}
-          />
-        ))}
+        <div className="flex flex-1 flex-wrap items-center justify-between gap-6">
+          {liveStats.map((stat) => (
+            <div key={stat.label} className="flex items-center gap-3">
+              <div className={`rounded-full bg-slate-900 p-2 ${stat.color}`}>
+                <stat.icon className="size-5" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-slate-50 leading-none">{stat.value}</p>
+                <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{stat.label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -17,7 +17,7 @@ try {
   console.warn('[aviator-tick-dev] Could not load .env.local', e);
 }
 
-const baseUrl = process.env.AVIATOR_TICK_URL ?? 'http://localhost:3000/api/aviator/tick';
+const baseUrl = process.env.AVIATOR_TICK_ENDPOINT ?? process.env.AVIATOR_TICK_URL ?? 'http://localhost:3000/api/aviator/tick';
 const secret = process.env.AVIATOR_TICK_SECRET ?? '';
 const intervalMs = Number(process.env.AVIATOR_TICK_INTERVAL_MS ?? 700);
 

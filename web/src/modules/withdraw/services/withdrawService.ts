@@ -16,8 +16,31 @@ export class WithdrawService {
     return this.repository.create(input);
   }
 
-  listAll(): Promise<WithdrawRequest[]> {
-    return this.repository.listAll();
+  async listAll(): Promise<WithdrawRequest[]> {
+    const requests = await this.repository.listAll();
+    return this.enrichWithUserEmails(requests);
+  }
+
+  private async enrichWithUserEmails(requests: WithdrawRequest[]): Promise<WithdrawRequest[]> {
+    const { getSupabaseServiceRoleClient } = await import('@/lib/supabase/serviceRoleClient');
+    const supabase = getSupabaseServiceRoleClient();
+
+    const userIds = Array.from(new Set(requests.map((r) => r.userId)));
+    const userMap = new Map<string, string>();
+
+    await Promise.all(
+      userIds.map(async (uid) => {
+        const { data } = await supabase.auth.admin.getUserById(uid);
+        if (data.user?.email) {
+          userMap.set(uid, data.user.email);
+        }
+      })
+    );
+
+    return requests.map((req) => ({
+      ...req,
+      userEmail: userMap.get(req.userId) ?? 'Desconhecido',
+    }));
   }
 
   listByUser(userId: string): Promise<WithdrawRequest[]> {

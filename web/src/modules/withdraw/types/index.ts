@@ -3,6 +3,7 @@ export type WithdrawStatus = 'pending' | 'approved' | 'rejected';
 export type WithdrawRequest = {
   id: string;
   userId: string;
+  userEmail?: string;
   amount: number;
   status: WithdrawStatus;
   createdAt: string;

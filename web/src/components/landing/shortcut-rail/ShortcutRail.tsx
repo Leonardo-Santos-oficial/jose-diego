@@ -9,15 +9,15 @@ type Shortcut = {
 };
 
 const shortcuts: Shortcut[] = [
-  { label: 'Aviator', description: 'Crash game', status: 'Disponível', href: '/app' },
+  { label: 'Aviator', description: 'Jogue Agora', status: 'Ao Vivo', href: '/app' },
   {
     label: 'Carteira',
-    description: 'Saldo virtual',
-    status: 'Em construção',
+    description: 'Depósitos e Saques',
+    status: 'Disponível',
     href: '/app',
     action: 'auth-required',
   },
-  { label: 'Admin', description: 'Controle total', status: 'Protegido', href: '/admin' },
+  { label: 'Admin', description: 'Painel de Controle', status: 'Restrito', href: '/admin' },
 ];
 
 type ShortcutRailProps = {

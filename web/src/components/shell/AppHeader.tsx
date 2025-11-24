@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useTransition } from 'react';
 import { signOutAction } from '@/app/actions/auth';
 import { Button } from '@/components/components/ui/button';
+import { DepositDialog } from '@/components/wallet/DepositDialog';
 import { RequestWithdrawDialogClient } from '@/components/wallet/RequestWithdrawDialogClient';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/components/ui/sheet';
 import { SidebarNav } from './SidebarNav';
@@ -88,19 +89,16 @@ export function AppHeader({
         </div>
         {isAuthenticated && (
           <div className="flex gap-2">
-            <Button
-              variant="default"
-              size="sm"
-              className="h-8 w-8 rounded-full p-0 lg:h-auto lg:w-auto lg:px-5"
-              onClick={() =>
-                alert(
-                  'Para realizar um depósito simulado, entre em contato com o suporte através do chat no canto inferior direito.'
-                )
-              }
-            >
-              <span className="lg:hidden">+</span>
-              <span className="hidden lg:inline">Depositar</span>
-            </Button>
+            <DepositDialog>
+              <Button
+                variant="default"
+                size="sm"
+                className="h-8 w-8 rounded-full p-0 lg:h-auto lg:w-auto lg:px-5"
+              >
+                <span className="lg:hidden">+</span>
+                <span className="hidden lg:inline">Depositar</span>
+              </Button>
+            </DepositDialog>
             <RequestWithdrawDialogClient userId={userId} />
           </div>
         )}

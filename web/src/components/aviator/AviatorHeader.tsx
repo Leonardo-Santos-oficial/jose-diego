@@ -3,6 +3,7 @@
 import { useAviatorStore } from '@/modules/aviator/state/useAviatorStore';
 import { Wallet, LogOut } from 'lucide-react';
 import { Button } from '@/components/components/ui/button';
+import { DepositDialog } from '@/components/wallet/DepositDialog';
 import { RequestWithdrawDialogClient } from '@/components/wallet/RequestWithdrawDialogClient';
 import { signOutAction } from '@/app/actions/auth';
 import { useTransition } from 'react';
@@ -40,18 +41,15 @@ export function AviatorHeader({ userId }: AviatorHeaderProps) {
 
       <div className="flex items-center gap-2 lg:gap-4">
         <div className="hidden lg:flex lg:items-center lg:gap-2">
-           <Button
-              variant="outline"
-              size="sm"
-              className="h-8 border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
-              onClick={() =>
-                alert(
-                  'Para realizar um depósito simulado, entre em contato com o suporte através do chat.'
-                )
-              }
-            >
-              Depositar
-            </Button>
+           <DepositDialog>
+             <Button
+                variant="outline"
+                size="sm"
+                className="h-8 border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
+              >
+                Depositar
+              </Button>
+           </DepositDialog>
             <RequestWithdrawDialogClient userId={userId} />
         </div>
 

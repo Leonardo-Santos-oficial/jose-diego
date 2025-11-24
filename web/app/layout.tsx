@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AppShell } from '@/components/shell/AppShell';
-import { getCurrentSession } from '@/lib/auth/session';
+import { getCurrentSession, getDisplayName } from '@/lib/auth/session';
 import { getWalletSnapshot } from '@/modules/wallet/server/getWalletSnapshot';
+import { UserChatWidgetServer } from '@/components/chat/UserChatWidgetServer';
+import { ChatWrapper } from '@/components/chat/ChatWrapper';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -73,10 +75,19 @@ export default async function RootLayout({
     }
   }
 
+  const displayName = getDisplayName(session);
+
   return (
     <html lang="pt-BR" className="dark">
       <body>
-        <AppShell session={session} walletBalance={walletBalance}>{children}</AppShell>
+        <AppShell session={session} walletBalance={walletBalance}>
+          {children}
+          {session && (
+            <ChatWrapper>
+              <UserChatWidgetServer userId={session.id} userName={displayName} />
+            </ChatWrapper>
+          )}
+        </AppShell>
       </body>
     </html>
   );

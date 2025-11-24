@@ -1,43 +1,42 @@
-import { Gauge, Image as ImageIcon, FileCheck } from 'lucide-react';
+import { Zap, Lock, FileCheck } from 'lucide-react';
 
 const checklist = [
   {
-    title: 'Metadata completa',
+    title: 'Saques Instantâneos',
     description:
-      'Open Graph, Twitter Cards e canonical configurados em app/layout.tsx para boost de SEO.',
-    icon: Gauge,
-    status: 'Feito',
+      'Receba seus ganhos via PIX em segundos, diretamente na sua conta bancária, sem burocracia.',
+    icon: Zap,
+    status: 'Rápido',
   },
   {
-    title: 'Imagens otimizadas',
+    title: 'Segurança Total',
     description:
-      'Logos e pôster do hero servidos via /public com Next/Image e poster no elemento <video>.',
-    icon: ImageIcon,
-    status: 'Feito',
+      'Seus dados e transações são protegidos com criptografia de ponta a ponta (SSL).',
+    icon: Lock,
+    status: 'Seguro',
   },
   {
-    title: 'Auditoria Lighthouse',
+    title: 'Transparência',
     description:
-      'Script npm run lighthouse:landing coleta relatório HTML (./test-results/lighthouse-report.html).',
+      'Histórico de partidas auditável e resultados gerados de forma comprovadamente justa.',
     icon: FileCheck,
-    status: 'Script pronto',
+    status: 'Justo',
   },
 ];
 
 export function PerformanceChecklist() {
   return (
     <section
-      id="performance"
+      id="beneficios"
       className="rounded-[32px] border border-white/5 bg-slate-950/60 p-8"
     >
       <header className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-[0.32em] text-amber-200">
-          Performance & SEO
+          Confiança
         </p>
-        <h2 className="text-2xl font-semibold text-slate-50">Checklist auditável</h2>
+        <h2 className="text-2xl font-semibold text-slate-50">Por que somos a melhor escolha?</h2>
         <p className="text-sm text-slate-300">
-          Execute o script Lighthouse sempre que atualizar a landing para garantir scores
-          &gt; 90 nas categorias principais.
+          Garantimos um ambiente justo, rápido e seguro para que você só se preocupe em ganhar.
         </p>
       </header>
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

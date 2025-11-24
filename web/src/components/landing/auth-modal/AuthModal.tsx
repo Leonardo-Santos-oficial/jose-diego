@@ -116,7 +116,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
           : null
     );
 
-  const description = 'Supabase Auth garante hashing seguro (REQ-SEC-08/09).';
+  const description = 'Acesse sua conta para jogar e ganhar.';
 
   return (
     <Dialog open={open} onOpenChange={(next) => (!next ? onClose() : null)}>
@@ -164,7 +164,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
                 />
               </div>
               <SubmitButton
-                idleLabel="Criar conta demo"
+                idleLabel="Criar Conta Grátis"
                 pendingLabel="Criando conta..."
               />
             </form>

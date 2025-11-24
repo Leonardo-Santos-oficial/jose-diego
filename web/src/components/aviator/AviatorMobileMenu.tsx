@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/comp
 import { Button } from '@/components/components/ui/button';
 import { Menu } from 'lucide-react';
 import { SidebarNav } from '@/components/shell/SidebarNav';
+import { DepositDialog } from '@/components/wallet/DepositDialog';
 import { RequestWithdrawDialogClient } from '@/components/wallet/RequestWithdrawDialogClient';
 
 export function AviatorMobileMenu({ userId }: { userId: string }) {
@@ -38,17 +39,14 @@ export function AviatorMobileMenu({ userId }: { userId: string }) {
             <SidebarNav isAuthenticated={true} />
           </div>
           <div className="border-t border-white/10 bg-slate-900/50 p-4 space-y-3">
-            <Button
-              variant="outline"
-              className="w-full justify-start border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
-              onClick={() =>
-                alert(
-                  'Para realizar um depósito simulado, entre em contato com o suporte através do chat.'
-                )
-              }
-            >
-              <span className="mr-2">+</span> Depositar
-            </Button>
+            <DepositDialog>
+              <Button
+                variant="outline"
+                className="w-full justify-start border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
+              >
+                <span className="mr-2">+</span> Depositar
+              </Button>
+            </DepositDialog>
             <div className="w-full [&>button]:w-full">
                <RequestWithdrawDialogClient userId={userId} />
             </div>

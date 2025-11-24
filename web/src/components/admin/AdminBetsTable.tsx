@@ -101,8 +101,8 @@ export function AdminBetsTable({ bets }: AdminBetsTableProps) {
                     <td className="py-4 text-slate-400">
                       {dateTime.format(new Date(bet.createdAt))}
                     </td>
-                    <td className="py-4 font-mono text-xs text-slate-500">
-                      {bet.roundId.slice(0, 8)}
+                    <td className="py-4 font-mono text-xs text-slate-500" title={bet.roundId}>
+                      {bet.roundId.slice(0, 8)}...
                     </td>
                     <td className="py-4 text-slate-200">
                       {bet.userEmail ?? bet.userId}
