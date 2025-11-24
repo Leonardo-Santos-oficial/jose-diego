@@ -5,6 +5,7 @@ import { getCurrentSession, getDisplayName } from '@/lib/auth/session';
 import { getWalletSnapshot } from '@/modules/wallet/server/getWalletSnapshot';
 import { UserChatWidgetServer } from '@/components/chat/UserChatWidgetServer';
 import { ChatWrapper } from '@/components/chat/ChatWrapper';
+import { ChatProvider } from '@/components/chat/ChatContext';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
@@ -80,14 +81,16 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR" className="dark">
       <body>
-        <AppShell session={session} walletBalance={walletBalance}>
-          {children}
-          {session && (
-            <ChatWrapper>
-              <UserChatWidgetServer userId={session.id} userName={displayName} />
-            </ChatWrapper>
-          )}
-        </AppShell>
+        <ChatProvider>
+          <AppShell session={session} walletBalance={walletBalance}>
+            {children}
+            {session && (
+              <ChatWrapper>
+                <UserChatWidgetServer userId={session.id} userName={displayName} />
+              </ChatWrapper>
+            )}
+          </AppShell>
+        </ChatProvider>
       </body>
     </html>
   );

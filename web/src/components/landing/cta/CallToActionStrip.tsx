@@ -2,21 +2,26 @@ import { Button } from '@/components/components/ui/button';
 
 type CallToActionStripProps = {
   onAuthRequest?: () => void;
+  isAuthenticated?: boolean;
 };
 
-export function CallToActionStrip({ onAuthRequest }: CallToActionStripProps) {
+export function CallToActionStrip({ onAuthRequest, isAuthenticated }: CallToActionStripProps) {
   return (
     <section className="rounded-[32px] border border-rose-200/20 bg-gradient-to-r from-rose-500/20 via-orange-400/10 to-yellow-300/10 px-8 py-10">
       <div className="flex flex-col gap-6 text-slate-50 md:flex-row md:items-center md:justify-between">
         <div className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-rose-200">
-            Pronto para Lucrar?
+            {isAuthenticated ? 'Continue Ganhando' : 'Pronto para Lucrar?'}
           </p>
           <h2 className="text-2xl font-semibold">
-            Crie sua conta em segundos e aproveite o melhor jogo do momento.
+            {isAuthenticated 
+              ? 'Volte para o jogo e multiplique seus ganhos agora mesmo.'
+              : 'Crie sua conta em segundos e aproveite o melhor jogo do momento.'}
           </h2>
           <p className="text-sm text-slate-100/80">
-            Junte-se a milhares de vencedores agora mesmo e comece a multiplicar.
+            {isAuthenticated
+              ? 'Sua próxima vitória está a apenas um clique de distância.'
+              : 'Junte-se a milhares de vencedores agora mesmo e comece a multiplicar.'}
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -25,7 +30,7 @@ export function CallToActionStrip({ onAuthRequest }: CallToActionStripProps) {
             className="w-full rounded-full bg-slate-950 px-6 py-3 text-base sm:w-auto"
             onClick={onAuthRequest}
           >
-            Criar Conta Grátis
+            {isAuthenticated ? 'Ir para o Jogo' : 'Criar Conta Grátis'}
           </Button>
           <Button
             size="lg"

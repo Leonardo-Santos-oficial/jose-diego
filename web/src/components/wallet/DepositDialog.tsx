@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/components/ui/button';
+import { useChat } from '@/components/chat/ChatContext';
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,15 @@ interface DepositDialogProps {
 
 export function DepositDialog({ children }: DepositDialogProps) {
   const [open, setOpen] = useState(false);
+  const { openChat } = useChat();
+
+  const handleConfirm = () => {
+    setOpen(false);
+    // Small delay to ensure dialog closes smoothly before chat opens
+    setTimeout(() => {
+      openChat();
+    }, 100);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -30,8 +40,8 @@ export function DepositDialog({ children }: DepositDialogProps) {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button onClick={() => setOpen(false)} className="w-full sm:w-auto">
-            Entendi
+          <Button onClick={handleConfirm} className="w-full sm:w-auto">
+            Entendi, abrir chat
           </Button>
         </DialogFooter>
       </DialogContent>

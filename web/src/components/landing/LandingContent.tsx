@@ -52,10 +52,11 @@ export function LandingContent({
 
   const handleAuthRequest = useCallback(() => {
     if (isAuthenticated) {
+      router.push('/app');
       return;
     }
     setModalRequested(true);
-  }, [isAuthenticated]);
+  }, [isAuthenticated, router]);
 
   const handleCloseModal = useCallback(() => {
     setModalRequested(false);
@@ -91,7 +92,10 @@ export function LandingContent({
           )}
           <InstitutionalShowcase />
           <FeatureHighlights />
-          <CallToActionStrip onAuthRequest={handleAuthRequest} />
+          <CallToActionStrip 
+            onAuthRequest={handleAuthRequest} 
+            isAuthenticated={isAuthenticated}
+          />
         </main>
       </div>
       <AuthModal open={modalOpen} onClose={handleCloseModal} />
