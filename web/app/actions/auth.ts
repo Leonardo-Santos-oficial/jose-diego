@@ -2,9 +2,11 @@
 
 import type { AuthFormState } from '@/app/actions/auth-state';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { AuthConfigurationError, AuthNetworkError } from '@/lib/auth/errors';
 import { supabaseAuthProxy } from '@/lib/auth/supabaseAuthProxy';
 import { getBaseUrl } from '@/lib/url/getBaseUrl';
+import { rateLimiter } from '@/lib/rate-limit';
 
 const validateField = (value: FormDataEntryValue | null) => {
   if (typeof value !== 'string' || value.trim().length === 0) {
@@ -28,10 +30,26 @@ const handleAuthError = (error: unknown, fallbackMessage: string) => {
   return { status: 'error', message } as AuthFormState;
 };
 
+async function checkRateLimit(action: string): Promise<string | null> {
+  const headersList = await headers();
+  const ip = headersList.get('x-forwarded-for') || 'unknown';
+  
+  // Limit: 5 attempts per 60 seconds per IP for auth actions
+  const isAllowed = rateLimiter.check(`auth:${action}:${ip}`, 5, 60 * 1000);
+  
+  if (!isAllowed) {
+    return 'Muitas tentativas. Tente novamente em 1 minuto.';
+  }
+  return null;
+}
+
 export async function signUpAction(
   _: AuthFormState,
   formData: FormData
 ): Promise<AuthFormState> {
+  const limitError = await checkRateLimit('signup');
+  if (limitError) return { status: 'error', message: limitError };
+
   const email = validateField(formData.get('email'));
   const password = validateField(formData.get('password'));
 
@@ -56,6 +74,9 @@ export async function signInAction(
   _: AuthFormState,
   formData: FormData
 ): Promise<AuthFormState> {
+  const limitError = await checkRateLimit('signin');
+  if (limitError) return { status: 'error', message: limitError };
+
   const email = validateField(formData.get('email'));
   const password = validateField(formData.get('password'));
 

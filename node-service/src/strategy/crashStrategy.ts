@@ -1,11 +1,21 @@
+export interface CrashResult {
+  multiplier: number;
+  seed: string;
+  hash: string;
+}
+
 export interface CrashStrategy {
-  nextCrashMultiplier(): number;
+  nextCrash(): CrashResult;
 }
 
 export class FixedCrashStrategy implements CrashStrategy {
   constructor(private readonly multiplier: number = 2.5) {}
 
-  nextCrashMultiplier(): number {
-    return this.multiplier;
+  nextCrash(): CrashResult {
+    return {
+      multiplier: this.multiplier,
+      seed: 'fixed-strategy-seed',
+      hash: 'fixed-strategy-hash',
+    };
   }
 }

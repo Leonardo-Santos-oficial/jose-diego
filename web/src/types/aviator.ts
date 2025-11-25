@@ -14,6 +14,7 @@ export interface GameStateMessage {
   bettingWindow?: BettingWindow;
   autopayouts?: Array<{ ticketId: string; userId: string; multiplier: number }>;
   houseEdge?: number;
+  hash?: string;
 }
 
 export interface GameHistoryEntry {

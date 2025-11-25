@@ -12,18 +12,23 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminBetsPage() {
+export default async function AdminBetsPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
   const session = await getCurrentSession();
 
   if (!isAdminSession(session)) {
     redirect('/');
   }
 
-  const bets = await fetchGlobalBetHistory(200);
+  const page = Number(searchParams.page) || 1;
+  const { data: bets, totalPages } = await fetchGlobalBetHistory(page, 50);
 
   return (
     <main className="flex flex-col gap-6 p-4 md:p-8">
-      <AdminBetsTable bets={bets} />
+      <AdminBetsTable bets={bets} currentPage={page} totalPages={totalPages} />
     </main>
   );
 }

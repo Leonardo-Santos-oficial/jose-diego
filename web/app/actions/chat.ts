@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-// import DOMPurify from 'isomorphic-dompurify'; // Removed to avoid Vercel/Edge issues with jsdom
+import { htmlSanitizer } from '@/lib/security/htmlSanitizer';
 import { getCurrentSession } from '@/lib/auth/session';
 import { isAdminSession } from '@/lib/auth/roles';
 import type { ChatActionState } from '@/app/actions/chat-state';
@@ -15,7 +15,8 @@ const messageSchema = z.object({
     .string()
     .trim()
     .min(1, 'Digite uma mensagem.')
-    .max(1000, 'Mensagem deve ter no máximo 1000 caracteres.'),
+    .max(1000, 'Mensagem deve ter no máximo 1000 caracteres.')
+    .transform((val) => htmlSanitizer.sanitize(val)),
 });
 
 const metadataSchema = z.object({

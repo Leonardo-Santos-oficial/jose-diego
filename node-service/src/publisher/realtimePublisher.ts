@@ -7,6 +7,7 @@ import { supabaseServiceClient } from '../clients/supabaseClient.js';
 export interface StatePayload extends GameStateSnapshot {
   bettingWindowRemainingMs?: number;
   targetMultiplier?: number;
+  hash?: string;
 }
 
 export interface HistoryPayload {

@@ -6,15 +6,16 @@ import { SupabaseRealtimePublisher } from './publisher/realtimePublisher.js';
 import { GameStateMachine } from './loop/GameStateMachine.js';
 import { LoopScheduler } from './loop/LoopScheduler.js';
 import { LoopController } from './loop/LoopController.js';
-import { FixedCrashStrategy } from './strategy/crashStrategy.js';
+import { ProvablyFairStrategy } from './strategy/ProvablyFairStrategy.js';
 import { CommandService } from './services/commandService.js';
 import { supabaseServiceClient } from './clients/supabaseClient.js';
+import { AdminCommandListener } from './clients/adminCommandListener.js';
 
 async function bootstrap(): Promise<void> {
   const publisher = new SupabaseRealtimePublisher();
   const machine = new GameStateMachine({
     publisher,
-    strategy: new FixedCrashStrategy(3)
+    strategy: new ProvablyFairStrategy()
   });
   const scheduler = new LoopScheduler(machine);
   const loopController = new LoopController(scheduler, machine);
@@ -23,9 +24,12 @@ async function bootstrap(): Promise<void> {
     () => machine.getContext(),
     publisher
   );
+  const adminListener = new AdminCommandListener(supabaseServiceClient, loopController);
+  
   const app = createServer({ commandService, loopController });
 
   scheduler.start();
+  adminListener.start();
 
   try {
     await app.listen({ port: env.PORT, host: '0.0.0.0' });

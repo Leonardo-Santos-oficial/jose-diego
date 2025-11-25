@@ -16,6 +16,8 @@ interface MachineContext {
   phase: GamePhase;
   phaseStartedAt: Date;
   bettingWindowRemainingMs: number;
+  seed: string;
+  hash: string;
 }
 
 interface MachineDependencies {
@@ -120,6 +122,7 @@ export class GameStateMachine {
       phase: this.context.phase,
       multiplier: this.context.multiplier,
       phaseStartedAt: this.context.phaseStartedAt,
+      hash: this.context.hash,
       ...extra
     };
     void this.deps.publisher.publishState(payload);
@@ -200,13 +203,16 @@ export class GameStateMachine {
   }
 
   private createRoundContext(): MachineContext {
+    const crash = this.deps.strategy.nextCrash();
     return {
       roundId: randomUUID(),
-      crashTarget: this.deps.strategy.nextCrashMultiplier(),
+      crashTarget: crash.multiplier,
       multiplier: 1,
       phase: 'awaitingBets',
       phaseStartedAt: new Date(),
-      bettingWindowRemainingMs: this.config.bettingWindowMs
+      bettingWindowRemainingMs: this.config.bettingWindowMs,
+      seed: crash.seed,
+      hash: crash.hash
     };
   }
 

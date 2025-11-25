@@ -66,7 +66,12 @@ export async function AdminChatAnalyticsSection() {
                   </span>
                 </div>
                 <div className="mb-2">
-                  <div className="text-slate-200">{thread.userId ?? 'Anônimo'}</div>
+                  <div className="text-slate-200">
+                    {thread.user?.displayName ??
+                      thread.user?.email ??
+                      thread.userId ??
+                      'Anônimo'}
+                  </div>
                   <div className="text-xs text-slate-500">
                     Resp: {thread.metadata.lastAgentName ?? '—'}
                   </div>
@@ -96,9 +101,14 @@ export async function AdminChatAnalyticsSection() {
                     className="border-b border-white/5 last:border-b-0"
                   >
                     <td className="px-4 py-3 font-mono text-xs text-slate-400">
-                      {thread.id}
+                      #{thread.id.slice(0, 8)}
                     </td>
-                    <td className="px-4 py-3 text-sm">{thread.userId ?? '—'}</td>
+                    <td className="px-4 py-3 text-sm">
+                      {thread.user?.displayName ??
+                        thread.user?.email ??
+                        thread.userId ??
+                        '—'}
+                    </td>
                     <td className="px-4 py-3 text-sm">
                       {thread.closedAt
                         ? new Date(thread.closedAt).toLocaleString('pt-BR')

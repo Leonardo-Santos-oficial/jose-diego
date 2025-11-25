@@ -1,5 +1,8 @@
 'use client';
 
+import Link from 'next/link';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/components/ui/button';
 import type { AdminBetHistoryEntry } from '@/modules/admin/services/betHistoryService';
 
 const currency = new Intl.NumberFormat('pt-BR', {
@@ -17,18 +20,59 @@ const dateTime = new Intl.DateTimeFormat('pt-BR', {
 
 type AdminBetsTableProps = {
   bets: AdminBetHistoryEntry[];
+  currentPage: number;
+  totalPages: number;
 };
 
-export function AdminBetsTable({ bets }: AdminBetsTableProps) {
+export function AdminBetsTable({
+  bets,
+  currentPage,
+  totalPages,
+}: AdminBetsTableProps) {
   return (
     <section className="rounded-3xl border border-slate-800/60 bg-slate-950/80 p-4 shadow-[0_25px_80px_rgba(2,6,23,0.35)] md:p-6">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-slate-50">
-          Admin • Histórico de Apostas
-        </h1>
-        <p className="text-sm text-slate-400">
-          Registro global de todas as apostas realizadas na plataforma.
-        </p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-50">
+            Admin • Histórico de Apostas
+          </h1>
+          <p className="text-sm text-slate-400">
+            Registro global de todas as apostas realizadas na plataforma.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={currentPage <= 1}
+            asChild
+          >
+            <Link
+              href={currentPage > 1 ? `/admin/bets?page=${currentPage - 1}` : '#'}
+              aria-disabled={currentPage <= 1}
+            >
+              <ChevronLeft className="size-4" />
+            </Link>
+          </Button>
+          <span className="text-sm text-slate-400">
+            Pág {currentPage} de {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={currentPage >= totalPages}
+            asChild
+          >
+            <Link
+              href={
+                currentPage < totalPages ? `/admin/bets?page=${currentPage + 1}` : '#'
+              }
+              aria-disabled={currentPage >= totalPages}
+            >
+              <ChevronRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {bets.length === 0 ? (

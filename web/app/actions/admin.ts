@@ -3,14 +3,26 @@
 import { AdjustWalletBalanceCommand } from '@/modules/admin/commands/AdjustWalletBalanceCommand';
 import type { AdminActionState } from '@/modules/admin/types/actionState';
 import { parseAdjustBalanceForm } from '@/modules/admin/services/parseAdjustBalanceForm';
+import { getCurrentSession } from '@/lib/auth/session';
+import { isAdminSession } from '@/lib/auth/roles';
 
 const UNEXPECTED_ERROR = 'Falha inesperada ao ajustar saldo.';
+const UNAUTHORIZED_ERROR = 'Acesso negado.';
 const isE2EEnabled = process.env.NEXT_PUBLIC_E2E === '1';
 
 export async function adjustBalanceAction(
   _prevState: AdminActionState,
   formData: FormData
 ): Promise<AdminActionState> {
+  const session = await getCurrentSession();
+  
+  if (!isAdminSession(session)) {
+    return {
+      status: 'error',
+      message: UNAUTHORIZED_ERROR,
+    };
+  }
+
   const validation = parseAdjustBalanceForm(formData);
 
   if (!validation.ok) {

@@ -8,13 +8,14 @@ import {
   type EngineState,
   type EngineStateRow,
 } from '@/modules/aviator/serverless/types';
+import type { CrashResult } from '@/modules/aviator/serverless/strategies/crashStrategy';
 
 const ENGINE_STATE_TABLE = 'engine_state';
 const GAME_ROUNDS_TABLE = 'game_rounds';
 const BETS_TABLE = 'bets';
 
 export interface EngineStateRepository {
-  ensureState(targetMultiplier: number, settings?: EngineSettings): Promise<EngineState>;
+  ensureState(crashResult: CrashResult, settings?: EngineSettings): Promise<EngineState>;
   updateState(
     id: string,
     data: Partial<{
@@ -24,6 +25,8 @@ export interface EngineStateRepository {
       targetMultiplier: number;
       roundId: string;
       settings: EngineSettings;
+      serverSeed: string;
+      serverHash: string;
     }>,
     fallbackSettings?: EngineSettings
   ): Promise<EngineState>;
@@ -57,13 +60,31 @@ export interface EngineStateRepository {
     balance: number;
     updatedAt: string;
   }>;
+  fetchPendingCommands(): Promise<Array<{ id: string; action: string; payload: any }>>;
+  markCommandProcessed(id: string, status: 'processed' | 'failed'): Promise<void>;
 }
 
 export class SupabaseEngineStateRepository implements EngineStateRepository {
   constructor(private readonly client: SupabaseClient = getSupabaseServiceRoleClient()) {}
 
+  async fetchPendingCommands() {
+    const { data } = await this.client
+      .from('admin_game_commands')
+      .select('id, action, payload')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true });
+    return data ?? [];
+  }
+
+  async markCommandProcessed(id: string, status: 'processed' | 'failed') {
+    await this.client
+      .from('admin_game_commands')
+      .update({ status, processed_at: new Date().toISOString() })
+      .eq('id', id);
+  }
+
   async ensureState(
-    targetMultiplier: number,
+    crashResult: CrashResult,
     settings: EngineSettings = DEFAULT_ENGINE_SETTINGS
   ): Promise<EngineState> {
     const { data, error } = await this.client
@@ -76,12 +97,27 @@ export class SupabaseEngineStateRepository implements EngineStateRepository {
       throw new Error(`Falha ao buscar engine_state: ${error.message}`);
     }
 
+    // We'll inject the seed/hash into the settings object stored in DB
+    // so we can retrieve it later without changing the schema.
+    const settingsWithHash = {
+      ...settings,
+      serverSeed: crashResult.seed,
+      serverHash: crashResult.hash,
+    };
+
     if (data) {
       if (!data.current_round_id) {
         const roundId = await this.createRound('awaitingBets');
         const { data: fixed, error: fixError } = await this.client
           .from(ENGINE_STATE_TABLE)
-          .update({ current_round_id: roundId })
+          .update({ 
+            current_round_id: roundId,
+            // Update settings to include the new hash/seed if we are starting fresh?
+            // Actually, if state exists, we might want to keep existing settings unless we are resetting.
+            // But ensureState is called every tick. We shouldn't overwrite settings every tick.
+            // However, if we are creating a NEW round, we might want to update the hash.
+            // But ensureState is mostly about making sure the ROW exists.
+          })
           .eq('id', data.id)
           .select('*')
           .single();
@@ -93,6 +129,11 @@ export class SupabaseEngineStateRepository implements EngineStateRepository {
         return mapStateRow(fixed as EngineStateRow, settings);
       }
 
+      // If we already have a state, we return it.
+      // Note: The state in DB might have an OLD hash/seed from previous round if we don't update it.
+      // But the Facade handles the logic of "if round is over, start new one".
+      // ensureState is just "get me the state, create if missing".
+      
       return mapStateRow(data as EngineStateRow, settings);
     }
 
@@ -105,8 +146,8 @@ export class SupabaseEngineStateRepository implements EngineStateRepository {
         phase: 'awaitingBets',
         phase_started_at: new Date().toISOString(),
         current_multiplier: 1,
-        target_multiplier: targetMultiplier,
-        settings,
+        target_multiplier: crashResult.multiplier,
+        settings: settingsWithHash,
       })
       .select('*')
       .single();
@@ -127,6 +168,8 @@ export class SupabaseEngineStateRepository implements EngineStateRepository {
       targetMultiplier: number;
       roundId: string;
       settings: EngineSettings;
+      serverSeed: string;
+      serverHash: string;
     }>,
     fallbackSettings: EngineSettings = DEFAULT_ENGINE_SETTINGS
   ): Promise<EngineState> {
@@ -147,8 +190,20 @@ export class SupabaseEngineStateRepository implements EngineStateRepository {
     if (data.roundId) {
       payload.current_round_id = data.roundId;
     }
-    if (data.settings) {
-      payload.settings = data.settings;
+    
+    let settingsToSave = data.settings;
+    if (data.serverSeed || data.serverHash) {
+      if (settingsToSave) {
+        settingsToSave = {
+          ...settingsToSave,
+          serverSeed: data.serverSeed ?? settingsToSave.serverSeed,
+          serverHash: data.serverHash ?? settingsToSave.serverHash,
+        };
+      }
+    }
+
+    if (settingsToSave) {
+      payload.settings = settingsToSave;
     }
 
     const { data: updated, error } = await this.client
@@ -361,6 +416,9 @@ function mapStateRow(row: EngineStateRow, fallbackSettings: EngineSettings): Eng
     ...pickNumericSetting(rawSettings, 'maxCrashMultiplier'),
   } as EngineSettings;
 
+  const serverSeed = typeof rawSettings['serverSeed'] === 'string' ? rawSettings['serverSeed'] : undefined;
+  const serverHash = typeof rawSettings['serverHash'] === 'string' ? rawSettings['serverHash'] : undefined;
+
   return {
     id: row.id,
     roundId: row.current_round_id ?? '',
@@ -369,6 +427,8 @@ function mapStateRow(row: EngineStateRow, fallbackSettings: EngineSettings): Eng
     currentMultiplier: Number(row.current_multiplier ?? 1),
     targetMultiplier: Number(row.target_multiplier ?? 2),
     settings,
+    serverSeed,
+    serverHash,
   };
 }
 

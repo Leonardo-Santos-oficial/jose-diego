@@ -31,7 +31,13 @@ const timeOnly = new Intl.DateTimeFormat('pt-BR', {
   minute: '2-digit',
 });
 
-type ThreadWithMessages = ChatThread & { messages: ChatMessage[] };
+type ThreadWithMessages = ChatThread & {
+  messages: ChatMessage[];
+  user?: {
+    email?: string;
+    displayName?: string;
+  };
+};
 
 type AdminChatInboxProps = {
   initialThreads: ThreadWithMessages[];
@@ -182,7 +188,12 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
                 </div>
                 <p className="mt-1 text-sm">
                   Usuário:{' '}
-                  <span className="font-semibold">{thread.userId ?? 'Anônimo'}</span>
+                  <span className="font-semibold">
+                    {thread.user?.displayName ??
+                      thread.user?.email ??
+                      thread.userId ??
+                      'Anônimo'}
+                  </span>
                 </p>
                 <p className="truncate text-xs text-slate-400">
                   Última mensagem: {thread.messages.at(-1)?.body ?? 'Sem mensagens'}
@@ -213,10 +224,19 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
                   Thread
                 </p>
                 <h3 className="text-xl font-semibold text-white">
-                  {selectedThread.id}
+                  {selectedThread.user?.displayName ??
+                    selectedThread.user?.email ??
+                    'Conversa'}
+                  <span className="ml-2 text-sm font-normal text-slate-500">
+                    #{selectedThread.id.slice(0, 8)}
+                  </span>
                 </h3>
                 <p className="text-sm text-slate-400">
-                  Usuário associado: {selectedThread.userId ?? '—'}
+                  Usuário associado:{' '}
+                  {selectedThread.user?.displayName ??
+                    selectedThread.user?.email ??
+                    selectedThread.userId ??
+                    '—'}
                 </p>
                 <p className="text-xs text-slate-500">
                   Responsável atual:{' '}

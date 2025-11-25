@@ -14,7 +14,7 @@ export function ChatWrapper({ children }: { children: React.ReactNode }) {
       <Button
         onClick={toggleChat}
         className={cn(
-          "fixed bottom-4 right-4 z-50 h-14 w-14 rounded-full shadow-2xl transition-all duration-300",
+          "fixed bottom-24 right-4 md:bottom-4 z-50 h-14 w-14 rounded-full shadow-2xl transition-all duration-300",
           isOpen ? "bg-rose-500 hover:bg-rose-600" : "bg-teal-500 hover:bg-teal-600"
         )}
       >
@@ -24,7 +24,7 @@ export function ChatWrapper({ children }: { children: React.ReactNode }) {
       {/* Chat Panel */}
       <div
         className={cn(
-          "fixed bottom-20 right-4 z-40 w-[90vw] max-w-[400px] transition-all duration-300 ease-in-out",
+          "fixed bottom-40 right-4 md:bottom-20 z-40 w-[90vw] max-w-[400px] transition-all duration-300 ease-in-out",
           isOpen
             ? "translate-y-0 opacity-100 scale-100"
             : "translate-y-10 opacity-0 scale-95 pointer-events-none"

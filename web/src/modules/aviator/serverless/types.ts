@@ -15,6 +15,8 @@ export interface EngineSettings {
   historySize: number;
   minCrashMultiplier: number;
   maxCrashMultiplier: number;
+  serverSeed?: string;
+  serverHash?: string;
 }
 
 export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
@@ -45,6 +47,8 @@ export interface EngineState {
   currentMultiplier: number;
   targetMultiplier: number;
   settings: EngineSettings;
+  serverHash?: string;
+  serverSeed?: string;
 }
 
 export interface PlaceBetInput {

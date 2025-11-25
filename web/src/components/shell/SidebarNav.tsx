@@ -9,6 +9,11 @@ const links = [
     description: 'Histórico global',
   },
   {
+    label: 'Controle Jogo',
+    href: '/admin/game',
+    description: 'Motor e Crash',
+  },
+  {
     label: 'Saques',
     href: '/admin/withdrawals',
     description: 'Aprovação de solicitações',

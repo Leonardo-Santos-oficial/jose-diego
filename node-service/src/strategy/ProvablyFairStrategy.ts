@@ -1,21 +1,8 @@
-import { createHash, randomBytes } from 'crypto';
-import {
-  DEFAULT_ENGINE_SETTINGS,
-  type EngineSettings,
-} from '@/modules/aviator/serverless/types';
-
-export interface CrashResult {
-  multiplier: number;
-  seed: string;
-  hash: string;
-}
-
-export interface CrashStrategy {
-  pickTargetMultiplier(settings?: EngineSettings): CrashResult;
-}
+import { createHash, randomBytes } from 'node:crypto';
+import type { CrashResult, CrashStrategy } from './crashStrategy.js';
 
 export class ProvablyFairStrategy implements CrashStrategy {
-  pickTargetMultiplier(settings: EngineSettings = DEFAULT_ENGINE_SETTINGS): CrashResult {
+  nextCrash(): CrashResult {
     // 1. Generate a random server seed (32 bytes hex)
     const seed = randomBytes(32).toString('hex');
 

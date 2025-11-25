@@ -10,14 +10,14 @@ import { useAviatorController } from '@/modules/aviator/hooks/useAviatorControll
 import { useAviatorStore } from '@/modules/aviator/state/useAviatorStore';
 import { aviatorAssets } from '@/modules/aviator/config/sceneConfig';
 import type { WalletSnapshot } from '@/types/aviator';
+import { AviatorHeader } from '@/components/aviator/AviatorHeader';
+import { GlobalChatWidget } from '@/components/global-chat/GlobalChatWidget';
 
 export type AviatorGameClientProps = {
   userId: string;
   initialWalletSnapshot?: WalletSnapshot | null;
   initialAutoCashoutPreference?: boolean;
 };
-
-import { AviatorHeader } from '@/components/aviator/AviatorHeader';
 
 export function AviatorGameClient({
   userId,
@@ -44,7 +44,7 @@ export function AviatorGameClient({
   }, [initialWalletSnapshot, startSyncTransition, syncWalletSnapshot]);
 
   return (
-    <div className="flex h-[100dvh] flex-col bg-slate-950 overflow-hidden">
+    <div className="flex h-[100dvh] flex-col overflow-hidden">
       <AviatorHeader userId={userId} />
       
       <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
@@ -97,6 +97,16 @@ export function AviatorGameClient({
             </div>
           </div>
         </div>
+
+        {/* Far Right Panel: Chat (Desktop) */}
+        <div className="hidden lg:order-3 lg:flex lg:w-[300px] lg:flex-col lg:border-l lg:border-white/10 lg:bg-slate-900">
+          <GlobalChatWidget />
+        </div>
+      </div>
+
+      {/* Mobile Chat Drawer (Optional - or just below betting area) */}
+      <div className="lg:hidden border-t border-white/10 bg-slate-900 p-4">
+         <GlobalChatWidget />
       </div>
     </div>
   );

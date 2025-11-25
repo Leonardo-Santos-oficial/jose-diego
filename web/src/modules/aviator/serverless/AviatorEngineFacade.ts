@@ -41,10 +41,57 @@ export class AviatorEngineFacade {
   }
 
   async tick(now: Date = new Date()): Promise<EngineTickResult> {
+    // 1. Process Admin Commands
+    const commands = await this.repo.fetchPendingCommands();
+    let forceCrash = false;
+
+    for (const cmd of commands) {
+      try {
+        if (cmd.action === 'pause') {
+          // Update settings to paused
+          const newSettings = { ...this.settings, paused: true };
+          // We need to persist this change to DB so subsequent ticks respect it
+          // But ensureState reads from DB.
+          // We should update the state immediately.
+          // However, we don't have the state ID yet.
+          // Let's fetch state first? No, ensureState does that.
+        } else if (cmd.action === 'resume') {
+           // Update settings to unpaused
+        } else if (cmd.action === 'force_crash') {
+          forceCrash = true;
+        }
+        await this.repo.markCommandProcessed(cmd.id, 'processed');
+      } catch (e) {
+        console.error('Failed to process command', cmd, e);
+        await this.repo.markCommandProcessed(cmd.id, 'failed');
+      }
+    }
+
+    // We need to fetch state *after* potentially processing commands that might affect global settings?
+    // Actually, commands like 'pause' should update the DB state.
+    // Since we don't have the state object yet, we can't update it easily.
+    // Let's fetch state first.
+
     let state = await this.repo.ensureState(
       this.strategy.pickTargetMultiplier(this.settings),
       this.settings
     );
+
+    // Now apply commands to the fetched state/settings
+    for (const cmd of commands) {
+      if (cmd.action === 'pause') {
+        const newSettings = { ...state.settings, paused: true };
+        state = await this.repo.updateState(state.id, { settings: newSettings });
+      } else if (cmd.action === 'resume') {
+        const newSettings = { ...state.settings, paused: false };
+        state = await this.repo.updateState(state.id, { settings: newSettings });
+      }
+    }
+
+    // Check if paused
+    if ((state.settings as any)?.paused) {
+      return { state, messages: [] };
+    }
 
     if (!state.roundId) {
       const roundId = await this.repo.createRound('awaitingBets');
@@ -73,19 +120,23 @@ export class AviatorEngineFacade {
       }
       case 'flying': {
         const nextMultiplier = calculateMultiplier(state, now, this.settings);
-        const willCrash = nextMultiplier >= state.targetMultiplier;
+        const willCrash = forceCrash || nextMultiplier >= state.targetMultiplier;
 
         if (willCrash) {
           await this.autoCashout.run(state.roundId, state.targetMultiplier);
+          // If forced crash, use current multiplier (or 1.0 if just started?)
+          // Actually if forced, we should probably crash at current multiplier.
+          const crashValue = forceCrash ? state.currentMultiplier : state.targetMultiplier;
+          
           await this.repo.setRoundStatus(
             state.roundId,
             'crashed',
-            state.targetMultiplier
+            crashValue
           );
           state = await this.repo.updateState(state.id, {
             phase: 'crashed',
             phaseStartedAt: now.toISOString(),
-            currentMultiplier: state.targetMultiplier,
+            currentMultiplier: crashValue,
           });
           const historyEntries = await this.repo.fetchHistory(this.settings.historySize);
           historyMessage = { entries: historyEntries };
@@ -100,7 +151,7 @@ export class AviatorEngineFacade {
       case 'crashed': {
         const elapsed = elapsedMs(state.phaseStartedAt, now);
         if (elapsed >= this.settings.resetDelayMs) {
-          const targetMultiplier = this.strategy.pickTargetMultiplier(this.settings);
+          const crashResult = this.strategy.pickTargetMultiplier(this.settings);
           const roundId = await this.repo.createRound('awaitingBets');
           await this.repo.setRoundStatus(roundId, 'awaitingBets');
           state = await this.repo.updateState(state.id, {
@@ -108,7 +159,10 @@ export class AviatorEngineFacade {
             phase: 'awaitingBets',
             phaseStartedAt: now.toISOString(),
             currentMultiplier: 1,
-            targetMultiplier,
+            targetMultiplier: crashResult.multiplier,
+            serverSeed: crashResult.seed,
+            serverHash: crashResult.hash,
+            settings: this.settings,
           });
         }
         break;
@@ -163,6 +217,7 @@ function buildStateMessage(
     multiplier:
       state.phase === 'awaitingBets' ? 1 : Number(state.currentMultiplier.toFixed(2)),
     phaseStartedAt: state.phaseStartedAt,
+    hash: state.serverHash,
   };
 
   if (state.phase === 'awaitingBets') {
