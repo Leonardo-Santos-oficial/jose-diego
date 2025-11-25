@@ -41,25 +41,47 @@ export const GameStatusDisplay = memo(function GameStatusDisplay({ state, multip
                      state === 'crashed' ? 'scale-90 opacity-80 grayscale' : 'scale-100';
 
   return (
-    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
+    <div className="absolute inset-0 z-20 pointer-events-none">
       
-      {/* Multiplier Text */}
-      <div className={`text-7xl md:text-9xl font-black tracking-tighter transition-all duration-300 ${textColor} ${pulseClass} ${scaleClass}`}>
-        {multiplier.toFixed(2)}x
+      {/* Multiplier Container - Posicionado no canto superior esquerdo */}
+      <div className="absolute top-4 left-4 md:top-8 md:left-8">
+        {/* Multiplier Text */}
+        <div className={`text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter transition-all duration-300 ${textColor} ${pulseClass} ${scaleClass}`}>
+          {multiplier.toFixed(2)}x
+        </div>
+
+        {/* Status Label */}
+        <div className="mt-2 text-sm md:text-base font-bold uppercase tracking-[0.15em] text-slate-300 drop-shadow-md">
+          {state === 'flying' && isHighMultiplier ? '🔥 SUPER GANHO!' : phaseLabels[state]}
+        </div>
       </div>
 
-      {/* Status Label */}
-      <div className="mt-4 text-xl font-bold uppercase tracking-[0.2em] text-slate-300 drop-shadow-md">
-        {state === 'flying' && isHighMultiplier ? 'SUPER GANHO!' : phaseLabels[state]}
-      </div>
-
-      {/* Loading Bar for Awaiting Bets */}
+      {/* Loading Bar for Awaiting Bets - Centralizado na tela com fundo escuro */}
       {state === 'awaitingBets' && (
-        <div className="mt-8 w-64 h-2 bg-slate-800/50 rounded-full overflow-hidden backdrop-blur-sm">
-          <div 
-            className="h-full bg-sky-500 transition-all duration-100 ease-linear"
-            style={{ width: `${closesIn ? (closesIn / 5000) * 100 : 100}%` }}
-          />
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          {/* Container com fundo escuro para melhor visibilidade */}
+          <div className="bg-slate-900/80 backdrop-blur-md rounded-2xl px-8 py-6 border border-slate-700/50 shadow-2xl">
+            {/* Texto com cor mais vibrante */}
+            <div className="text-xl md:text-2xl font-bold text-amber-400 mb-4 text-center drop-shadow-lg">
+              ⏱️ Próxima rodada em...
+            </div>
+            
+            {/* Barra de loading maior e mais visível */}
+            <div className="w-56 md:w-72 h-3 bg-slate-700 rounded-full overflow-hidden border border-slate-600">
+              <div 
+                className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 transition-all duration-100 ease-linear shadow-lg"
+                style={{ 
+                  width: `${closesIn ? (closesIn / 5000) * 100 : 100}%`,
+                  boxShadow: '0 0 10px rgba(251, 146, 60, 0.5)'
+                }}
+              />
+            </div>
+            
+            {/* Contador de segundos */}
+            <div className="text-center mt-3 text-2xl md:text-3xl font-black text-white">
+              {closesIn ? Math.ceil(closesIn / 1000) : 5}s
+            </div>
+          </div>
         </div>
       )}
     </div>

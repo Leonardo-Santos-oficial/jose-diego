@@ -21,12 +21,13 @@ export function AviatorScene({ state, history }: AviatorSceneProps) {
   const currentState = state?.state ?? 'awaitingBets';
   const currentMultiplier = state?.multiplier ?? 1;
   const closesIn = state?.bettingWindow?.closesInMs ?? null;
+  const isFlying = currentState === 'flying';
 
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-slate-900 select-none">
       
       {/* 1. Background Layer */}
-      <SceneBackground multiplier={currentMultiplier} />
+      <SceneBackground multiplier={currentMultiplier} isFlying={isFlying} />
 
       {/* 2. Trajectory Layer */}
       <FlightCurve />
