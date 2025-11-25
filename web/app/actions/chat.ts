@@ -103,7 +103,8 @@ export async function sendAdminMessageAction(
     return { status: 'error', message: firstIssue, threadId };
   }
 
-  const sanitizedBody = DOMPurify.sanitize(parsed.data.body);
+  // Simple HTML strip to avoid heavy dependencies on server
+  const sanitizedBody = parsed.data.body.replace(/<[^>]*>?/gm, '');
 
   try {
     const result = await adminCommand.executeForAdmin({
