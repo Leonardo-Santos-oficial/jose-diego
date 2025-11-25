@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, Fragment } from 'react';
 import type { GameStateMessage } from '@/types/aviator';
 
 interface PlayerPlaneProps {
@@ -50,7 +50,7 @@ export const PlayerPlane = memo(function PlayerPlane({ multiplier, state }: Play
       <div className="relative w-16 md:w-24 lg:w-32 drop-shadow-2xl filter">
         {/* Advanced Particle/Smoke System */}
         {isFlying && (
-          <>
+          <Fragment>
              {/* Main Smoke Stream */}
              <div className="absolute top-[55%] right-[60%] w-[300%] h-2 md:h-4 bg-gradient-to-l from-rose-500/20 via-white/40 to-transparent blur-[4px] rounded-full origin-right animate-pulse" />
              
@@ -63,7 +63,7 @@ export const PlayerPlane = memo(function PlayerPlane({ multiplier, state }: Play
                 <div className="absolute right-10 w-1 h-1 bg-amber-300 rounded-full animate-[ping_1.5s_linear_infinite] opacity-60" style={{ animationDelay: '0.3s' }} />
                 <div className="absolute right-5 w-1.5 h-1.5 bg-rose-300 rounded-full animate-[ping_0.8s_linear_infinite] opacity-40" style={{ animationDelay: '0.5s' }} />
              </div>
-          </>
+          </Fragment>
         )}
         
         {/* Plane SVG */}

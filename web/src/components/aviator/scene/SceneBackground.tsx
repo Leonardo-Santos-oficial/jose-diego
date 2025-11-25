@@ -4,6 +4,14 @@ interface SceneBackgroundProps {
   multiplier: number;
 }
 
+function Cloud({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={`text-white ${className}`}>
+      <path d="M18.5,12c0-1.7-1.1-3.2-2.6-3.8c0.1-0.4,0.1-0.8,0.1-1.2c0-3.3-2.7-6-6-6c-2.8,0-5.2,2-5.8,4.7C2.6,6.2,1.5,7.5,1.5,9c0,0.2,0,0.4,0.1,0.6C0.7,10.1,0,11,0,12c0,1.7,1.3,3,3,3h15.5C20.2,15,21.5,13.7,21.5,12z" />
+    </svg>
+  );
+}
+
 export const SceneBackground = memo(function SceneBackground({ multiplier }: SceneBackgroundProps) {
   // Calculate atmosphere darkness based on multiplier
   // 1x = 0% darkness (Blue Sky)
@@ -49,11 +57,3 @@ export const SceneBackground = memo(function SceneBackground({ multiplier }: Sce
     </div>
   );
 });
-
-function Cloud({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={`text-white ${className}`}>
-      <path d="M18.5,12c0-1.7-1.1-3.2-2.6-3.8c0.1-0.4,0.1-0.8,0.1-1.2c0-3.3-2.7-6-6-6c-2.8,0-5.2,2-5.8,4.7C2.6,6.2,1.5,7.5,1.5,9c0,0.2,0,0.4,0.1,0.6C0.7,10.1,0,11,0,12c0,1.7,1.3,3,3,3h15.5C20.2,15,21.5,13.7,21.5,12z" />
-    </svg>
-  );
-}

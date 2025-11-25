@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import DOMPurify from 'isomorphic-dompurify';
+// import DOMPurify from 'isomorphic-dompurify'; // Removed to avoid Vercel/Edge issues with jsdom
 import { getCurrentSession } from '@/lib/auth/session';
 import { isAdminSession } from '@/lib/auth/roles';
 import type { ChatActionState } from '@/app/actions/chat-state';
@@ -52,7 +52,8 @@ export async function sendChatMessageAction(
     return { status: 'error', message: firstIssue };
   }
 
-  const sanitizedBody = DOMPurify.sanitize(parsed.data.body);
+  // Simple HTML strip to avoid heavy dependencies on server
+  const sanitizedBody = parsed.data.body.replace(/<[^>]*>?/gm, '');
 
   try {
     const result = await userCommand.executeForUser({
