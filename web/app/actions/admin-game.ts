@@ -3,13 +3,14 @@
 import { getSupabaseServiceRoleClient } from '@/lib/supabase/serviceRoleClient';
 import { revalidatePath } from 'next/cache';
 
-type GameAction = 'pause' | 'resume' | 'force_crash';
+type GameAction = 'pause' | 'resume' | 'force_crash' | 'set_result' | 'update_settings';
 
-export async function sendGameCommand(action: GameAction) {
+export async function sendGameCommand(action: GameAction, payload?: any) {
   const supabase = getSupabaseServiceRoleClient();
 
   const { error } = await supabase.from('admin_game_commands').insert({
     action,
+    payload,
     status: 'pending',
   });
 

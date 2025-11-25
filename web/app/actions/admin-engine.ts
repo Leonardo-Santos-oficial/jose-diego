@@ -8,6 +8,7 @@ export type EngineStatus = {
   phase: string;
   currentMultiplier: number;
   roundId: string;
+  rtp?: number;
 };
 
 export async function getEngineStatus(): Promise<EngineStatus | null> {
@@ -31,5 +32,6 @@ export async function getEngineStatus(): Promise<EngineStatus | null> {
     phase: data.phase,
     currentMultiplier: Number(data.current_multiplier),
     roundId: data.current_round_id,
+    rtp: settings?.rtp ?? 97.0,
   };
 }

@@ -11,6 +11,9 @@ export function GameControlPanel() {
   const [lastStatus, setLastStatus] = useState<string | null>(null);
   const [engineStatus, setEngineStatus] = useState<EngineStatus | null>(null);
 
+  const [rtpInput, setRtpInput] = useState('97.0');
+  const [forceResultInput, setForceResultInput] = useState('');
+
   const fetchStatus = async () => {
     const status = await getEngineStatus();
     setEngineStatus(status);
@@ -22,14 +25,33 @@ export function GameControlPanel() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleCommand = (action: 'pause' | 'resume' | 'force_crash') => {
+  useEffect(() => {
+    if (engineStatus?.rtp) {
+      setRtpInput(engineStatus.rtp.toString());
+    }
+  }, [engineStatus?.rtp]);
+
+  const handleCommand = (action: 'pause' | 'resume' | 'force_crash' | 'set_result' | 'update_settings', payload?: any) => {
     startTransition(async () => {
-      const result = await sendGameCommand(action);
+      const result = await sendGameCommand(action, payload);
       setLastStatus(result.message);
       setTimeout(() => setLastStatus(null), 3000);
       // Force immediate refresh after command
       setTimeout(fetchStatus, 1000);
     });
+  };
+
+  const handleSetRtp = () => {
+    const rtp = parseFloat(rtpInput);
+    if (isNaN(rtp) || rtp < 0 || rtp > 100) return;
+    handleCommand('update_settings', { rtp });
+  };
+
+  const handleForceResult = () => {
+    const value = parseFloat(forceResultInput);
+    if (isNaN(value) || value < 1) return;
+    handleCommand('set_result', { value });
+    setForceResultInput('');
   };
 
   return (
@@ -68,7 +90,7 @@ export function GameControlPanel() {
         </div>
       </header>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-4">
           <h3 className="mb-2 font-semibold text-white">Estado do Loop</h3>
           <div className="flex gap-2">
@@ -103,18 +125,55 @@ export function GameControlPanel() {
             <AlertTriangle className="mr-2 size-4" /> Forçar Crash Agora
           </Button>
           <p className="mt-2 text-xs text-slate-500">
-            Encerra a rodada atual imediatamente (Crash em 1.00x ou atual).
+            Encerra a rodada atual imediatamente.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-4 opacity-50">
-          <h3 className="mb-2 font-semibold text-white">Configuração RTP</h3>
-          <div className="flex items-center justify-between rounded bg-slate-950 p-2">
-            <span className="text-sm text-slate-400">Atual</span>
-            <span className="font-mono text-teal-300">97.0%</span>
+        <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-4">
+          <h3 className="mb-2 font-semibold text-white">RTP (%)</h3>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              value={rtpInput}
+              onChange={(e) => setRtpInput(e.target.value)}
+              className="w-full rounded bg-slate-950 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              placeholder="97.0"
+              step="0.1"
+            />
+            <Button
+              onClick={handleSetRtp}
+              disabled={isPending}
+              className="bg-teal-500/20 text-teal-300 hover:bg-teal-500/30"
+            >
+              <RefreshCw className="size-4" />
+            </Button>
           </div>
           <p className="mt-2 text-xs text-slate-500">
-            Configuração de retorno teórico (Em breve).
+            Define a taxa de retorno ao jogador.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-4">
+          <h3 className="mb-2 font-semibold text-white">Forçar Resultado</h3>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              value={forceResultInput}
+              onChange={(e) => setForceResultInput(e.target.value)}
+              className="w-full rounded bg-slate-950 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+              placeholder="Ex: 15.00"
+              step="0.01"
+            />
+            <Button
+              onClick={handleForceResult}
+              disabled={isPending || !forceResultInput}
+              className="bg-purple-500/20 text-purple-300 hover:bg-purple-500/30"
+            >
+              Set
+            </Button>
+          </div>
+          <p className="mt-2 text-xs text-slate-500">
+            Define o crash da PRÓXIMA rodada.
           </p>
         </div>
       </div>

@@ -16,6 +16,17 @@ export interface CrashStrategy {
 
 export class ProvablyFairStrategy implements CrashStrategy {
   pickTargetMultiplier(settings: EngineSettings = DEFAULT_ENGINE_SETTINGS): CrashResult {
+    // 0. Check for forced result
+    if (settings.forcedResult != null && settings.forcedResult > 0) {
+      const seed = randomBytes(32).toString('hex');
+      const hash = createHash('sha256').update(seed).digest('hex');
+      return {
+        multiplier: settings.forcedResult,
+        seed,
+        hash,
+      };
+    }
+
     // 1. Generate a random server seed (32 bytes hex)
     const seed = randomBytes(32).toString('hex');
 
@@ -37,14 +48,15 @@ export class ProvablyFairStrategy implements CrashStrategy {
     // Using the seed to generate a uniform float [0, 1)
     const randomFloat = h / e;
 
-    // House Edge: 1% chance of instant crash
+    // House Edge: 1% chance of instant crash (default)
     // If randomFloat is very close to 1, result is huge.
     // Formula: multiplier = (100 * E - h) / (E - h) / 100 ... simplified:
     
-    const houseEdge = 0.01; // 1%
+    const rtp = settings.rtp ?? 97.0;
+    const houseEdge = (100 - rtp) / 100; // e.g. 3% = 0.03
     
     // Calculate multiplier
-    // X = 0.99 / (1 - U)
+    // X = (1 - houseEdge) / (1 - U)
     const rawMultiplier = (1 - houseEdge) / (1 - randomFloat);
     
     // Clamp to 1.00 if it's less (shouldn't happen with this formula but safety first)

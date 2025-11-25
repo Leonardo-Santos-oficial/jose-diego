@@ -17,6 +17,9 @@ export interface EngineSettings {
   maxCrashMultiplier: number;
   serverSeed?: string;
   serverHash?: string;
+  paused?: boolean;
+  rtp?: number; // 0 to 100
+  forcedResult?: number | null;
 }
 
 export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
@@ -26,6 +29,7 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
   historySize: 30,
   minCrashMultiplier: 1.2,
   maxCrashMultiplier: 35,
+  rtp: 97.0,
 };
 
 export interface EngineStateRow {

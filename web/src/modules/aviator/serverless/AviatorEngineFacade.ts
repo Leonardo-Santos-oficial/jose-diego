@@ -85,6 +85,15 @@ export class AviatorEngineFacade {
       } else if (cmd.action === 'resume') {
         const newSettings = { ...state.settings, paused: false };
         state = await this.repo.updateState(state.id, { settings: newSettings });
+      } else if (cmd.action === 'set_result') {
+        const forcedResult = typeof cmd.payload?.value === 'number' ? cmd.payload.value : parseFloat(cmd.payload?.value);
+        if (!isNaN(forcedResult)) {
+          const newSettings = { ...state.settings, forcedResult };
+          state = await this.repo.updateState(state.id, { settings: newSettings });
+        }
+      } else if (cmd.action === 'update_settings') {
+        const newSettings = { ...state.settings, ...cmd.payload };
+        state = await this.repo.updateState(state.id, { settings: newSettings });
       }
     }
 
@@ -150,8 +159,18 @@ export class AviatorEngineFacade {
       }
       case 'crashed': {
         const elapsed = elapsedMs(state.phaseStartedAt, now);
-        if (elapsed >= this.settings.resetDelayMs) {
-          const crashResult = this.strategy.pickTargetMultiplier(this.settings);
+        // Use state.settings for resetDelayMs if available, otherwise fallback to default
+        const resetDelay = state.settings?.resetDelayMs ?? this.settings.resetDelayMs;
+        
+        if (elapsed >= resetDelay) {
+          const crashResult = this.strategy.pickTargetMultiplier(state.settings);
+          
+          // If forcedResult was used, clear it for the next round
+          let nextSettings = state.settings;
+          if (state.settings.forcedResult) {
+             nextSettings = { ...state.settings, forcedResult: null };
+          }
+
           const roundId = await this.repo.createRound('awaitingBets');
           await this.repo.setRoundStatus(roundId, 'awaitingBets');
           state = await this.repo.updateState(state.id, {
@@ -162,7 +181,7 @@ export class AviatorEngineFacade {
             targetMultiplier: crashResult.multiplier,
             serverSeed: crashResult.seed,
             serverHash: crashResult.hash,
-            settings: this.settings,
+            settings: nextSettings,
           });
         }
         break;

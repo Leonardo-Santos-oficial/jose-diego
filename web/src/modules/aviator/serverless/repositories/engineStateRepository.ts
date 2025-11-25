@@ -414,6 +414,8 @@ function mapStateRow(row: EngineStateRow, fallbackSettings: EngineSettings): Eng
     ...pickNumericSetting(rawSettings, 'historySize'),
     ...pickNumericSetting(rawSettings, 'minCrashMultiplier'),
     ...pickNumericSetting(rawSettings, 'maxCrashMultiplier'),
+    ...pickNumericSetting(rawSettings, 'rtp'),
+    ...pickNumericSetting(rawSettings, 'forcedResult'),
     paused: !!rawSettings['paused'],
   } as EngineSettings;
 
