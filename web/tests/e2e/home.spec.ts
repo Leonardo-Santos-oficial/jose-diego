@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-test('landing placeholder loads', async ({ page }) => {
+test('landing page loads successfully', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('Demo Aviator · RTP 97%')).toBeVisible();
+  await expect(page.locator('h1').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: /jogar/i }).first()).toBeVisible();
 });
