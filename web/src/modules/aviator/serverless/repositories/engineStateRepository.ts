@@ -414,6 +414,7 @@ function mapStateRow(row: EngineStateRow, fallbackSettings: EngineSettings): Eng
     ...pickNumericSetting(rawSettings, 'historySize'),
     ...pickNumericSetting(rawSettings, 'minCrashMultiplier'),
     ...pickNumericSetting(rawSettings, 'maxCrashMultiplier'),
+    paused: !!rawSettings['paused'],
   } as EngineSettings;
 
   const serverSeed = typeof rawSettings['serverSeed'] === 'string' ? rawSettings['serverSeed'] : undefined;
