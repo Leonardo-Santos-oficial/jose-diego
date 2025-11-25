@@ -26,7 +26,7 @@ export function AviatorScene({ state, history }: AviatorSceneProps) {
     <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-slate-900 select-none">
       
       {/* 1. Background Layer */}
-      <SceneBackground />
+      <SceneBackground multiplier={currentMultiplier} />
 
       {/* 2. Trajectory Layer */}
       <FlightCurve />

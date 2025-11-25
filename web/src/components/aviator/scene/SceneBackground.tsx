@@ -1,18 +1,51 @@
 import { memo } from 'react';
 
-export const SceneBackground = memo(function SceneBackground() {
+interface SceneBackgroundProps {
+  multiplier: number;
+}
+
+export const SceneBackground = memo(function SceneBackground({ multiplier }: SceneBackgroundProps) {
+  // Calculate atmosphere darkness based on multiplier
+  // 1x = 0% darkness (Blue Sky)
+  // 10x = 100% darkness (Space)
+  const darkness = Math.min((multiplier - 1) / 10, 1);
+
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden bg-gradient-to-b from-sky-400 to-sky-600">
-      {/* Animated Clouds Layer */}
-      <div className="absolute inset-0 opacity-30">
-        <Cloud className="absolute top-[10%] left-[10%] w-32 animate-[float_20s_linear_infinite]" />
-        <Cloud className="absolute top-[20%] left-[60%] w-48 animate-[float_25s_linear_infinite_reverse]" />
-        <Cloud className="absolute top-[40%] left-[30%] w-24 animate-[float_15s_linear_infinite]" />
-        <Cloud className="absolute top-[15%] left-[80%] w-40 animate-[float_30s_linear_infinite]" />
+    <div className="absolute inset-0 z-0 overflow-hidden bg-sky-500 transition-colors duration-1000">
+      
+      {/* Base Sky Gradient (Day) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-sky-400 to-sky-600" />
+
+      {/* Space/Night Overlay (Fade in based on multiplier) */}
+      <div 
+        className="absolute inset-0 bg-gradient-to-b from-slate-950 via-indigo-950 to-sky-900 transition-opacity duration-700 ease-linear"
+        style={{ opacity: darkness }}
+      />
+
+      {/* Stars (Only visible when dark) */}
+      <div 
+        className="absolute inset-0 transition-opacity duration-1000"
+        style={{ opacity: Math.max(0, darkness - 0.3) }} // Stars appear after 3x
+      >
+        <div className="absolute top-10 left-20 w-1 h-1 bg-white rounded-full animate-pulse" />
+        <div className="absolute top-40 left-80 w-1 h-1 bg-white rounded-full animate-pulse delay-75" />
+        <div className="absolute top-20 right-40 w-1.5 h-1.5 bg-white rounded-full animate-pulse delay-150" />
+        <div className="absolute bottom-40 left-10 w-1 h-1 bg-white rounded-full animate-pulse delay-300" />
+        <div className="absolute top-1/2 right-10 w-1 h-1 bg-white rounded-full animate-pulse delay-500" />
+      </div>
+
+      {/* Animated Clouds Layer (Fades out slightly in space) */}
+      <div 
+        className="absolute inset-0 transition-opacity duration-1000"
+        style={{ opacity: 1 - (darkness * 0.5) }}
+      >
+        <Cloud className="absolute top-[10%] left-[10%] w-32 animate-[float_20s_linear_infinite] opacity-80" />
+        <Cloud className="absolute top-[20%] left-[60%] w-48 animate-[float_25s_linear_infinite_reverse] opacity-60" />
+        <Cloud className="absolute top-[40%] left-[30%] w-24 animate-[float_15s_linear_infinite] opacity-40" />
       </div>
       
-      {/* Grid/Horizon Effect (Optional for depth) */}
-      <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-slate-900/10 to-transparent" />
+      {/* Horizon Glow */}
+      <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-white/10 to-transparent mix-blend-overlay" />
     </div>
   );
 });

@@ -48,9 +48,22 @@ export const PlayerPlane = memo(function PlayerPlane({ multiplier, state }: Play
       style={style}
     >
       <div className="relative w-16 md:w-24 lg:w-32 drop-shadow-2xl filter">
-        {/* Jet Stream / Trail */}
+        {/* Advanced Particle/Smoke System */}
         {isFlying && (
-           <div className="absolute top-1/2 right-full w-32 h-1 bg-gradient-to-l from-white/50 to-transparent blur-sm transform -translate-y-1/2" />
+          <>
+             {/* Main Smoke Stream */}
+             <div className="absolute top-[55%] right-[60%] w-[300%] h-2 md:h-4 bg-gradient-to-l from-rose-500/20 via-white/40 to-transparent blur-[4px] rounded-full origin-right animate-pulse" />
+             
+             {/* Engine Glow */}
+             <div className="absolute top-[50%] right-[80%] w-4 h-4 bg-rose-500 rounded-full blur-md animate-ping" />
+             
+             {/* Speed Lines / Particles (CSS Trick) */}
+             <div className="absolute top-[60%] right-[50%] w-full h-1 bg-transparent">
+                <div className="absolute right-0 w-2 h-2 bg-white rounded-full animate-[ping_1s_linear_infinite] opacity-50" style={{ animationDelay: '0.1s' }} />
+                <div className="absolute right-10 w-1 h-1 bg-amber-300 rounded-full animate-[ping_1.5s_linear_infinite] opacity-60" style={{ animationDelay: '0.3s' }} />
+                <div className="absolute right-5 w-1.5 h-1.5 bg-rose-300 rounded-full animate-[ping_0.8s_linear_infinite] opacity-40" style={{ animationDelay: '0.5s' }} />
+             </div>
+          </>
         )}
         
         {/* Plane SVG */}
