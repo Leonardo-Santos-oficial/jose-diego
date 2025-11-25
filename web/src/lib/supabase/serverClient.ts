@@ -14,6 +14,8 @@ export async function getSupabaseServerClient(options: ServerClientOptions = {})
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !anonKey) {
+    console.error('❌ Erro Crítico: Variáveis de ambiente do Supabase não encontradas.');
+    console.error('Verifique se NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY estão configuradas no Vercel.');
     throw new Error(missingEnvMessage);
   }
 
