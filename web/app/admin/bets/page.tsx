@@ -15,7 +15,7 @@ export const dynamic = 'force-dynamic';
 export default async function AdminBetsPage({
   searchParams,
 }: {
-  searchParams: { page?: string };
+  searchParams: Promise<{ page?: string }>;
 }) {
   const session = await getCurrentSession();
 
@@ -23,7 +23,8 @@ export default async function AdminBetsPage({
     redirect('/');
   }
 
-  const page = Number(searchParams.page) || 1;
+  const resolvedSearchParams = await searchParams;
+  const page = Number(resolvedSearchParams.page) || 1;
   const { data: bets, totalPages } = await fetchGlobalBetHistory(page, 50);
 
   return (

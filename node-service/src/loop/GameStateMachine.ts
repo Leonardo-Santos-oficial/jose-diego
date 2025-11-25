@@ -8,6 +8,7 @@ import {
 } from './types.js';
 import type { StatePayload, RealtimePublisher } from '../publisher/realtimePublisher.js';
 import type { CrashStrategy } from '../strategy/crashStrategy.js';
+import type { AutoCashoutService } from '../services/autoCashoutService.js';
 
 interface MachineContext {
   roundId: string;
@@ -23,6 +24,7 @@ interface MachineContext {
 interface MachineDependencies {
   publisher: RealtimePublisher;
   strategy: CrashStrategy;
+  autoCashoutService: AutoCashoutService;
   config?: Partial<GameLoopConfig>;
 }
 
@@ -67,6 +69,9 @@ class FlyingState extends GameState {
     const capped = Math.min(next, this.machine.getContext().crashTarget);
     this.machine.updateContext({ multiplier: capped });
     this.machine.publishState({});
+    
+    void this.machine.processAutoCashout(capped);
+
     if (capped >= this.machine.getContext().crashTarget) {
       this.machine.transitionTo('crashed');
     }
@@ -110,6 +115,10 @@ export class GameStateMachine {
 
   tick(deltaMs: number): void {
     this.state.tick(deltaMs);
+  }
+
+  async processAutoCashout(multiplier: number): Promise<void> {
+    await this.deps.autoCashoutService.run(this.context.roundId, multiplier);
   }
 
   getContext(): MachineContext {
