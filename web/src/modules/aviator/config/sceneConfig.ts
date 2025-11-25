@@ -2,6 +2,11 @@ import type { GameHistoryEntry } from '@/types/aviator';
 
 export const aviatorAssets = {
   background: '/aviator/images/img_bg.png',
+  bgDefault: '/aviator/images/bg_default.png',
+  curve: '/aviator/images/landscape.png', // Using img_01 as the curve
+  cloud1: '/aviator/images/cloud1.png',
+  cloud2: '/aviator/images/cloud2.png',
+  cloud3: '/aviator/images/cloud3.png',
   plane: '/aviator/images/plane.png',
   hudMoney: '/aviator/images/hud_money-default-000.png',
   hudProgress: '/aviator/images/img_hudprogressbar-default-001.png',
