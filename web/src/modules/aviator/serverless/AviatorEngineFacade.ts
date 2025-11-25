@@ -99,7 +99,8 @@ export class AviatorEngineFacade {
 
     // Check if paused
     if ((state.settings as any)?.paused) {
-      return { state, messages: [] };
+      const stateMessage = buildStateMessage(state, now, this.settings);
+      return { state, stateMessage };
     }
 
     if (!state.roundId) {
