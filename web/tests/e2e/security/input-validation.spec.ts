@@ -387,7 +387,7 @@ test.describe('Content-Type Validation', () => {
       headers: {
         'Content-Type': 'text/html',
       },
-      body: '<html><script>alert("xss")</script></html>',
+      data: '<html><script>alert("xss")</script></html>',
     });
 
     // Should reject incorrect content type
@@ -399,7 +399,7 @@ test.describe('Content-Type Validation', () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: 'not-valid-json{',
+      data: 'not-valid-json{',
     });
 
     // Should reject invalid JSON
