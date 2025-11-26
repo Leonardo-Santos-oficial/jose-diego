@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import { cookieSecurity } from '@/config/security';
 
 const missingEnvMessage =
   'Configure NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no arquivo .env.local.';
@@ -31,9 +32,10 @@ export async function getSupabaseServerClient(options: ServerClientOptions = {})
           return;
         }
         try {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
+          cookiesToSet.forEach(({ name, value, options }) => {
+            const secureOptions = cookieSecurity.applyToOptions(options);
+            cookieStore.set(name, value, secureOptions);
+          });
         } catch {
           // Ignorar erro se chamado de Server Component
         }
