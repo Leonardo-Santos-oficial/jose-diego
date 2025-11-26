@@ -13,15 +13,18 @@ class ContentSecurityPolicyStrategy implements SecurityHeaderStrategy {
   constructor() {
     this.directives = {
       'default-src': ["'self'"],
-      'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://vercel.live'],
+      'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://vercel.live', 'https://*.vercel.app'],
       'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-      'img-src': ["'self'", 'data:', 'blob:', 'https:'],
-      'font-src': ["'self'", 'https://fonts.gstatic.com'],
+      'img-src': ["'self'", 'data:', 'blob:', 'https://jose-diego.vercel.app', 'https://*.supabase.co'],
+      'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
       'connect-src': ["'self'", 'https://*.supabase.co', 'wss://*.supabase.co', 'https://vercel.live'],
       'frame-ancestors': ["'self'"],
       'form-action': ["'self'"],
       'base-uri': ["'self'"],
       'object-src': ["'none'"],
+      'media-src': ["'self'"],
+      'worker-src': ["'self'", 'blob:'],
+      'child-src': ["'self'", 'blob:'],
       'upgrade-insecure-requests': [],
     };
   }
