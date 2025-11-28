@@ -44,7 +44,7 @@ export class ConsolePublisher implements RealtimePublisher {
   }
 }
 
-type BroadcastEvent = 'game.state' | 'game.history' | 'commands.bet' | 'commands.cashout';
+type BroadcastEvent = 'state' | 'history' | 'commands.bet' | 'commands.cashout';
 
 export class SupabaseRealtimePublisher implements RealtimePublisher {
   private readonly stateChannel: RealtimeChannel;
@@ -69,7 +69,7 @@ export class SupabaseRealtimePublisher implements RealtimePublisher {
   }
 
   async publishState(payload: StatePayload): Promise<void> {
-    await this.broadcast(this.stateChannel, 'game.state', payload);
+    await this.broadcast(this.stateChannel, 'state', payload);
   }
 
   async publishBetResult(result: BetResult): Promise<void> {
@@ -81,7 +81,7 @@ export class SupabaseRealtimePublisher implements RealtimePublisher {
   }
 
   async publishHistory(payload: HistoryPayload): Promise<void> {
-    await this.broadcast(this.historyChannel, 'game.history', payload);
+    await this.broadcast(this.historyChannel, 'history', payload);
   }
 
   private async broadcast(channel: RealtimeChannel, event: BroadcastEvent, payload: unknown): Promise<void> {
