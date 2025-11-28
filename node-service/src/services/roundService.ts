@@ -21,7 +21,9 @@ export class SupabaseRoundService implements RoundService {
 
     if (error) {
       logger.error({ error, roundId }, 'Failed to create round in database');
-      throw new Error(`Failed to create round: ${error.message}`);
+      // Don't throw - let the game continue, bets will be rejected by DB constraints
+      // This prevents the motor from crashing due to DB issues
+      return;
     }
 
     logger.info({ roundId }, 'Round created in database');
