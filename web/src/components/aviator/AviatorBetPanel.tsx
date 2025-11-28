@@ -39,24 +39,52 @@ export function AviatorBetPanel({
 
   const [amount, setAmount] = useState('25');
   const [autopayout, setAutopayout] = useState('2');
-  const [ticketId, setTicketId] = useState('');
+  const [activeTicketId, setActiveTicketId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const [cashoutKind, setCashoutKind] = useState<'manual' | 'auto'>(
     initialAutoCashoutPreference ? 'auto' : 'manual'
   );
   const lastBetResult = useAviatorStore((state) => state.betResult);
   const [, startPreferenceTransition] = useTransition();
 
+  // Mark as mounted after first render to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Automatically set the ticketId when a bet is placed
   useEffect(() => {
     if (betFormState.status === 'success' && betFormState.data?.ticketId) {
-      setTicketId(betFormState.data.ticketId);
+      setActiveTicketId(betFormState.data.ticketId);
     }
   }, [betFormState]);
+
+  // Also update from store (in case bet result comes via realtime)
+  useEffect(() => {
+    if (lastBetResult?.ticketId) {
+      setActiveTicketId(lastBetResult.ticketId);
+    }
+  }, [lastBetResult?.ticketId]);
+
+  // Clear ticket when round changes (new round = need new bet)
+  useEffect(() => {
+    setActiveTicketId(null);
+  }, [currentRoundId]);
+
+  // Clear ticket after successful cashout
+  useEffect(() => {
+    if (cashoutFormState.status === 'success') {
+      setActiveTicketId(null);
+    }
+  }, [cashoutFormState.status]);
 
   const parsedAmount = useMemo(() => Number(amount.replace(',', '.')), [amount]);
   const amountValidation = useMemo(() => validateBetAmount(parsedAmount), [parsedAmount]);
 
   const isPhaseBlocked = !currentRoundId || currentPhase !== 'awaitingBets';
   const isBetDisabled = betPending || isPhaseBlocked || !amountValidation.ok;
+  const hasBetInRound = !!activeTicketId;
+  const canCashout = hasBetInRound && currentPhase === 'flying';
 
   const betAction = useMemo(
     () => async (formData: FormData) => {
@@ -73,14 +101,6 @@ export function AviatorBetPanel({
     },
     [controller, dispatchCashout]
   );
-
-  const handlePasteLastTicket = () => {
-    const lastTicketId = lastBetResult?.ticketId;
-    if (!lastTicketId) {
-      return;
-    }
-    setTicketId(lastTicketId);
-  };
 
   const toggleAutoCashout = () => {
     const nextKind = cashoutKind === 'manual' ? 'auto' : 'manual';
@@ -174,42 +194,34 @@ export function AviatorBetPanel({
 
         <div className="h-px bg-white/5" aria-hidden="true" />
 
+        {/* Cashout Form - Only shows when user has a bet in current round */}
         <form
           action={cashoutActionWithAudio}
           className="space-y-2 lg:space-y-3"
           data-testid="aviator-cashout-form"
         >
-          <div>
-            <div className="flex items-center justify-between gap-2">
-              <label className="text-[10px] text-slate-400 lg:text-sm" htmlFor="cashout-ticket">
-                Ticket (UUID)
-              </label>
-              <button
-                type="button"
-                onClick={handlePasteLastTicket}
-                disabled={!lastBetResult?.ticketId || cashoutPending}
-                className={cn(
-                  'text-[10px] font-semibold uppercase tracking-wide text-teal-300 transition lg:text-xs',
-                  (!lastBetResult?.ticketId || cashoutPending) && 'opacity-40'
-                )}
-              >
-                Colar último
-              </button>
-            </div>
-            <input
-              id="cashout-ticket"
-              name="ticketId"
-              type="text"
-              value={ticketId}
-              onChange={(event) => setTicketId(event.target.value)}
-              className="mt-0.5 w-full rounded-md border border-white/10 bg-slate-900/50 px-2 py-1.5 text-[10px] text-white focus:border-teal-400 focus:outline-none lg:mt-1 lg:rounded-xl lg:px-4 lg:py-3 lg:text-base"
-              placeholder="Cole o UUID do ticket"
-              disabled={cashoutPending}
-              required
-            />
+          {/* Hidden field with auto-managed ticket ID */}
+          <input type="hidden" name="ticketId" value={activeTicketId ?? ''} />
+          <input type="hidden" name="kind" value={cashoutKind} />
+
+          {/* Status indicator - uses consistent initial state to avoid hydration mismatch */}
+          <div className={cn(
+            'rounded-md border px-2 py-1.5 text-[10px] lg:rounded-xl lg:px-4 lg:py-3 lg:text-sm',
+            mounted && hasBetInRound
+              ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200'
+              : 'border-white/10 bg-slate-900/40 text-slate-400'
+          )}>
+            {mounted && hasBetInRound ? (
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Aposta ativa - pronto para cashout</span>
+              </div>
+            ) : (
+              <span>Faça uma aposta para habilitar o cashout</span>
+            )}
           </div>
 
-          <input type="hidden" name="kind" value={cashoutKind} />
+          {/* Auto Cashout Toggle */}
           <div className="flex items-center justify-between rounded-md border border-white/10 bg-slate-900/40 px-2 py-1.5 text-[10px] text-slate-200 lg:rounded-xl lg:px-4 lg:py-3 lg:text-sm">
             <div className="flex items-center gap-2">
               <p className="font-semibold">Auto Cashout</p>
@@ -231,15 +243,25 @@ export function AviatorBetPanel({
             </button>
           </div>
 
+          {/* Cashout Button */}
           <button
             type="submit"
-            disabled={cashoutPending}
+            disabled={!mounted || !canCashout || cashoutPending}
             className={cn(
-              'w-full whitespace-nowrap rounded-lg border border-fuchsia-400/40 bg-fuchsia-500/80 px-4 py-2 text-xs font-bold text-slate-900 transition active:scale-[0.98] lg:rounded-xl lg:py-4 lg:text-lg',
+              'w-full whitespace-nowrap rounded-lg border px-4 py-2 text-xs font-bold transition active:scale-[0.98] lg:rounded-xl lg:py-4 lg:text-lg',
+              mounted && canCashout
+                ? 'border-fuchsia-400/40 bg-fuchsia-500/80 text-slate-900'
+                : 'border-white/10 bg-slate-700 text-slate-400 cursor-not-allowed',
               cashoutPending && 'cursor-not-allowed opacity-50'
             )}
           >
-            {cashoutPending ? 'Solicitando...' : 'Cashout'}
+            {cashoutPending 
+              ? 'Solicitando...' 
+              : !mounted || !hasBetInRound 
+                ? 'Sem aposta ativa'
+                : currentPhase !== 'flying'
+                  ? 'Aguarde o voo'
+                  : 'Cashout'}
           </button>
           {cashoutFormState.message ? (
             <p
