@@ -46,10 +46,10 @@ export class VpsEngineAdapter implements CommandAdapter {
     return {
       status,
       ticketId: response.ticketId,
-      creditedAmount: response.payout,
-      cashoutMultiplier: response.multiplier,
+      creditedAmount: response.creditedAmount ?? response.payout,
+      cashoutMultiplier: response.cashoutMultiplier ?? response.multiplier,
       reason: response.reason,
-      snapshot: {
+      snapshot: response.snapshot ?? {
         balance: 0,
         updatedAt: new Date().toISOString(),
       },

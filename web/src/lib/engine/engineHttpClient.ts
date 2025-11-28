@@ -32,12 +32,18 @@ export interface BetResponse {
 }
 
 export interface CashoutResponse {
-  status: 'credited' | 'failed';
+  status: 'credited' | 'rejected';
   ticketId: string;
-  userId: string;
-  payout?: number;
-  multiplier?: number;
+  userId?: string;
+  creditedAmount?: number;
+  cashoutMultiplier?: number;
+  payout?: number; // alias for creditedAmount
+  multiplier?: number; // alias for cashoutMultiplier
   reason?: string;
+  snapshot?: {
+    balance: number;
+    updatedAt: string;
+  };
 }
 
 export interface HealthResponse {
