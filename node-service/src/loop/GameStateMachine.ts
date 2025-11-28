@@ -9,6 +9,7 @@ import {
 import type { StatePayload, RealtimePublisher } from '../publisher/realtimePublisher.js';
 import type { CrashStrategy } from '../strategy/crashStrategy.js';
 import type { AutoCashoutService } from '../services/autoCashoutService.js';
+import type { RoundService } from '../services/roundService.js';
 
 interface MachineContext {
   roundId: string;
@@ -25,6 +26,7 @@ interface MachineDependencies {
   publisher: RealtimePublisher;
   strategy: CrashStrategy;
   autoCashoutService: AutoCashoutService;
+  roundService: RoundService;
   config?: Partial<GameLoopConfig>;
 }
 
@@ -183,6 +185,8 @@ export class GameStateMachine {
 
   onCrashEntered(): void {
     this.recordHistoryEntry();
+    // Update round status in database
+    void this.deps.roundService.finishRound(this.context.roundId, this.context.multiplier);
   }
 
   private recordHistoryEntry(): void {
@@ -220,8 +224,15 @@ export class GameStateMachine {
 
   private createRoundContext(): MachineContext {
     const crash = this.deps.strategy.nextCrash();
+    const roundId = randomUUID();
+    
+    // Create round in database asynchronously
+    // We don't await here as the constructor is sync, but the round will be created
+    // before any bets can be placed (bettingWindowMs delay provides enough time)
+    void this.deps.roundService.createRound(roundId);
+    
     return {
-      roundId: randomUUID(),
+      roundId,
       crashTarget: crash.multiplier,
       multiplier: 1,
       phase: 'awaitingBets',

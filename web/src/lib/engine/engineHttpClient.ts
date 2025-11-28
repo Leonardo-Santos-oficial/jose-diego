@@ -114,7 +114,9 @@ export class EngineHttpClient {
 
       const data = await response.json();
 
-      if (!response.ok) {
+      // 409 Conflict is expected for rejected bets/cashouts - return data instead of throwing
+      // The response body contains status: 'rejected' and reason
+      if (!response.ok && response.status !== 409) {
         throw new EngineClientError(
           data.message ?? `Request failed with status ${response.status}`,
           response.status,

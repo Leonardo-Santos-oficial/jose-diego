@@ -9,17 +9,20 @@ import { LoopController } from './loop/LoopController.js';
 import { ProvablyFairStrategy } from './strategy/ProvablyFairStrategy.js';
 import { CommandService } from './services/commandService.js';
 import { AutoCashoutService } from './services/autoCashoutService.js';
+import { SupabaseRoundService } from './services/roundService.js';
 import { supabaseServiceClient } from './clients/supabaseClient.js';
 import { AdminCommandListener } from './clients/adminCommandListener.js';
 
 async function bootstrap(): Promise<void> {
   const publisher = new SupabaseRealtimePublisher();
   const autoCashoutService = new AutoCashoutService(supabaseServiceClient, publisher);
+  const roundService = new SupabaseRoundService(supabaseServiceClient);
   
   const machine = new GameStateMachine({
     publisher,
     strategy: new ProvablyFairStrategy(),
-    autoCashoutService
+    autoCashoutService,
+    roundService
   });
   const scheduler = new LoopScheduler(machine);
   const loopController = new LoopController(scheduler, machine);
