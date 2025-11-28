@@ -55,6 +55,7 @@ export function AviatorBetPanel({
   // Automatically set the ticketId when a bet is placed
   useEffect(() => {
     if (betFormState.status === 'success' && betFormState.data?.ticketId) {
+      console.log('[BetPanel] Setting activeTicketId from bet response:', betFormState.data.ticketId);
       setActiveTicketId(betFormState.data.ticketId);
     }
   }, [betFormState]);
@@ -62,19 +63,36 @@ export function AviatorBetPanel({
   // Also update from store (in case bet result comes via realtime)
   useEffect(() => {
     if (lastBetResult?.ticketId) {
+      console.log('[BetPanel] Setting activeTicketId from store:', lastBetResult.ticketId);
       setActiveTicketId(lastBetResult.ticketId);
     }
   }, [lastBetResult?.ticketId]);
 
-  // Clear ticket when round changes (new round = need new bet)
+  // Track which round the current bet belongs to
+  const [betRoundId, setBetRoundId] = useState<string | null>(null);
+
+  // Update betRoundId when we get a ticket
   useEffect(() => {
-    setActiveTicketId(null);
-  }, [currentRoundId]);
+    if (activeTicketId && currentRoundId) {
+      setBetRoundId(currentRoundId);
+    }
+  }, [activeTicketId, currentRoundId]);
+
+  // Clear ticket only when we enter a NEW round (not the one we bet on)
+  useEffect(() => {
+    if (currentRoundId && betRoundId && currentRoundId !== betRoundId) {
+      console.log('[BetPanel] New round detected, clearing ticket. Old:', betRoundId, 'New:', currentRoundId);
+      setActiveTicketId(null);
+      setBetRoundId(null);
+    }
+  }, [currentRoundId, betRoundId]);
 
   // Clear ticket after successful cashout
   useEffect(() => {
     if (cashoutFormState.status === 'success') {
+      console.log('[BetPanel] Cashout success, clearing ticket');
       setActiveTicketId(null);
+      setBetRoundId(null);
     }
   }, [cashoutFormState.status]);
 
