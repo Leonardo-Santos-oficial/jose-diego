@@ -54,6 +54,7 @@ export function AviatorBetPanel({
 
   // Automatically set the ticketId when a bet is placed
   useEffect(() => {
+    console.log('[BetPanel] betFormState changed:', JSON.stringify(betFormState));
     if (betFormState.status === 'success' && betFormState.data?.ticketId) {
       console.log('[BetPanel] Setting activeTicketId from bet response:', betFormState.data.ticketId);
       setActiveTicketId(betFormState.data.ticketId);

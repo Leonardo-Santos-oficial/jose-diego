@@ -38,6 +38,8 @@ export class CommandService {
       p_autocashout: command.autopayoutMultiplier ?? null
     })) as PostgrestSingleResponse<BetRpcPayload>;
 
+    console.log('[CommandService] perform_bet response:', JSON.stringify(response));
+
     if (response.error || !response.data) {
       const reason = response.error?.message ?? 'Falha ao registrar aposta';
       return {
@@ -60,6 +62,7 @@ export class CommandService {
       }
     };
 
+    console.log('[CommandService] BetResult:', JSON.stringify(result));
     await this.publisher.publishBetResult(result);
     return result;
   }
