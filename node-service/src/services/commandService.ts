@@ -36,11 +36,14 @@ export class CommandService {
       p_user_id: command.userId,
       p_amount: command.amount,
       p_autocashout: command.autopayoutMultiplier ?? null
-    })) as PostgrestSingleResponse<BetRpcPayload>;
+    })) as PostgrestSingleResponse<BetRpcPayload[]>;
 
     console.log('[CommandService] perform_bet response:', JSON.stringify(response));
 
-    if (response.error || !response.data) {
+    // RPC with RETURN QUERY returns an array
+    const data = Array.isArray(response.data) ? response.data[0] : response.data;
+
+    if (response.error || !data) {
       const reason = response.error?.message ?? 'Falha ao registrar aposta';
       return {
         roundId: command.roundId,
@@ -55,10 +58,10 @@ export class CommandService {
       roundId: command.roundId,
       userId: command.userId,
       status: 'accepted',
-      ticketId: response.data.ticket_id,
+      ticketId: data.ticket_id,
       snapshot: {
-        balance: Number(response.data.balance ?? 0),
-        updatedAt: response.data.updated_at
+        balance: Number(data.balance ?? 0),
+        updatedAt: data.updated_at
       }
     };
 
