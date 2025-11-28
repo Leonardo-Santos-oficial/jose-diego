@@ -42,12 +42,23 @@ async function bootstrap(): Promise<void> {
   
   const app = createServer({ commandService, loopController });
 
-  scheduler.start();
+  // Check saved state before starting
+  const savedSettings = await engineStateService.getSettings();
+  const shouldStartPaused = savedSettings?.paused === true;
+  
+  if (shouldStartPaused) {
+    logger.info('Engine starting in PAUSED state (from saved settings)');
+  } else {
+    scheduler.start();
+    // Ensure paused state is false in DB
+    await engineStateService.updatePausedState(false);
+  }
+  
   adminListener.start();
 
   try {
     await app.listen({ port: env.PORT, host: '0.0.0.0' });
-    logger.info({ port: env.PORT }, 'Aviator Node Service listening');
+    logger.info({ port: env.PORT, paused: shouldStartPaused }, 'Aviator Node Service listening');
   } catch (error) {
     logger.error({ error }, 'Failed to start Aviator Node Service');
     process.exitCode = 1;
