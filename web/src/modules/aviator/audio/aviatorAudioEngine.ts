@@ -5,6 +5,7 @@ type Sample = 'click' | 'win' | 'lose';
 export class AviatorAudioEngine {
   private readonly music?: HTMLAudioElement;
   private readonly samples: Partial<Record<Sample, HTMLAudioElement>> = {};
+  private soundEnabled = false;
 
   constructor() {
     if (typeof window === 'undefined') {
@@ -18,6 +19,8 @@ export class AviatorAudioEngine {
   }
 
   toggleMusic(enabled: boolean) {
+    this.soundEnabled = enabled;
+    
     if (!this.music) {
       return;
     }
@@ -33,6 +36,11 @@ export class AviatorAudioEngine {
   }
 
   play(sample: Sample) {
+    // Only play samples if sound is enabled
+    if (!this.soundEnabled) {
+      return;
+    }
+    
     const audio = this.samples[sample];
     if (!audio) {
       return;
