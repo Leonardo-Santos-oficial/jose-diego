@@ -5,7 +5,9 @@ import type { BetResult, CashoutResult } from '../commands/types.js';
 import { supabaseServiceClient } from '../clients/supabaseClient.js';
 
 export interface StatePayload extends GameStateSnapshot {
+  state?: GameStateSnapshot['phase']; // Alias for frontend compatibility
   bettingWindowRemainingMs?: number;
+  bettingWindow?: { closesInMs: number }; // Frontend expects this format
   targetMultiplier?: number;
   hash?: string;
 }

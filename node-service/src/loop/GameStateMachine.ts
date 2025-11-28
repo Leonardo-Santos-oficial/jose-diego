@@ -126,12 +126,19 @@ export class GameStateMachine {
   }
 
   publishState(extra: Partial<StatePayload>): void {
+    const bettingWindowRemainingMs = extra.bettingWindowRemainingMs ?? this.context.bettingWindowRemainingMs;
+    
     const payload: StatePayload = {
       roundId: this.context.roundId,
       phase: this.context.phase,
+      state: this.context.phase, // Frontend expects 'state', not 'phase'
       multiplier: this.context.multiplier,
       phaseStartedAt: this.context.phaseStartedAt,
       hash: this.context.hash,
+      // Frontend expects bettingWindow.closesInMs format
+      bettingWindow: {
+        closesInMs: bettingWindowRemainingMs ?? 0
+      },
       ...extra
     };
     void this.deps.publisher.publishState(payload);
