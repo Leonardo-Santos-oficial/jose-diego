@@ -4,11 +4,17 @@ import {
   createAviatorEngineFacade,
   AviatorEngineFacade,
 } from '@/modules/aviator/serverless/AviatorEngineFacade';
+import {
+  getVpsEngineAdapter,
+  type CommandAdapter,
+} from '@/modules/aviator/serverless/adapters';
 import { getCurrentSession } from '@/lib/auth/session';
 import {
   validateBetAmount,
   type BetAmountValidationResult,
 } from '@/modules/aviator/validation/validateBetAmount';
+
+const USE_VPS_ENGINE = !!process.env.NEXT_PUBLIC_ENGINE_URL;
 
 type PlaceBetPayload = {
   roundId: string;
@@ -23,6 +29,7 @@ type CashoutPayload = {
 
 type PlayerCommandServiceDeps = {
   createFacade?: () => AviatorEngineFacade;
+  adapter?: CommandAdapter;
 };
 
 type PlayerCommandServiceOptions = PlayerCommandServiceDeps & {
@@ -96,14 +103,20 @@ export class PlayerCommandService {
     const validation = validateBetAmount(payload.amount);
     assertValidAmount(validation);
 
-    const facade = this.resolveFacade();
-
-    return facade.placeBet({
+    const betInput = {
       userId: this.context.userId,
       roundId: normalizedRoundId,
       amount: Number(payload.amount.toFixed(2)),
       autopayoutMultiplier: parseOptionalNumber(payload.autopayoutMultiplier),
-    });
+    };
+
+    if (USE_VPS_ENGINE) {
+      const adapter = this.deps.adapter ?? getVpsEngineAdapter();
+      return adapter.placeBet(betInput);
+    }
+
+    const facade = this.resolveFacade();
+    return facade.placeBet(betInput);
   }
 
   async cashout(payload: CashoutPayload): Promise<CashoutResultMessage> {
@@ -115,12 +128,19 @@ export class PlayerCommandService {
       );
     }
 
-    const facade = this.resolveFacade();
-    return facade.cashout({
+    const cashoutInput = {
       userId: this.context.userId,
       ticketId,
-      kind: payload.kind === 'auto' ? 'auto' : 'manual',
-    });
+      kind: payload.kind === 'auto' ? 'auto' as const : 'manual' as const,
+    };
+
+    if (USE_VPS_ENGINE) {
+      const adapter = this.deps.adapter ?? getVpsEngineAdapter();
+      return adapter.cashout(cashoutInput);
+    }
+
+    const facade = this.resolveFacade();
+    return facade.cashout(cashoutInput);
   }
 
   private resolveFacade(): AviatorEngineFacade {
@@ -151,5 +171,6 @@ function parseOptionalNumber(value?: number): number | undefined {
 function pickDeps(options: PlayerCommandServiceOptions): PlayerCommandServiceDeps {
   return {
     createFacade: options.createFacade,
+    adapter: options.adapter,
   };
 }

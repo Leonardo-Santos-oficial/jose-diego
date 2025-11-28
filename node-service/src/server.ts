@@ -10,10 +10,33 @@ interface ServerDependencies {
   loopController: LoopController;
 }
 
+const ALLOWED_ORIGINS = [
+  'https://jose-diego.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173'
+];
+
 export function createServer({ commandService, loopController }: ServerDependencies): FastifyInstance {
   const app = Fastify({
     logger: {
       level: process.env.LOG_LEVEL ?? 'info'
+    }
+  });
+
+  app.addHook('onRequest', async (request, reply) => {
+    const origin = request.headers.origin;
+    
+    if (origin && ALLOWED_ORIGINS.includes(origin)) {
+      reply.header('Access-Control-Allow-Origin', origin);
+    }
+    
+    reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    reply.header('Access-Control-Allow-Credentials', 'true');
+    reply.header('Access-Control-Max-Age', '86400');
+    
+    if (request.method === 'OPTIONS') {
+      return reply.status(204).send();
     }
   });
 
