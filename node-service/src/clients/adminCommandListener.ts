@@ -64,7 +64,8 @@ export class AdminCommandListener {
         case 'update_settings':
           if (row.payload?.rtp && typeof row.payload.rtp === 'number') {
             await this.engineStateService.updateRtp(row.payload.rtp);
-            logger.info({ rtp: row.payload.rtp }, 'RTP updated');
+            this.machine.setRtp(row.payload.rtp); // Update RTP in the game machine
+            logger.info({ rtp: row.payload.rtp }, 'RTP updated in engine');
           }
           break;
         default:

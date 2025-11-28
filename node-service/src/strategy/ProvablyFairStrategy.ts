@@ -1,8 +1,8 @@
 import { createHash, randomBytes } from 'node:crypto';
-import type { CrashResult, CrashStrategy } from './crashStrategy.js';
+import type { CrashResult, CrashStrategy, CrashOptions } from './crashStrategy.js';
 
 export class ProvablyFairStrategy implements CrashStrategy {
-  nextCrash(): CrashResult {
+  nextCrash(options?: CrashOptions): CrashResult {
     // 1. Generate a random server seed (32 bytes hex)
     const seed = randomBytes(32).toString('hex');
 
@@ -14,34 +14,26 @@ export class ProvablyFairStrategy implements CrashStrategy {
     const h = parseInt(seed.slice(0, 13), 16);
     const e = Math.pow(2, 52);
     
-    // Standard crash game formula: E / (E - h)
-    // But we need to handle the "house edge" (instant crash at 1.00x)
-    // Usually 1% to 4% of games crash instantly.
-    
-    // Let's use a simpler logic often used in these demos:
-    // 0.99 / (1 - random)
-    
     // Using the seed to generate a uniform float [0, 1)
     const randomFloat = h / e;
 
-    // House Edge: 1% chance of instant crash
-    // If randomFloat is very close to 1, result is huge.
-    // Formula: multiplier = (100 * E - h) / (E - h) / 100 ... simplified:
+    // RTP (Return To Player) determines the house edge
+    // RTP of 97% means 3% house edge
+    // RTP of 5% means 95% house edge (very aggressive)
+    const rtp = options?.rtp ?? 97; // Default RTP is 97%
+    const houseEdge = (100 - rtp) / 100; // Convert percentage to decimal
     
-    const houseEdge = 0.01; // 1%
-    
-    // Calculate multiplier
-    // X = 0.99 / (1 - U)
+    // Calculate multiplier using the formula: X = (1 - houseEdge) / (1 - U)
+    // Where U is a uniform random number [0, 1)
     const rawMultiplier = (1 - houseEdge) / (1 - randomFloat);
     
-    // Clamp to 1.00 if it's less (shouldn't happen with this formula but safety first)
-    // And round to 2 decimal places
+    // Round to 2 decimal places
     let multiplier = Math.floor(rawMultiplier * 100) / 100;
 
-    // Safety clamp
+    // Safety clamp - minimum is 1.00x
     if (multiplier < 1) multiplier = 1;
     
-    // Cap at a reasonable max for the demo (e.g., 10000x) to prevent overflow issues
+    // Cap at a reasonable max (e.g., 10000x) to prevent overflow issues
     if (multiplier > 10000) multiplier = 10000;
 
     return {

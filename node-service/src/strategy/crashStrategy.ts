@@ -4,8 +4,13 @@ export interface CrashResult {
   hash: string;
 }
 
+export interface CrashOptions {
+  /** RTP percentage (0-100). Default is 97. Lower RTP = more house edge = lower multipliers */
+  rtp?: number;
+}
+
 export interface CrashStrategy {
-  nextCrash(): CrashResult;
+  nextCrash(options?: CrashOptions): CrashResult;
 }
 
 export class FixedCrashStrategy implements CrashStrategy {

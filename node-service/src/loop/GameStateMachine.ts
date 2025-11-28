@@ -10,6 +10,7 @@ import type { StatePayload, RealtimePublisher } from '../publisher/realtimePubli
 import type { CrashStrategy } from '../strategy/crashStrategy.js';
 import type { AutoCashoutService } from '../services/autoCashoutService.js';
 import type { RoundService } from '../services/roundService.js';
+import type { EngineStateService } from '../services/engineStateService.js';
 
 interface MachineContext {
   roundId: string;
@@ -27,6 +28,7 @@ interface MachineDependencies {
   strategy: CrashStrategy;
   autoCashoutService: AutoCashoutService;
   roundService: RoundService;
+  engineStateService?: EngineStateService;
   config?: Partial<GameLoopConfig>;
 }
 
@@ -107,12 +109,32 @@ export class GameStateMachine {
   private context: MachineContext;
   private history: HistoryEntry[] = [];
   public readonly config: GameLoopConfig;
+  private currentRtp: number = 97; // Default RTP
 
   constructor(private readonly deps: MachineDependencies) {
     this.config = { ...defaultLoopConfig, ...deps.config };
     this.context = this.createRoundContext();
     this.state = this.buildState('awaitingBets');
     this.state.enter();
+    // Load initial RTP from database
+    void this.loadRtpFromDatabase();
+  }
+
+  private async loadRtpFromDatabase(): Promise<void> {
+    if (!this.deps.engineStateService) return;
+    try {
+      const settings = await this.deps.engineStateService.getSettings();
+      if (settings?.rtp !== undefined) {
+        this.currentRtp = settings.rtp;
+      }
+    } catch {
+      // Use default RTP if unable to load
+    }
+  }
+
+  /** Update the RTP value used for crash calculations */
+  setRtp(rtp: number): void {
+    this.currentRtp = Math.max(0, Math.min(100, rtp));
   }
 
   tick(deltaMs: number): void {
@@ -233,7 +255,8 @@ export class GameStateMachine {
   }
 
   private createRoundContext(): MachineContext {
-    const crash = this.deps.strategy.nextCrash();
+    // Pass current RTP to the strategy for crash calculation
+    const crash = this.deps.strategy.nextCrash({ rtp: this.currentRtp });
     const roundId = randomUUID();
     
     // Use admin-forced crash target if set, otherwise use strategy result

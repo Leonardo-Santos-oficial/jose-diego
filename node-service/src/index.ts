@@ -24,7 +24,8 @@ async function bootstrap(): Promise<void> {
     publisher,
     strategy: new ProvablyFairStrategy(),
     autoCashoutService,
-    roundService
+    roundService,
+    engineStateService
   });
   const scheduler = new LoopScheduler(machine);
   const loopController = new LoopController(scheduler, machine);
