@@ -15,15 +15,17 @@ export async function placeBetAction(
 
   const roundId = (formData.get('roundId') ?? '').toString().trim();
   const amount = Number(formData.get('amount'));
-  const autopayoutMultiplier = formData.get('autopayoutMultiplier');
+  const autopayoutRaw = (formData.get('autopayoutMultiplier') ?? '').toString().trim();
+  // Only use autopayout if it's a non-empty string with a valid number
+  const autopayoutMultiplier = autopayoutRaw ? Number(autopayoutRaw) : undefined;
 
   try {
     const service = await PlayerCommandService.forCurrentUser();
     const result = await service.placeBet({
       roundId,
       amount,
-      autopayoutMultiplier: autopayoutMultiplier
-        ? Number(autopayoutMultiplier)
+      autopayoutMultiplier: autopayoutMultiplier && Number.isFinite(autopayoutMultiplier) 
+        ? autopayoutMultiplier 
         : undefined,
     });
 

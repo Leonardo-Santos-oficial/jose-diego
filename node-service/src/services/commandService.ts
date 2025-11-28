@@ -38,8 +38,6 @@ export class CommandService {
       p_autocashout: command.autopayoutMultiplier ?? null
     })) as PostgrestSingleResponse<BetRpcPayload[]>;
 
-    console.log('[CommandService] perform_bet response:', JSON.stringify(response));
-
     // RPC with RETURN QUERY returns an array
     const data = Array.isArray(response.data) ? response.data[0] : response.data;
 
@@ -65,7 +63,6 @@ export class CommandService {
       }
     };
 
-    console.log('[CommandService] BetResult:', JSON.stringify(result));
     await this.publisher.publishBetResult(result);
     return result;
   }

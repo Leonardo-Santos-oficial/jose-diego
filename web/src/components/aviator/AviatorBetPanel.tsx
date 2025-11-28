@@ -54,9 +54,7 @@ export function AviatorBetPanel({
 
   // Automatically set the ticketId when a bet is placed
   useEffect(() => {
-    console.log('[BetPanel] betFormState changed:', JSON.stringify(betFormState));
     if (betFormState.status === 'success' && betFormState.data?.ticketId) {
-      console.log('[BetPanel] Setting activeTicketId from bet response:', betFormState.data.ticketId);
       setActiveTicketId(betFormState.data.ticketId);
     }
   }, [betFormState]);
@@ -64,7 +62,6 @@ export function AviatorBetPanel({
   // Also update from store (in case bet result comes via realtime)
   useEffect(() => {
     if (lastBetResult?.ticketId) {
-      console.log('[BetPanel] Setting activeTicketId from store:', lastBetResult.ticketId);
       setActiveTicketId(lastBetResult.ticketId);
     }
   }, [lastBetResult?.ticketId]);
@@ -79,19 +76,27 @@ export function AviatorBetPanel({
     }
   }, [activeTicketId, currentRoundId]);
 
-  // Clear ticket only when we enter a NEW round (not the one we bet on)
+  // Clear ticket when:
+  // 1. We enter a NEW round (not the one we bet on)
+  // 2. The round crashes (phase becomes 'crashed') - bet is lost
   useEffect(() => {
     if (currentRoundId && betRoundId && currentRoundId !== betRoundId) {
-      console.log('[BetPanel] New round detected, clearing ticket. Old:', betRoundId, 'New:', currentRoundId);
       setActiveTicketId(null);
       setBetRoundId(null);
     }
   }, [currentRoundId, betRoundId]);
 
+  // Clear ticket when the round crashes (bet is lost)
+  useEffect(() => {
+    if (activeTicketId && currentPhase === 'crashed') {
+      setActiveTicketId(null);
+      setBetRoundId(null);
+    }
+  }, [currentPhase, activeTicketId]);
+
   // Clear ticket after successful cashout
   useEffect(() => {
     if (cashoutFormState.status === 'success') {
-      console.log('[BetPanel] Cashout success, clearing ticket');
       setActiveTicketId(null);
       setBetRoundId(null);
     }
@@ -146,6 +151,12 @@ export function AviatorBetPanel({
       <div className="mt-3 space-y-3 lg:mt-4 lg:space-y-5">
         <form action={betAction} className="space-y-2 lg:space-y-3" data-testid="aviator-bet-form">
           <input type="hidden" name="roundId" value={currentRoundId ?? ''} />
+          {/* Only send autopayoutMultiplier when auto-cashout is enabled AND mounted */}
+          <input 
+            type="hidden" 
+            name="autopayoutMultiplier" 
+            value={mounted && cashoutKind === 'auto' ? autopayout : ''} 
+          />
           <div>
             <label className="text-xs text-slate-200 lg:text-sm" htmlFor="bet-amount">
               Valor da aposta
@@ -173,7 +184,6 @@ export function AviatorBetPanel({
             </label>
             <input
               id="bet-autopayout"
-              name="autopayoutMultiplier"
               type="range"
               min={1}
               max={10}
