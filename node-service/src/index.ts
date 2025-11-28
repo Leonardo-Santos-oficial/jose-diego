@@ -10,6 +10,7 @@ import { ProvablyFairStrategy } from './strategy/ProvablyFairStrategy.js';
 import { CommandService } from './services/commandService.js';
 import { AutoCashoutService } from './services/autoCashoutService.js';
 import { SupabaseRoundService } from './services/roundService.js';
+import { SupabaseEngineStateService } from './services/engineStateService.js';
 import { supabaseServiceClient } from './clients/supabaseClient.js';
 import { AdminCommandListener } from './clients/adminCommandListener.js';
 
@@ -17,6 +18,7 @@ async function bootstrap(): Promise<void> {
   const publisher = new SupabaseRealtimePublisher();
   const autoCashoutService = new AutoCashoutService(supabaseServiceClient, publisher);
   const roundService = new SupabaseRoundService(supabaseServiceClient);
+  const engineStateService = new SupabaseEngineStateService(supabaseServiceClient);
   
   const machine = new GameStateMachine({
     publisher,
@@ -31,7 +33,12 @@ async function bootstrap(): Promise<void> {
     () => machine.getContext(),
     publisher
   );
-  const adminListener = new AdminCommandListener(supabaseServiceClient, loopController);
+  const adminListener = new AdminCommandListener(
+    supabaseServiceClient,
+    loopController,
+    engineStateService,
+    machine
+  );
   
   const app = createServer({ commandService, loopController });
 

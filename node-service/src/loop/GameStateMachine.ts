@@ -183,6 +183,16 @@ export class GameStateMachine {
     this.transitionTo('crashed');
   }
 
+  /**
+   * Sets the crash target for the NEXT round.
+   * This is stored and will be applied when a new round starts.
+   */
+  private nextRoundCrashTarget?: number;
+
+  setNextCrashTarget(multiplier: number): void {
+    this.nextRoundCrashTarget = multiplier;
+  }
+
   onCrashEntered(): void {
     this.recordHistoryEntry();
     // Update round status in database
@@ -226,6 +236,13 @@ export class GameStateMachine {
     const crash = this.deps.strategy.nextCrash();
     const roundId = randomUUID();
     
+    // Use admin-forced crash target if set, otherwise use strategy result
+    let crashTarget = crash.multiplier;
+    if (this.nextRoundCrashTarget !== undefined) {
+      crashTarget = this.nextRoundCrashTarget;
+      this.nextRoundCrashTarget = undefined; // Clear after use
+    }
+    
     // Create round in database asynchronously
     // We don't await here as the constructor is sync, but the round will be created
     // before any bets can be placed (bettingWindowMs delay provides enough time)
@@ -233,7 +250,7 @@ export class GameStateMachine {
     
     return {
       roundId,
-      crashTarget: crash.multiplier,
+      crashTarget,
       multiplier: 1,
       phase: 'awaitingBets',
       phaseStartedAt: new Date(),
