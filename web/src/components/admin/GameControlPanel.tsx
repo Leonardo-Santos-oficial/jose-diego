@@ -55,19 +55,19 @@ export function GameControlPanel() {
   };
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-slate-950/80 p-6 shadow-[0_0_60px_rgba(15,118,110,0.15)]">
-      <header className="mb-6 flex items-center justify-between">
+    <section className="rounded-2xl border border-white/10 bg-slate-950/80 p-4 shadow-[0_0_60px_rgba(15,118,110,0.15)] sm:rounded-3xl sm:p-6">
+      <header className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-teal-300">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-teal-300 sm:text-xs">
             Controle do Motor
           </p>
-          <h2 className="text-xl font-semibold text-white">Gerenciamento do Jogo</h2>
-          <p className="text-sm text-slate-400">
-            Ações diretas no loop do jogo. Use com cautela em produção.
+          <h2 className="text-lg font-semibold text-white sm:text-xl">Gerenciamento do Jogo</h2>
+          <p className="text-xs text-slate-400 sm:text-sm">
+            Ações diretas no loop. Use com cautela.
           </p>
         </div>
-        <div className="text-right">
-          <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-between rounded-xl bg-slate-900/60 p-3 sm:flex-col sm:items-end sm:bg-transparent sm:p-0 sm:text-right">
+          <div className="flex items-center gap-2">
             <span className="relative flex size-3">
               <span
                 className={`absolute inline-flex size-full animate-ping rounded-full opacity-75 ${
@@ -80,100 +80,105 @@ export function GameControlPanel() {
                 }`}
               ></span>
             </span>
-            <span className="text-sm font-medium text-white">
+            <span className="text-xs font-medium text-white sm:text-sm">
               {engineStatus?.isPaused ? 'PAUSADO' : 'RODANDO'}
             </span>
           </div>
-          <p className="text-xs text-slate-500">
-            Fase: {engineStatus?.phase ?? '...'} • {engineStatus?.currentMultiplier}x
+          <p className="text-[10px] text-slate-500 sm:text-xs">
+            {engineStatus?.phase ?? '...'} • {engineStatus?.currentMultiplier}x
           </p>
         </div>
       </header>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-4">
-          <h3 className="mb-2 font-semibold text-white">Estado do Loop</h3>
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+        <div className="rounded-xl border border-white/5 bg-slate-900/60 p-3 sm:rounded-2xl sm:p-4">
+          <h3 className="mb-2 text-sm font-semibold text-white sm:text-base">Estado do Loop</h3>
           <div className="flex gap-2">
             <Button
               onClick={() => handleCommand('resume')}
               disabled={isPending || !engineStatus?.isPaused}
-              className="flex-1 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 disabled:opacity-50"
+              size="sm"
+              className="flex-1 bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 disabled:opacity-50 text-xs sm:text-sm"
             >
-              <Play className="mr-2 size-4" /> Iniciar
+              <Play className="mr-1 size-3 sm:mr-2 sm:size-4" /> Iniciar
             </Button>
             <Button
               onClick={() => handleCommand('pause')}
               disabled={isPending || !!engineStatus?.isPaused}
-              className="flex-1 bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 disabled:opacity-50"
+              size="sm"
+              className="flex-1 bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 disabled:opacity-50 text-xs sm:text-sm"
             >
-              <Pause className="mr-2 size-4" /> Pausar
+              <Pause className="mr-1 size-3 sm:mr-2 sm:size-4" /> Pausar
             </Button>
           </div>
-          <p className="mt-2 text-xs text-slate-500">
-            Pausa ou retoma a geração de novas rodadas.
+          <p className="mt-2 text-[10px] text-slate-500 sm:text-xs">
+            Pausa ou retoma as rodadas.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-4">
-          <h3 className="mb-2 font-semibold text-white">Emergência</h3>
+        <div className="rounded-xl border border-white/5 bg-slate-900/60 p-3 sm:rounded-2xl sm:p-4">
+          <h3 className="mb-2 text-sm font-semibold text-white sm:text-base">Emergência</h3>
           <Button
             onClick={() => handleCommand('force_crash')}
             disabled={isPending}
             variant="destructive"
-            className="w-full bg-rose-500/20 text-rose-300 hover:bg-rose-500/30"
+            size="sm"
+            className="w-full bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 text-xs sm:text-sm"
           >
-            <AlertTriangle className="mr-2 size-4" /> Forçar Crash Agora
+            <AlertTriangle className="mr-1 size-3 sm:mr-2 sm:size-4" /> Forçar Crash
           </Button>
-          <p className="mt-2 text-xs text-slate-500">
-            Encerra a rodada atual imediatamente.
+          <p className="mt-2 text-[10px] text-slate-500 sm:text-xs">
+            Encerra a rodada imediatamente.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-4">
-          <h3 className="mb-2 font-semibold text-white">RTP (%)</h3>
+        <div className="rounded-xl border border-white/5 bg-slate-900/60 p-3 sm:rounded-2xl sm:p-4">
+          <h3 className="mb-2 text-sm font-semibold text-white sm:text-base">RTP (%)</h3>
           <div className="flex gap-2">
             <input
               type="number"
               value={rtpInput}
               onChange={(e) => setRtpInput(e.target.value)}
-              className="w-full rounded bg-slate-950 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              className="w-full rounded bg-slate-950 px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-teal-500 sm:px-3 sm:py-2 sm:text-sm"
               placeholder="97.0"
               step="0.1"
             />
             <Button
               onClick={handleSetRtp}
               disabled={isPending}
-              className="bg-teal-500/20 text-teal-300 hover:bg-teal-500/30"
+              size="sm"
+              className="bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 px-2 sm:px-3"
             >
-              <RefreshCw className="size-4" />
+              <RefreshCw className="size-3 sm:size-4" />
             </Button>
           </div>
-          <p className="mt-2 text-xs text-slate-500">
-            Define a taxa de retorno ao jogador.
+          <p className="mt-2 text-[10px] text-slate-500 sm:text-xs">
+            Taxa de retorno ao jogador.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-4">
-          <h3 className="mb-2 font-semibold text-white">Forçar Resultado</h3>
+        <div className="rounded-xl border border-white/5 bg-slate-900/60 p-3 sm:rounded-2xl sm:p-4">
+          <h3 className="mb-2 text-sm font-semibold text-white sm:text-base">Forçar Resultado</h3>
           <div className="flex gap-2">
             <input
               type="number"
               value={forceResultInput}
               onChange={(e) => setForceResultInput(e.target.value)}
-              className="w-full rounded bg-slate-950 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+              className="w-full rounded bg-slate-950 px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500 sm:px-3 sm:py-2 sm:text-sm"
               placeholder="Ex: 15.00"
               step="0.01"
             />
             <Button
               onClick={handleForceResult}
               disabled={isPending || !forceResultInput}
-              className="bg-purple-500/20 text-purple-300 hover:bg-purple-500/30"
+              size="sm"
+              className="bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 px-2 sm:px-3"
             >
               Set
             </Button>
           </div>
-          <p className="mt-2 text-xs text-slate-500">
-            Define o crash da PRÓXIMA rodada.
+          <p className="mt-2 text-[10px] text-slate-500 sm:text-xs">
+            Crash da próxima rodada.
           </p>
         </div>
       </div>

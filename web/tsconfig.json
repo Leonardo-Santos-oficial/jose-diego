@@ -19,6 +19,7 @@
       "@/modules/*": ["src/modules/*"],
       "@/types/*": ["src/types/*"],
       "@/config/*": ["src/config/*"],
+      "@/hooks/*": ["src/hooks/*"],
       "@/app/*": ["app/*"],
       "@/tests/*": ["tests/*"]
     },

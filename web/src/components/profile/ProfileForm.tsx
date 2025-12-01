@@ -1,130 +1,336 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useState, useActionState, useCallback } from 'react';
+import { useFormStatus } from 'react-dom';
 import { updateProfileAction } from '@/app/actions/profile';
-import {
-  createInitialProfileActionState,
-  type ProfileActionState,
-} from '@/app/actions/profile-state';
+import { createInitialProfileActionState } from '@/app/actions/profile-state';
+import { Input } from '@/components/components/ui/input';
+import { Label } from '@/components/components/ui/label';
+import { Button } from '@/components/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/components/ui/card';
 import { cn } from '@/components/lib/utils';
+import { User, CreditCard, Building2, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { AvatarUpload } from './AvatarUpload';
+import { useAvatarUpload } from '@/hooks/useAvatarUpload';
+import type { BankAccount, BankAccountType, WithdrawMethod } from '@/modules/profile/types';
 
-export type ProfileFormProps = {
+interface ProfileFormProps {
+  userId: string;
   initialDisplayName: string;
   initialPixKey: string;
+  initialPreferredMethod: WithdrawMethod;
+  initialBankAccount: BankAccount | null;
+  initialAvatarUrl: string | null;
   userEmail: string;
-};
+}
 
-export function ProfileForm({
-  initialDisplayName,
-  initialPixKey,
-  userEmail,
-}: ProfileFormProps) {
-  const [state, formAction, pending] = useActionState<ProfileActionState, FormData>(
-    updateProfileAction,
-    createInitialProfileActionState()
-  );
+type WithdrawTab = 'pix' | 'bank';
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
 
   return (
-    <form
-      action={formAction}
-      className="space-y-6 rounded-3xl border border-white/10 bg-slate-950/80 p-4 shadow-[0_0_40px_rgba(15,118,110,0.2)] md:p-6"
+    <Button 
+      type="submit" 
+      className="w-full bg-gradient-to-r from-[#E31C58] to-[#FF6B6B] hover:from-[#FF6B6B] hover:to-[#E31C58] text-white font-semibold py-3 rounded-lg transition-all duration-300"
+      disabled={pending}
     >
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-teal-300">
-          Perfil do jogador
-        </p>
-        <h1 className="text-2xl font-semibold text-slate-50">
-          Dados da conta e chave Pix
-        </h1>
-        <p className="text-sm text-slate-400">
-          Use um nome de exibição para aparecer no topo do app e informe a chave Pix que
-          será utilizada nas solicitações de saque simuladas.
-        </p>
-      </div>
+      {pending ? (
+        <>
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          Salvando...
+        </>
+      ) : (
+        'Salvar Alterações'
+      )}
+    </Button>
+  );
+}
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <div>
-          <label htmlFor="displayName" className="text-sm font-semibold text-slate-200">
-            Nome de exibição
-          </label>
-          <input
-            id="displayName"
-            name="displayName"
-            defaultValue={initialDisplayName}
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-500 focus:border-teal-400 focus:outline-none"
-            placeholder="Ex.: Capitão Demo"
-            maxLength={60}
-            disabled={pending}
-          />
-          <p className="mt-1 text-xs text-slate-400">
-            Mostrado no cabeçalho e no painel admin.
-          </p>
+export function ProfileForm({ 
+  userId,
+  initialDisplayName, 
+  initialPixKey, 
+  initialPreferredMethod,
+  initialBankAccount,
+  initialAvatarUrl,
+  userEmail
+}: ProfileFormProps) {
+  const [state, formAction] = useActionState(updateProfileAction, createInitialProfileActionState());
+  
+  // Avatar upload
+  const { state: avatarState, upload: uploadAvatar } = useAvatarUpload(userId);
+  const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
+  
+  const handleAvatarSelect = useCallback(async (file: File) => {
+    const result = await uploadAvatar(file);
+    if (result) {
+      setAvatarUrl(result.url);
+    }
+  }, [uploadAvatar]);
+  
+  // Determine initial tab based on preferred method
+  const [withdrawTab, setWithdrawTab] = useState<WithdrawTab>(initialPreferredMethod === 'bank' ? 'bank' : 'pix');
+  const [displayName, setDisplayName] = useState(initialDisplayName);
+  const [pixKey, setPixKey] = useState(initialPixKey);
+  
+  // Bank account fields
+  const [bankName, setBankName] = useState(initialBankAccount?.bankName ?? '');
+  const [bankAgency, setBankAgency] = useState(initialBankAccount?.agency ?? '');
+  const [bankAccount, setBankAccount] = useState(initialBankAccount?.account ?? '');
+  const [bankAccountType, setBankAccountType] = useState<BankAccountType>(initialBankAccount?.accountType ?? 'corrente');
+  const [bankHolderName, setBankHolderName] = useState(initialBankAccount?.holderName ?? '');
+  const [bankHolderCpf, setBankHolderCpf] = useState(initialBankAccount?.holderCpf ?? '');
+
+  return (
+    <div className="space-y-6">
+      {/* Success/Error Messages */}
+      {state.status === 'success' && (
+        <div className="flex items-center gap-3 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+          <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+          <p className="text-green-400 text-sm">{state.message}</p>
         </div>
-        <div>
-          <label htmlFor="email" className="text-sm font-semibold text-slate-200">
-            E-mail
-          </label>
-          <input
-            id="email"
-            name="email"
-            value={userEmail}
-            disabled
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-3 text-base text-slate-400"
-          />
-          <p className="mt-1 text-xs text-slate-500">
-            O e-mail é gerenciado pelo Supabase Auth.
-          </p>
+      )}
+      
+      {state.status === 'error' && state.message && (
+        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+          <p className="text-red-400 text-sm">{state.message}</p>
         </div>
-      </div>
+      )}
 
-      <div>
-        <label htmlFor="pixKey" className="text-sm font-semibold text-slate-200">
-          Chave Pix principal
-        </label>
-        <textarea
-          id="pixKey"
-          name="pixKey"
-          defaultValue={initialPixKey}
-          rows={3}
-          maxLength={140}
-          className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-base text-white placeholder:text-slate-500 focus:border-teal-400 focus:outline-none"
-          placeholder="Digite CPF, e-mail ou chave aleatória..."
-          disabled={pending}
-        />
-        <p className="mt-1 text-xs text-slate-400">
-          Este valor aparece para o administrador quando você solicitar um saque.
-        </p>
-      </div>
+      <form action={formAction} className="space-y-6">
+        {/* Hidden field for preferred method */}
+        <input type="hidden" name="preferredWithdrawMethod" value={withdrawTab} />
+        {avatarUrl && <input type="hidden" name="avatarUrl" value={avatarUrl} />}
 
-      {state.message ? (
-        <div
-          className={cn(
-            'rounded-2xl px-4 py-3 text-sm font-medium',
-            state.status === 'success'
-              ? 'border border-emerald-400/60 bg-emerald-500/10 text-emerald-200'
-              : 'border border-rose-400/60 bg-rose-500/10 text-rose-200'
-          )}
-          role="status"
-        >
-          {state.message}
-        </div>
-      ) : null}
+        {/* Profile Card */}
+        <Card className="bg-[#1E1E24]/80 backdrop-blur-sm border-[#2A2A32] shadow-xl">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <AvatarUpload
+                currentAvatarUrl={avatarUrl}
+                displayName={displayName}
+                isUploading={avatarState.status === 'uploading'}
+                onFileSelect={handleAvatarSelect}
+                error={avatarState.error}
+                size="lg"
+              />
+              <div className="text-center sm:text-left">
+                <CardTitle className="text-xl text-white">Informações Pessoais</CardTitle>
+                <CardDescription className="text-gray-400">
+                  {userEmail}
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="displayName" className="text-gray-300 flex items-center gap-2">
+                <User className="w-4 h-4 text-[#E31C58]" />
+                Nome de Exibição
+              </Label>
+              <Input
+                id="displayName"
+                name="displayName"
+                type="text"
+                value={displayName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)}
+                placeholder="Seu nome de exibição"
+                className="bg-[#12121A] border-[#2A2A32] text-white placeholder:text-gray-500 focus:border-[#E31C58] focus:ring-[#E31C58]/20"
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="submit"
-          disabled={pending}
-          className={cn(
-            'rounded-full bg-teal-500/80 px-8 py-3 text-base font-semibold text-slate-950 shadow-lg transition hover:bg-teal-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-300',
-            pending && 'cursor-not-allowed opacity-60'
-          )}
-        >
-          {pending ? 'Salvando...' : 'Salvar alterações'}
-        </button>
-        <p className="text-xs text-slate-500">
-          Última atualização segura e validada no servidor.
-        </p>
-      </div>
-    </form>
+        {/* Withdrawal Method Card */}
+        <Card className="bg-[#1E1E24]/80 backdrop-blur-sm border-[#2A2A32] shadow-xl">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-xl text-white flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-[#E31C58]" />
+              Método de Saque
+            </CardTitle>
+            <CardDescription className="text-gray-400">
+              Escolha como deseja receber seus saques
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Tab Navigation */}
+            <div className="flex bg-[#12121A] rounded-lg p-1 gap-1">
+              <button
+                type="button"
+                onClick={() => setWithdrawTab('pix')}
+                className={cn(
+                  "flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2",
+                  withdrawTab === 'pix'
+                    ? "bg-gradient-to-r from-[#E31C58] to-[#FF6B6B] text-white shadow-lg"
+                    : "text-gray-400 hover:text-white hover:bg-[#2A2A32]"
+                )}
+              >
+                <CreditCard className="w-4 h-4" />
+                Pix
+              </button>
+              <button
+                type="button"
+                onClick={() => setWithdrawTab('bank')}
+                className={cn(
+                  "flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2",
+                  withdrawTab === 'bank'
+                    ? "bg-gradient-to-r from-[#E31C58] to-[#FF6B6B] text-white shadow-lg"
+                    : "text-gray-400 hover:text-white hover:bg-[#2A2A32]"
+                )}
+              >
+                <Building2 className="w-4 h-4" />
+                Conta Bancária
+              </button>
+            </div>
+
+            {/* Pix Tab Content */}
+            {withdrawTab === 'pix' && (
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="pixKey" className="text-gray-300 flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-[#E31C58]" />
+                    Chave Pix
+                  </Label>
+                  <Input
+                    id="pixKey"
+                    name="pixKey"
+                    type="text"
+                    value={pixKey}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPixKey(e.target.value)}
+                    placeholder="CPF, Email, Telefone ou Chave Aleatória"
+                    className="bg-[#12121A] border-[#2A2A32] text-white placeholder:text-gray-500 focus:border-[#E31C58] focus:ring-[#E31C58]/20"
+                  />
+                  <p className="text-xs text-gray-500">
+                    Insira sua chave Pix para receber saques instantâneos
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Bank Tab Content */}
+            {withdrawTab === 'bank' && (
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="bankName" className="text-gray-300 flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-[#E31C58]" />
+                    Nome do Banco
+                  </Label>
+                  <Input
+                    id="bankName"
+                    name="bankName"
+                    type="text"
+                    value={bankName}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBankName(e.target.value)}
+                    placeholder="Ex: Banco do Brasil, Itaú, Nubank..."
+                    className="bg-[#12121A] border-[#2A2A32] text-white placeholder:text-gray-500 focus:border-[#E31C58] focus:ring-[#E31C58]/20"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="bankAgency" className="text-gray-300">
+                      Agência
+                    </Label>
+                    <Input
+                      id="bankAgency"
+                      name="bankAgency"
+                      type="text"
+                      value={bankAgency}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBankAgency(e.target.value)}
+                      placeholder="0000"
+                      className="bg-[#12121A] border-[#2A2A32] text-white placeholder:text-gray-500 focus:border-[#E31C58] focus:ring-[#E31C58]/20"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="bankAccount" className="text-gray-300">
+                      Número da Conta
+                    </Label>
+                    <Input
+                      id="bankAccountField"
+                      name="bankAccount"
+                      type="text"
+                      value={bankAccount}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBankAccount(e.target.value)}
+                      placeholder="00000-0"
+                      className="bg-[#12121A] border-[#2A2A32] text-white placeholder:text-gray-500 focus:border-[#E31C58] focus:ring-[#E31C58]/20"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-gray-300">Tipo de Conta</Label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="bankAccountType"
+                        value="corrente"
+                        checked={bankAccountType === 'corrente'}
+                        onChange={() => setBankAccountType('corrente')}
+                        className="w-4 h-4 text-[#E31C58] bg-[#12121A] border-[#2A2A32] focus:ring-[#E31C58]/20"
+                      />
+                      <span className="text-gray-300 text-sm">Corrente</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="bankAccountType"
+                        value="poupanca"
+                        checked={bankAccountType === 'poupanca'}
+                        onChange={() => setBankAccountType('poupanca')}
+                        className="w-4 h-4 text-[#E31C58] bg-[#12121A] border-[#2A2A32] focus:ring-[#E31C58]/20"
+                      />
+                      <span className="text-gray-300 text-sm">Poupança</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="bankHolderName" className="text-gray-300">
+                      Nome do Titular
+                    </Label>
+                    <Input
+                      id="bankHolderName"
+                      name="bankHolderName"
+                      type="text"
+                      value={bankHolderName}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBankHolderName(e.target.value)}
+                      placeholder="Nome completo"
+                      className="bg-[#12121A] border-[#2A2A32] text-white placeholder:text-gray-500 focus:border-[#E31C58] focus:ring-[#E31C58]/20"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="bankHolderCpf" className="text-gray-300">
+                      CPF do Titular
+                    </Label>
+                    <Input
+                      id="bankHolderCpf"
+                      name="bankHolderCpf"
+                      type="text"
+                      value={bankHolderCpf}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBankHolderCpf(e.target.value)}
+                      placeholder="000.000.000-00"
+                      className="bg-[#12121A] border-[#2A2A32] text-white placeholder:text-gray-500 focus:border-[#E31C58] focus:ring-[#E31C58]/20"
+                    />
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-500">
+                  O saque será enviado via TED/DOC para sua conta bancária
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Submit Button */}
+        <SubmitButton />
+      </form>
+    </div>
   );
 }

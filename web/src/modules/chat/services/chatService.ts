@@ -1,5 +1,6 @@
 import { getSupabaseServerClient } from '@/lib/supabase/serverClient';
 import type {
+  AttachmentType,
   ChatMessage,
   ChatMessageRole,
   ChatThread,
@@ -86,14 +87,23 @@ export class ChatService {
     userId: string;
     role: ChatMessageRole;
     body: string;
+    attachmentUrl?: string;
+    attachmentType?: AttachmentType;
+    attachmentName?: string;
   }): Promise<ChatMessage> {
     const client = await this.getClient();
-    const payload = {
+    const payload: Record<string, unknown> = {
       thread_id: options.threadId,
       user_id: options.userId,
       sender_role: options.role,
       body: options.body,
     };
+
+    if (options.attachmentUrl) {
+      payload.attachment_url = options.attachmentUrl;
+      payload.attachment_type = options.attachmentType ?? 'document';
+      payload.attachment_name = options.attachmentName ?? null;
+    }
 
     const { data, error } = await client
       .from('chat_messages')
@@ -104,6 +114,12 @@ export class ChatService {
     if (error) {
       throw error;
     }
+
+    // Update thread's updated_at timestamp
+    await client
+      .from('chat_threads')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', options.threadId);
 
     return this.toMessage(data);
   }
@@ -247,6 +263,9 @@ export class ChatService {
       senderRole: (row.sender_role as ChatMessage['senderRole']) ?? 'user',
       body: String(row.body ?? ''),
       createdAt: row.created_at as string,
+      attachmentUrl: (row.attachment_url as string | null) ?? null,
+      attachmentType: (row.attachment_type as AttachmentType | null) ?? null,
+      attachmentName: (row.attachment_name as string | null) ?? null,
     };
   }
 }

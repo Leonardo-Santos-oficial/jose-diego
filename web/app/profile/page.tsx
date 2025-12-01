@@ -6,7 +6,7 @@ import { getUserProfile } from '@/modules/profile/server/getUserProfile';
 
 export const metadata: Metadata = {
   title: 'Perfil do Jogador',
-  description: 'Atualize seu nome de exibição e chave Pix para saques simulados.',
+  description: 'Atualize seu nome de exibição e dados para saque.',
 };
 
 export default async function ProfilePage() {
@@ -19,10 +19,14 @@ export default async function ProfilePage() {
   const profile = await getUserProfile(session.id);
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6 p-4 md:p-8">
+    <div className="mx-auto flex max-w-4xl flex-col gap-4 p-3 sm:gap-6 sm:p-4 md:p-8">
       <ProfileForm
+        userId={session.id}
         initialDisplayName={profile.displayName}
         initialPixKey={profile.pixKey}
+        initialPreferredMethod={profile.preferredWithdrawMethod}
+        initialBankAccount={profile.bankAccount}
+        initialAvatarUrl={profile.avatarUrl}
         userEmail={session.email ?? ''}
       />
     </div>

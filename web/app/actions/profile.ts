@@ -16,6 +16,14 @@ const profileSchema = z.object({
     .trim()
     .max(140, 'Sua chave Pix deve ter até 140 caracteres.')
     .default(''),
+  preferredWithdrawMethod: z.enum(['pix', 'bank']).default('pix'),
+  bankName: z.string().trim().max(60).default(''),
+  bankAgency: z.string().trim().max(10).default(''),
+  bankAccount: z.string().trim().max(20).default(''),
+  bankAccountType: z.enum(['corrente', 'poupanca']).default('corrente'),
+  bankHolderName: z.string().trim().max(100).default(''),
+  bankHolderCpf: z.string().trim().max(14).default(''),
+  avatarUrl: z.string().url().optional().nullable(),
 });
 
 export async function updateProfileAction(
@@ -34,6 +42,14 @@ export async function updateProfileAction(
   const parsed = profileSchema.safeParse({
     displayName: formData.get('displayName') ?? '',
     pixKey: formData.get('pixKey') ?? '',
+    preferredWithdrawMethod: formData.get('preferredWithdrawMethod') ?? 'pix',
+    bankName: formData.get('bankName') ?? '',
+    bankAgency: formData.get('bankAgency') ?? '',
+    bankAccount: formData.get('bankAccount') ?? '',
+    bankAccountType: formData.get('bankAccountType') ?? 'corrente',
+    bankHolderName: formData.get('bankHolderName') ?? '',
+    bankHolderCpf: formData.get('bankHolderCpf') ?? '',
+    avatarUrl: formData.get('avatarUrl') || null,
   });
 
   if (!parsed.success) {
@@ -41,7 +57,18 @@ export async function updateProfileAction(
     return { status: 'error', message: firstIssue };
   }
 
-  const { displayName, pixKey } = parsed.data;
+  const {
+    displayName,
+    pixKey,
+    preferredWithdrawMethod,
+    bankName,
+    bankAgency,
+    bankAccount,
+    bankAccountType,
+    bankHolderName,
+    bankHolderCpf,
+    avatarUrl,
+  } = parsed.data;
 
   try {
     const supabase = await getSupabaseServerClient();
@@ -49,6 +76,14 @@ export async function updateProfileAction(
       user_id: userId,
       display_name: displayName || null,
       pix_key: pixKey || null,
+      preferred_withdraw_method: preferredWithdrawMethod,
+      bank_name: bankName || null,
+      bank_agency: bankAgency || null,
+      bank_account: bankAccount || null,
+      bank_account_type: bankAccountType || null,
+      bank_holder_name: bankHolderName || null,
+      bank_holder_cpf: bankHolderCpf || null,
+      avatar_url: avatarUrl || null,
     });
 
     if (upsertError) {

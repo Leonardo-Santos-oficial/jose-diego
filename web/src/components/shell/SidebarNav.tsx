@@ -1,23 +1,9 @@
 const links = [
   { label: 'Início', href: '/', description: 'Landing e onboarding' },
   { label: 'Jogo Aviator', href: '/app', description: 'Área autenticada' },
+  { label: 'Benefícios', href: '/beneficios', description: 'Bônus e recompensas VIP' },
   { label: 'Perfil', href: '/profile', description: 'Atualize dados e Pix' },
-  { label: 'Painel Admin', href: '/admin', description: 'Operações internas' },
-  {
-    label: 'Apostas',
-    href: '/admin/bets',
-    description: 'Histórico global',
-  },
-  {
-    label: 'Controle Jogo',
-    href: '/admin/game',
-    description: 'Motor e Crash',
-  },
-  {
-    label: 'Saques',
-    href: '/admin/withdrawals',
-    description: 'Aprovação de solicitações',
-  },
+  { label: 'Painel Admin', href: '/admin', description: 'Gerenciamento completo' },
 ];
 
 type SidebarNavProps = {

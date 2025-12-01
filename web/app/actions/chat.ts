@@ -17,6 +17,9 @@ const messageSchema = z.object({
     .min(1, 'Digite uma mensagem.')
     .max(1000, 'Mensagem deve ter no máximo 1000 caracteres.')
     .transform((val) => htmlSanitizer.sanitize(val)),
+  attachmentUrl: z.string().url().optional().nullable(),
+  attachmentType: z.enum(['image', 'document']).optional().nullable(),
+  attachmentName: z.string().max(255).optional().nullable(),
 });
 
 const metadataSchema = z.object({
@@ -46,7 +49,12 @@ export async function sendChatMessageAction(
     return { status: 'error', message: 'Faça login para usar o chat.' };
   }
 
-  const parsed = messageSchema.safeParse({ body: formData.get('body') ?? '' });
+  const parsed = messageSchema.safeParse({ 
+    body: formData.get('body') ?? '',
+    attachmentUrl: formData.get('attachmentUrl') || null,
+    attachmentType: formData.get('attachmentType') || null,
+    attachmentName: formData.get('attachmentName') || null,
+  });
 
   if (!parsed.success) {
     const firstIssue = parsed.error.issues[0]?.message ?? 'Mensagem inválida.';
@@ -60,6 +68,9 @@ export async function sendChatMessageAction(
     const result = await userCommand.executeForUser({
       userId,
       body: sanitizedBody,
+      attachmentUrl: parsed.data.attachmentUrl ?? undefined,
+      attachmentType: parsed.data.attachmentType ?? undefined,
+      attachmentName: parsed.data.attachmentName ?? undefined,
     });
 
     return {

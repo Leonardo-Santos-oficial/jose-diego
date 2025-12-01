@@ -1,9 +1,15 @@
 import { ChatService } from '@/modules/chat/services/chatService';
-import type { ChatMessage, ChatThread } from '@/modules/chat/types';
+import type { ChatMessage, ChatThread, AttachmentType } from '@/modules/chat/types';
 
 type SendMessageResult = {
   thread: ChatThread;
   message: ChatMessage;
+};
+
+type MessageAttachment = {
+  attachmentUrl?: string;
+  attachmentType?: AttachmentType;
+  attachmentName?: string;
 };
 
 export class SendChatMessageCommand {
@@ -12,13 +18,16 @@ export class SendChatMessageCommand {
   async executeForUser(params: {
     userId: string;
     body: string;
-  }): Promise<SendMessageResult> {
+  } & MessageAttachment): Promise<SendMessageResult> {
     const thread = await this.chatService.getOrCreateThread(params.userId);
     const message = await this.chatService.appendMessage({
       threadId: thread.id,
       userId: params.userId,
       role: 'user',
       body: params.body,
+      attachmentUrl: params.attachmentUrl,
+      attachmentType: params.attachmentType,
+      attachmentName: params.attachmentName,
     });
 
     return { thread, message };
@@ -27,7 +36,7 @@ export class SendChatMessageCommand {
   async executeForAdmin(params: {
     threadId: string;
     body: string;
-  }): Promise<SendMessageResult> {
+  } & MessageAttachment): Promise<SendMessageResult> {
     const thread = await this.chatService.getThreadById(params.threadId);
 
     if (!thread || !thread.userId) {
@@ -39,6 +48,9 @@ export class SendChatMessageCommand {
       userId: thread.userId,
       role: 'admin',
       body: params.body,
+      attachmentUrl: params.attachmentUrl,
+      attachmentType: params.attachmentType,
+      attachmentName: params.attachmentName,
     });
 
     return { thread, message };

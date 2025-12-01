@@ -1,7 +1,7 @@
 'use client';
 
-import { useActionState, useEffect, useRef, useState } from 'react';
-import { ChevronDown, ChevronUp, Minus, MessageSquare } from 'lucide-react';
+import { useActionState, useEffect, useRef, useState, useCallback } from 'react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { 
   sendGlobalMessageAction, 
   getRecentGlobalMessagesAction,
@@ -13,6 +13,7 @@ import { Button } from '@/components/components/ui/button';
 import { Input } from '@/components/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/components/ui/card';
 import { cn } from '@/components/lib/utils';
+import { useSyntheticMessages } from '@/hooks/useSyntheticMessages';
 
 const initialState: GlobalChatActionState = {
   status: 'idle',
@@ -25,28 +26,29 @@ export function GlobalChatWidget() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
+  const addMessage = useCallback((message: GlobalChatMessage) => {
+    setMessages((prev) => {
+      if (prev.some(m => m.id === message.id)) {
+        return prev;
+      }
+      return [...prev, message];
+    });
+  }, []);
+
+  useSyntheticMessages(addMessage);
+
   useEffect(() => {
-    // 1. Fetch initial messages
     getRecentGlobalMessagesAction().then((initialMessages) => {
       setMessages(initialMessages);
     });
 
-    // 2. Subscribe to realtime updates
     const client = new GlobalChatRealtimeClient();
-    const unsubscribe = client.subscribe((message) => {
-      setMessages((prev) => {
-        // Avoid duplicates if realtime comes after optimistic update
-        if (prev.some(m => m.id === message.id)) {
-          return prev;
-        }
-        return [...prev, message];
-      });
-    });
+    const unsubscribe = client.subscribe(addMessage);
 
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [addMessage]);
 
   useEffect(() => {
     if (scrollRef.current && !isMinimized) {

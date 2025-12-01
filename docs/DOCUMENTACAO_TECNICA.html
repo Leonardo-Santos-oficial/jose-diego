@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentação Técnica - Plataforma Aviator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            line-height: 1.6;
+            color: #e0e0e0;
+            background: #1a1a2e;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #16213e;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+            color: #00d9ff;
+            padding: 40px;
+            text-align: center;
+            border-bottom: 3px solid #00d9ff;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        }
+        
+        header p {
+            font-size: 1.1em;
+            color: #94a3b8;
+        }
+        
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: #0f0f23;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #333;
+        }
+        
+        .sidebar h3 {
+            color: #00d9ff;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+        
+        .sidebar ul {
+            list-style: none;
+        }
+        
+        .sidebar li {
+            margin-bottom: 8px;
+        }
+        
+        .sidebar a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.85em;
+            display: block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .sidebar a:hover {
+            background: #1a1a2e;
+            color: #00d9ff;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        section {
+            margin-bottom: 60px;
+            padding-bottom: 40px;
+            border-bottom: 1px solid #333;
+        }
+        
+        h2 {
+            color: #00d9ff;
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #00d9ff;
+        }
+        
+        h3 {
+            color: #e94560;
+            font-size: 1.3em;
+            margin: 30px 0 15px 0;
+        }
+        
+        h4 {
+            color: #ffd700;
+            font-size: 1.1em;
+            margin: 20px 0 10px 0;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            color: #b0b0b0;
+        }
+        
+        pre {
+            background: #0f0f23;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 0.9em;
+        }
+        
+        code {
+            color: #00ff88;
+        }
+        
+        .inline-code {
+            background: #0f0f23;
+            color: #ff6b6b;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #0f0f23;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        
+        th {
+            background: #1a1a2e;
+            color: #00d9ff;
+            font-weight: bold;
+        }
+        
+        td {
+            color: #b0b0b0;
+        }
+        
+        tr:hover {
+            background: #1a1a2e;
+        }
+        
+        .diagram {
+            background: #0f0f23;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Consolas', monospace;
+            white-space: pre;
+            overflow-x: auto;
+            color: #94a3b8;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .badge-blue { background: #0066cc; color: white; }
+        .badge-green { background: #00aa55; color: white; }
+        .badge-orange { background: #ff8800; color: white; }
+        .badge-purple { background: #9933ff; color: white; }
+        .badge-red { background: #cc3333; color: white; }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid;
+        }
+        
+        .alert-info {
+            background: rgba(0, 217, 255, 0.1);
+            border-color: #00d9ff;
+            color: #00d9ff;
+        }
+        
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-color: #ffc107;
+            color: #ffc107;
+        }
+        
+        .alert-danger {
+            background: rgba(233, 69, 96, 0.1);
+            border-color: #e94560;
+            color: #e94560;
+        }
+        
+        .alert-success {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+        
+        ul, ol {
+            margin: 15px 0 15px 30px;
+            color: #b0b0b0;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .tech-item {
+            background: #0f0f23;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .tech-item h5 {
+            color: #00d9ff;
+            margin-bottom: 5px;
+        }
+        
+        .tech-item p {
+            color: #94a3b8;
+            font-size: 0.9em;
+            margin: 0;
+        }
+        
+        .file-tree {
+            background: #0f0f23;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9em;
+            color: #94a3b8;
+        }
+        
+        .file-tree .folder {
+            color: #ffd700;
+        }
+        
+        .file-tree .file {
+            color: #00ff88;
+        }
+        
+        footer {
+            background: #0f0f23;
+            color: #94a3b8;
+            text-align: center;
+            padding: 30px;
+            border-top: 1px solid #333;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                color: #333;
+            }
+            .container {
+                background: white;
+            }
+            pre, .diagram {
+                background: #f5f5f5;
+                border-color: #ddd;
+            }
+            code {
+                color: #d63384;
+            }
+            h2, h3 {
+                color: #333;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+            .content {
+                padding: 20px;
+            }
+            pre, .diagram {
+                font-size: 0.75em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Documentação Técnica</h1>
+            <p>Plataforma Aviator - Guia para Desenvolvedores</p>
+        </header>
+        
+        <div class="content">
+            <!-- Índice -->
+            <section id="indice">
+                <h2>📑 Índice</h2>
+                <ol>
+                    <li><a href="#arquitetura" style="color: #00d9ff;">Visão Geral da Arquitetura</a></li>
+                    <li><a href="#stack" style="color: #00d9ff;">Stack Tecnológica</a></li>
+                    <li><a href="#estrutura" style="color: #00d9ff;">Estrutura do Projeto</a></li>
+                    <li><a href="#ambiente" style="color: #00d9ff;">Configuração do Ambiente</a></li>
+                    <li><a href="#banco" style="color: #00d9ff;">Banco de Dados</a></li>
+                    <li><a href="#apis" style="color: #00d9ff;">APIs e Endpoints</a></li>
+                    <li><a href="#auth" style="color: #00d9ff;">Autenticação e Autorização</a></li>
+                    <li><a href="#realtime" style="color: #00d9ff;">Sistema de Tempo Real</a></li>
+                    <li><a href="#engine" style="color: #00d9ff;">Motor do Jogo (Engine)</a></li>
+                    <li><a href="#upload" style="color: #00d9ff;">Sistema de Upload</a></li>
+                    <li><a href="#chat" style="color: #00d9ff;">Sistema de Chat</a></li>
+                    <li><a href="#admin" style="color: #00d9ff;">Painel Administrativo</a></li>
+                    <li><a href="#testes" style="color: #00d9ff;">Testes</a></li>
+                    <li><a href="#deploy" style="color: #00d9ff;">Deploy e Infraestrutura</a></li>
+                    <li><a href="#troubleshooting" style="color: #00d9ff;">Manutenção e Troubleshooting</a></li>
+                </ol>
+            </section>
+
+            <!-- 1. Arquitetura -->
+            <section id="arquitetura">
+                <h2>1. Visão Geral da Arquitetura</h2>
+                
+                <h3>1.1 Diagrama de Arquitetura</h3>
+                <div class="diagram">
+┌─────────────────────────────────────────────────────────────────────┐
+│                           CLIENTE (Browser)                          │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────┐  │
+│  │   Next.js App   │  │  Realtime WS    │  │  Supabase Client   │  │
+│  └────────┬────────┘  └────────┬────────┘  └─────────┬───────────┘  │
+└───────────┼─────────────────────┼─────────────────────┼──────────────┘
+            │                     │                     │
+            ▼                     ▼                     ▼
+┌───────────────────┐  ┌─────────────────────┐  ┌─────────────────────┐
+│   Vercel Edge     │  │   Node Service      │  │   Supabase Cloud    │
+│   (Next.js SSR)   │  │   (Game Engine)     │  │   (BaaS)            │
+│                   │  │                     │  │                     │
+│  - Server Actions │  │  - Socket.IO        │  │  - PostgreSQL       │
+│  - API Routes     │  │  - Game Loop        │  │  - Realtime         │
+│  - Middleware     │  │  - Bet Processing   │  │  - Storage          │
+└───────────────────┘  └─────────────────────┘  │  - Auth             │
+                                                └─────────────────────┘
+                </div>
+                
+                <h3>1.2 Fluxo de Dados</h3>
+                <div class="diagram">
+Usuário ──► Next.js ──► Server Actions ──► Supabase
+                │
+                └──► API Routes ──► Node Service (Engine)
+                            │
+                            └──► Supabase Realtime ──► Broadcast para clientes
+                </div>
+                
+                <h3>1.3 Componentes Principais</h3>
+                <table>
+                    <tr>
+                        <th>Componente</th>
+                        <th>Responsabilidade</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Next.js App</strong></td>
+                        <td>Frontend React, SSR, Server Actions</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Node Service</strong></td>
+                        <td>Motor do jogo, WebSocket, processamento de apostas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Supabase</strong></td>
+                        <td>Banco de dados, autenticação, storage, realtime</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vercel</strong></td>
+                        <td>Hospedagem do frontend, edge functions</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- 2. Stack -->
+            <section id="stack">
+                <h2>2. Stack Tecnológica</h2>
+                
+                <h3>2.1 Frontend</h3>
+                <div class="tech-stack">
+                    <div class="tech-item">
+                        <h5>Next.js 15.x</h5>
+                        <p>Framework React com App Router</p>
+                    </div>
+                    <div class="tech-item">
+                        <h5>React 19.x</h5>
+                        <p>Biblioteca UI</p>
+                    </div>
+                    <div class="tech-item">
+                        <h5>TypeScript 5.x</h5>
+                        <p>Tipagem estática</p>
+                    </div>
+                    <div class="tech-item">
+                        <h5>Tailwind CSS 3.x</h5>
+                        <p>Estilização utility-first</p>
+                    </div>
+                    <div class="tech-item">
+                        <h5>shadcn/ui</h5>
+                        <p>Componentes UI</p>
+                    </div>
+                    <div class="tech-item">
+                        <h5>Zod 3.x</h5>
+                        <p>Validação de schemas</p>
+                    </div>
+                </div>
+                
+                <h3>2.2 Backend</h3>
+                <div class="tech-stack">
+                    <div class="tech-item">
+                        <h5>Node.js 20.x</h5>
+                        <p>Runtime JavaScript</p>
+                    </div>
+                    <div class="tech-item">
+                        <h5>Fastify 4.x</h5>
+                        <p>Framework HTTP</p>
+                    </div>
+                    <div class="tech-item">
+                        <h5>Socket.IO 4.x</h5>
+                        <p>WebSocket realtime</p>
+                    </div>
+                    <div class="tech-item">
+                        <h5>Pino 8.x</h5>
+                        <p>Logging</p>
+                    </div>
+                </div>
+                
+                <h3>2.3 Banco de Dados e Serviços</h3>
+                <table>
+                    <tr>
+                        <th>Tecnologia</th>
+                        <th>Uso</th>
+                    </tr>
+                    <tr>
+                        <td>Supabase</td>
+                        <td>BaaS (Backend as a Service)</td>
+                    </tr>
+                    <tr>
+                        <td>PostgreSQL</td>
+                        <td>Banco de dados relacional</td>
+                    </tr>
+                    <tr>
+                        <td>Supabase Realtime</td>
+                        <td>Comunicação em tempo real</td>
+                    </tr>
+                    <tr>
+                        <td>Supabase Storage</td>
+                        <td>Armazenamento de arquivos</td>
+                    </tr>
+                    <tr>
+                        <td>Supabase Auth</td>
+                        <td>Autenticação</td>
+                    </tr>
+                </table>
+                
+                <h3>2.4 Ferramentas de Desenvolvimento</h3>
+                <table>
+                    <tr>
+                        <th>Ferramenta</th>
+                        <th>Uso</th>
+                    </tr>
+                    <tr>
+                        <td>Vitest</td>
+                        <td>Testes unitários</td>
+                    </tr>
+                    <tr>
+                        <td>Playwright</td>
+                        <td>Testes E2E</td>
+                    </tr>
+                    <tr>
+                        <td>ESLint</td>
+                        <td>Linting</td>
+                    </tr>
+                    <tr>
+                        <td>Prettier</td>
+                        <td>Formatação de código</td>
+                    </tr>
+                    <tr>
+                        <td>tsup</td>
+                        <td>Bundling do Node Service</td>
+                    </tr>
+                    <tr>
+                        <td>PM2</td>
+                        <td>Gerenciador de processos</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- 3. Estrutura -->
+            <section id="estrutura">
+                <h2>3. Estrutura do Projeto</h2>
+                
+                <h3>3.1 Estrutura Geral</h3>
+                <div class="file-tree">
+<span class="folder">projeto/</span>
+├── <span class="folder">web/</span>                    # Frontend Next.js
+│   ├── <span class="folder">app/</span>               # App Router (páginas e rotas)
+│   ├── <span class="folder">src/</span>               # Código fonte
+│   │   ├── <span class="folder">components/</span>    # Componentes React
+│   │   ├── <span class="folder">modules/</span>       # Módulos de domínio
+│   │   ├── <span class="folder">lib/</span>          # Bibliotecas e utilitários
+│   │   ├── <span class="folder">hooks/</span>        # React Hooks customizados
+│   │   └── <span class="folder">config/</span>       # Configurações
+│   ├── <span class="folder">public/</span>           # Assets estáticos
+│   └── <span class="folder">supabase/</span>         # Migrations e seeds
+│
+├── <span class="folder">node-service/</span>          # Backend Node.js (Engine)
+│   ├── <span class="folder">src/</span>
+│   │   ├── <span class="folder">loop/</span>         # Game loop
+│   │   ├── <span class="folder">strategy/</span>     # Estratégias de crash
+│   │   ├── <span class="folder">services/</span>     # Serviços de negócio
+│   │   ├── <span class="folder">routes/</span>       # Rotas HTTP
+│   │   └── <span class="folder">publisher/</span>    # Publicação de eventos
+│   └── <span class="file">ecosystem.config.cjs</span>  # Configuração PM2
+│
+├── <span class="folder">docs/</span>                  # Documentação
+└── <span class="folder">deploy/</span>               # Scripts de deploy
+                </div>
+                
+                <h3>3.2 Estrutura do Frontend</h3>
+                <div class="file-tree">
+<span class="folder">web/</span>
+├── <span class="folder">app/</span>                          # Next.js App Router
+│   ├── <span class="file">layout.tsx</span>               # Layout raiz
+│   ├── <span class="file">page.tsx</span>                 # Página inicial (/)
+│   ├── <span class="folder">app/</span>                     # Área do jogo (/app)
+│   ├── <span class="folder">admin/</span>                   # Painel admin (/admin)
+│   ├── <span class="folder">profile/</span>                 # Perfil do usuário (/profile)
+│   ├── <span class="folder">beneficios/</span>              # Programa de benefícios
+│   ├── <span class="folder">auth/</span>                    # Callbacks de autenticação
+│   ├── <span class="folder">api/</span>                     # API Routes
+│   └── <span class="folder">actions/</span>                 # Server Actions
+│
+├── <span class="folder">src/</span>
+│   ├── <span class="folder">components/</span>
+│   │   ├── <span class="folder">admin/</span>              # Componentes do admin
+│   │   ├── <span class="folder">chat/</span>               # Chat de suporte
+│   │   ├── <span class="folder">global-chat/</span>        # Chat global
+│   │   ├── <span class="folder">game/</span>               # Componentes do jogo
+│   │   ├── <span class="folder">profile/</span>            # Componentes de perfil
+│   │   └── <span class="folder">ui/</span>                 # Componentes base (shadcn)
+│   │
+│   ├── <span class="folder">modules/</span>
+│   │   ├── <span class="folder">admin/</span>              # Lógica do admin
+│   │   ├── <span class="folder">chat/</span>               # Sistema de chat
+│   │   ├── <span class="folder">global-chat/</span>        # Chat global
+│   │   ├── <span class="folder">upload/</span>             # Sistema de upload
+│   │   └── <span class="folder">withdraw/</span>           # Sistema de saques
+│   │
+│   ├── <span class="folder">lib/</span>
+│   │   ├── <span class="folder">auth/</span>               # Autenticação
+│   │   ├── <span class="folder">supabase/</span>           # Clientes Supabase
+│   │   └── <span class="folder">realtime/</span>           # Clientes realtime
+│   │
+│   └── <span class="folder">hooks/</span>                  # React Hooks
+                </div>
+            </section>
+
+            <!-- 4. Ambiente -->
+            <section id="ambiente">
+                <h2>4. Configuração do Ambiente</h2>
+                
+                <h3>4.1 Variáveis de Ambiente - Frontend</h3>
+                <p>Arquivo: <span class="inline-code">web/.env.local</span></p>
+                <pre><code># Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Node Service
+NEXT_PUBLIC_NODE_SERVICE_URL=http://localhost:3001
+NODE_SERVICE_INTERNAL_URL=http://localhost:3001
+
+# Auth
+NEXTAUTH_SECRET=sua-chave-secreta
+NEXTAUTH_URL=http://localhost:3000
+
+# Optional
+NEXT_PUBLIC_SITE_URL=http://localhost:3000</code></pre>
+                
+                <h3>4.2 Variáveis de Ambiente - Node Service</h3>
+                <p>Arquivo: <span class="inline-code">node-service/.env</span></p>
+                <pre><code># Server
+PORT=3001
+HOST=0.0.0.0
+NODE_ENV=production
+
+# Supabase
+SUPABASE_URL=https://xxxxx.supabase.co
+SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Game Settings
+GAME_TICK_INTERVAL=100
+GAME_BET_PHASE_DURATION=10000
+GAME_MIN_MULTIPLIER=1.0
+GAME_MAX_MULTIPLIER=100.0
+
+# Logging
+LOG_LEVEL=info</code></pre>
+                
+                <h3>4.3 Instalação e Execução</h3>
+                <pre><code># Clone o repositório
+git clone &lt;repo-url&gt;
+
+# Frontend
+cd web
+npm install
+npm run dev
+
+# Node Service (outro terminal)
+cd node-service
+npm install
+npm run dev</code></pre>
+                
+                <h3>4.4 Scripts Disponíveis</h3>
+                
+                <h4>Frontend (web/package.json)</h4>
+                <table>
+                    <tr>
+                        <th>Script</th>
+                        <th>Comando</th>
+                        <th>Descrição</th>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">dev</span></td>
+                        <td>next dev --turbopack</td>
+                        <td>Desenvolvimento com Turbopack</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">build</span></td>
+                        <td>next build</td>
+                        <td>Build de produção</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">start</span></td>
+                        <td>next start</td>
+                        <td>Inicia servidor de produção</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">test</span></td>
+                        <td>vitest</td>
+                        <td>Executa testes</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">test:e2e</span></td>
+                        <td>playwright test</td>
+                        <td>Testes E2E</td>
+                    </tr>
+                </table>
+                
+                <h4>Node Service (node-service/package.json)</h4>
+                <table>
+                    <tr>
+                        <th>Script</th>
+                        <th>Comando</th>
+                        <th>Descrição</th>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">dev</span></td>
+                        <td>tsx watch src/index.ts</td>
+                        <td>Desenvolvimento com hot reload</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">build</span></td>
+                        <td>tsup</td>
+                        <td>Build de produção</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">start</span></td>
+                        <td>node dist/index.js</td>
+                        <td>Inicia servidor</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">test</span></td>
+                        <td>vitest</td>
+                        <td>Executa testes</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- 5. Banco de Dados -->
+            <section id="banco">
+                <h2>5. Banco de Dados</h2>
+                
+                <h3>5.1 Diagrama ER</h3>
+                <div class="diagram">
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   auth.users    │     │  user_profiles  │     │    wallets      │
+├─────────────────┤     ├─────────────────┤     ├─────────────────┤
+│ id (PK)         │────►│ user_id (FK,PK) │────►│ user_id (FK,PK) │
+│ email           │     │ display_name    │     │ balance         │
+│ created_at      │     │ avatar_url      │     │ updated_at      │
+│ ...             │     │ pix_key         │     └─────────────────┘
+└─────────────────┘     │ bank_*          │
+                        └─────────────────┘
+                                │
+        ┌───────────────────────┼───────────────────────┐
+        │                       │                       │
+        ▼                       ▼                       ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│      bets       │     │ withdraw_requests│    │  chat_threads   │
+├─────────────────┤     ├─────────────────┤     ├─────────────────┤
+│ id (PK)         │     │ id (PK)         │     │ id (PK)         │
+│ user_id (FK)    │     │ user_id (FK)    │     │ user_id (FK)    │
+│ round_id        │     │ amount          │     │ status          │
+│ amount          │     │ status          │     │ created_at      │
+│ cash_out_at     │     │ pix_key         │     │ updated_at      │
+│ multiplier      │     │ bank_*          │     │ metadata        │
+│ status          │     │ created_at      │     └────────┬────────┘
+│ created_at      │     │ processed_at    │              │
+└─────────────────┘     └─────────────────┘              │
+                                                         ▼
+                                                ┌─────────────────┐
+                                                │  chat_messages  │
+                                                ├─────────────────┤
+                                                │ id (PK)         │
+                                                │ thread_id (FK)  │
+                                                │ user_id (FK)    │
+                                                │ sender_role     │
+                                                │ body            │
+                                                │ attachment_url  │
+                                                │ attachment_type │
+                                                │ created_at      │
+                                                └─────────────────┘
+                </div>
+                
+                <h3>5.2 Tabelas Principais</h3>
+                
+                <h4>user_profiles</h4>
+                <pre><code>CREATE TABLE user_profiles (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  display_name TEXT,
+  avatar_url TEXT,
+  pix_key TEXT,
+  bank_name TEXT,
+  bank_agency TEXT,
+  bank_account TEXT,
+  bank_account_type TEXT,
+  bank_holder_name TEXT,
+  bank_holder_document TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);</code></pre>
+                
+                <h4>wallets</h4>
+                <pre><code>CREATE TABLE wallets (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  balance DECIMAL(15,2) DEFAULT 0.00,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);</code></pre>
+                
+                <h4>bets</h4>
+                <pre><code>CREATE TABLE bets (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id),
+  round_id TEXT NOT NULL,
+  amount DECIMAL(15,2) NOT NULL,
+  cash_out_at DECIMAL(10,2),
+  multiplier DECIMAL(10,2),
+  profit DECIMAL(15,2),
+  status TEXT DEFAULT 'pending', -- pending, won, lost, cashed_out
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</code></pre>
+                
+                <h4>chat_messages</h4>
+                <pre><code>CREATE TABLE chat_messages (
+  id BIGSERIAL PRIMARY KEY,
+  thread_id UUID REFERENCES chat_threads(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id),
+  sender_role TEXT NOT NULL, -- user, admin
+  body TEXT NOT NULL,
+  attachment_url TEXT,
+  attachment_type TEXT, -- image, document
+  attachment_name TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);</code></pre>
+                
+                <h3>5.3 Row Level Security (RLS)</h3>
+                <pre><code>-- Exemplo: Usuários só podem ver/editar seu próprio perfil
+ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own profile"
+  ON user_profiles FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own profile"
+  ON user_profiles FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- Storage policies para avatars
+CREATE POLICY "Users can upload their own avatar"
+  ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'avatars' AND auth.role() = 'authenticated');
+
+CREATE POLICY "Anyone can view avatars"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'avatars');</code></pre>
+            </section>
+
+            <!-- 6. APIs -->
+            <section id="apis">
+                <h2>6. APIs e Endpoints</h2>
+                
+                <h3>6.1 API Routes (Next.js)</h3>
+                
+                <h4>Aviator Game</h4>
+                <table>
+                    <tr>
+                        <th>Método</th>
+                        <th>Endpoint</th>
+                        <th>Descrição</th>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-green">POST</span></td>
+                        <td>/api/aviator/bets</td>
+                        <td>Criar nova aposta</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-green">POST</span></td>
+                        <td>/api/aviator/cashout</td>
+                        <td>Fazer cash out</td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-green">POST</span></td>
+                        <td>/api/aviator/tick</td>
+                        <td>Tick do jogo (interno)</td>
+                    </tr>
+                </table>
+                
+                <h4>POST /api/aviator/bets</h4>
+                <pre><code>// Request
+{
+  "amount": 10.00,
+  "roundId": "round-123"
+}
+
+// Response
+{
+  "success": true,
+  "bet": {
+    "id": "bet-uuid",
+    "amount": 10.00,
+    "roundId": "round-123",
+    "status": "pending"
+  }
+}</code></pre>
+                
+                <h4>POST /api/aviator/cashout</h4>
+                <pre><code>// Request
+{
+  "betId": "bet-uuid",
+  "multiplier": 2.50
+}
+
+// Response
+{
+  "success": true,
+  "profit": 25.00,
+  "multiplier": 2.50
+}</code></pre>
+                
+                <h3>6.2 Server Actions</h3>
+                
+                <h4>Autenticação (app/actions/auth.ts)</h4>
+                <pre><code>// Login
+export async function loginAction(formData: FormData): Promise&lt;AuthActionState&gt;
+
+// Logout
+export async function logoutAction(): Promise&lt;void&gt;
+
+// Registro
+export async function registerAction(formData: FormData): Promise&lt;AuthActionState&gt;</code></pre>
+                
+                <h4>Perfil (app/actions/profile.ts)</h4>
+                <pre><code>// Atualizar perfil
+export async function updateProfileAction(formData: FormData): Promise&lt;ProfileActionState&gt;
+
+// Atualizar configurações de saque
+export async function updateWithdrawSettingsAction(formData: FormData): Promise&lt;ProfileActionState&gt;</code></pre>
+                
+                <h4>Upload (app/actions/upload-avatar.ts)</h4>
+                <pre><code>// Upload de avatar
+export async function uploadAvatarAction(formData: FormData): Promise&lt;UploadAvatarResult&gt;
+
+// Upload de anexo do chat
+export async function uploadChatAttachmentAction(formData: FormData): Promise&lt;UploadChatAttachmentResult&gt;</code></pre>
+            </section>
+
+            <!-- 7. Auth -->
+            <section id="auth">
+                <h2>7. Autenticação e Autorização</h2>
+                
+                <h3>7.1 Fluxo de Autenticação</h3>
+                <div class="diagram">
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Cliente   │────►│  Next.js    │────►│  Supabase   │
+│   (Login)   │     │  Middleware │     │    Auth     │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                   │                   │
+       │                   │    JWT Token      │
+       │◄──────────────────┼───────────────────│
+       │                   │                   │
+       │  Cookie com       │                   │
+       │  Session Token    │                   │
+       └───────────────────┘                   │
+                </div>
+                
+                <h3>7.2 Verificação de Admin</h3>
+                <pre><code>// web/src/lib/auth/roles.ts
+export function isAdminSession(session: Session | null): boolean {
+  if (!session?.user) return false;
+  
+  const adminEmails = [
+    'admin@example.com',
+    'leonardosantosaki@gmail.com',
+    // ... outros admins
+  ];
+  
+  return adminEmails.includes(session.user.email ?? '');
+}</code></pre>
+                
+                <h3>7.3 Clientes Supabase</h3>
+                <table>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Uso</th>
+                        <th>Arquivo</th>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">getSupabaseClient()</span></td>
+                        <td>Browser (client-side)</td>
+                        <td>lib/supabaseClient.ts</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">getSupabaseServerClient()</span></td>
+                        <td>Server Components/Actions</td>
+                        <td>lib/supabase/serverClient.ts</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">getSupabaseServiceRoleClient()</span></td>
+                        <td>Admin operations</td>
+                        <td>lib/supabase/serviceRoleClient.ts</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- 8. Realtime -->
+            <section id="realtime">
+                <h2>8. Sistema de Tempo Real</h2>
+                
+                <h3>8.1 Canais Realtime</h3>
+                <table>
+                    <tr>
+                        <th>Canal</th>
+                        <th>Tipo</th>
+                        <th>Uso</th>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">aviator:game</span></td>
+                        <td>Broadcast</td>
+                        <td>Estado do jogo (tick, rodadas)</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">chat:support:{threadId}</span></td>
+                        <td>Broadcast</td>
+                        <td>Mensagens de suporte</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">chat:global</span></td>
+                        <td>Broadcast</td>
+                        <td>Chat global</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">bets:user:{userId}</span></td>
+                        <td>Postgres Changes</td>
+                        <td>Atualizações de apostas</td>
+                    </tr>
+                </table>
+                
+                <h3>8.2 Cliente Realtime (Frontend)</h3>
+                <pre><code>// lib/realtime/aviatorClient.ts
+export class AviatorRealtimeClient {
+  private channel: RealtimeChannel;
+  
+  subscribe(callback: (event: AviatorEvent) => void) {
+    this.channel = supabase
+      .channel('aviator:game')
+      .on('broadcast', { event: 'tick' }, (payload) => {
+        callback(payload);
+      })
+      .on('broadcast', { event: 'round_start' }, (payload) => {
+        callback(payload);
+      })
+      .on('broadcast', { event: 'round_end' }, (payload) => {
+        callback(payload);
+      })
+      .subscribe();
+  }
+  
+  dispose() {
+    this.channel?.unsubscribe();
+  }
+}</code></pre>
+            </section>
+
+            <!-- 9. Engine -->
+            <section id="engine">
+                <h2>9. Motor do Jogo (Engine)</h2>
+                
+                <h3>9.1 Estados do Jogo</h3>
+                <div class="diagram">
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   BETTING   │────►│   FLYING    │────►│   CRASHED   │
+│  (5-10s)    │     │  (variável) │     │   (2-3s)    │
+└─────────────┘     └─────────────┘     └──────┬──────┘
+       ▲                                        │
+       └────────────────────────────────────────┘
+                </div>
+                
+                <h3>9.2 Game Loop</h3>
+                <pre><code>// Ciclo simplificado do jogo
+class GameLoop {
+  private state: 'betting' | 'flying' | 'crashed' = 'betting';
+  private multiplier: number = 1.0;
+  private targetCrash: number;
+  
+  async tick() {
+    switch (this.state) {
+      case 'betting':
+        // Fase de apostas (5-10 segundos)
+        // Aceitar novas apostas
+        break;
+        
+      case 'flying':
+        // Avião voando, multiplicador subindo
+        this.multiplier += 0.01;
+        this.publishTick(this.multiplier);
+        
+        if (this.multiplier >= this.targetCrash) {
+          this.crash();
+        }
+        break;
+        
+      case 'crashed':
+        // Processar perdas
+        // Iniciar nova rodada
+        this.startNewRound();
+        break;
+    }
+  }
+}</code></pre>
+                
+                <h3>9.3 Estratégia de Crash</h3>
+                <pre><code>// Estratégia padrão (distribuição exponencial)
+class DefaultCrashStrategy implements CrashStrategy {
+  pickTargetMultiplier(): number {
+    // Algoritmo que garante house edge
+    const houseEdge = 0.05; // 5%
+    const random = Math.random();
+    
+    // Distribuição exponencial inversa
+    return Math.max(1.0, (1 / (1 - random * (1 - houseEdge))));
+  }
+}</code></pre>
+            </section>
+
+            <!-- 10. Upload -->
+            <section id="upload">
+                <h2>10. Sistema de Upload</h2>
+                
+                <h3>10.1 Configuração</h3>
+                <pre><code>// modules/upload/types.ts
+export const UPLOAD_CONFIGS: Record&lt;UploadDestination, UploadConfig&gt; = {
+  avatar: {
+    maxSizeBytes: 2 * 1024 * 1024, // 2MB
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+    bucket: 'avatars',
+    pathPrefix: 'users',
+  },
+  'chat-attachment': {
+    maxSizeBytes: 10 * 1024 * 1024, // 10MB
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'],
+    bucket: 'chat-attachments',
+    pathPrefix: 'threads',
+  },
+};</code></pre>
+                
+                <h3>10.2 Buckets do Storage</h3>
+                <table>
+                    <tr>
+                        <th>Bucket</th>
+                        <th>Público</th>
+                        <th>Uso</th>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">avatars</span></td>
+                        <td>Sim</td>
+                        <td>Fotos de perfil dos usuários</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">chat-attachments</span></td>
+                        <td>Sim</td>
+                        <td>Anexos do chat de suporte</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- 11. Chat -->
+            <section id="chat">
+                <h2>11. Sistema de Chat</h2>
+                
+                <h3>11.1 ChatService</h3>
+                <pre><code>class ChatService {
+  // Obter ou criar thread para usuário
+  async getOrCreateThread(userId: string): Promise&lt;ChatThread&gt;
+  
+  // Listar threads (admin)
+  async listThreadsForAdmin(options: ListOptions): Promise&lt;ChatThread[]&gt;
+  
+  // Listar mensagens de uma thread
+  async listMessages(threadId: string, limit?: number): Promise&lt;ChatMessage[]&gt;
+  
+  // Adicionar mensagem
+  async appendMessage(options: AppendMessageOptions): Promise&lt;ChatMessage&gt;
+  
+  // Atualizar status da thread
+  async updateThreadStatus(threadId: string, status: ThreadStatus): Promise&lt;ChatThread&gt;
+}</code></pre>
+            </section>
+
+            <!-- 12. Admin -->
+            <section id="admin">
+                <h2>12. Painel Administrativo</h2>
+                
+                <h3>12.1 Funcionalidades</h3>
+                <table>
+                    <tr>
+                        <th>Funcionalidade</th>
+                        <th>Descrição</th>
+                        <th>Rota</th>
+                    </tr>
+                    <tr>
+                        <td>Dashboard</td>
+                        <td>Visão geral de usuários e apostas</td>
+                        <td>/admin</td>
+                    </tr>
+                    <tr>
+                        <td>Usuários</td>
+                        <td>Lista de todos os usuários</td>
+                        <td>/admin (tab)</td>
+                    </tr>
+                    <tr>
+                        <td>Saques</td>
+                        <td>Gestão de saques</td>
+                        <td>/admin/withdrawals</td>
+                    </tr>
+                    <tr>
+                        <td>Suporte</td>
+                        <td>Inbox de chat</td>
+                        <td>/admin (tab)</td>
+                    </tr>
+                </table>
+                
+                <h3>12.2 Fluxo de Aprovação de Saques</h3>
+                <pre><code>// Estados do saque
+type WithdrawStatus = 'pending' | 'approved' | 'paid' | 'rejected';
+
+// Ações do admin
+async function approveWithdraw(requestId: string) {
+  await updateWithdrawRequest(requestId, { 
+    status: 'approved',
+    processedAt: new Date(),
+    processedBy: adminId
+  });
+}
+
+async function rejectWithdraw(requestId: string, reason: string) {
+  await updateWithdrawRequest(requestId, {
+    status: 'rejected',
+    adminNotes: reason,
+    processedAt: new Date(),
+    processedBy: adminId
+  });
+  
+  // Devolver saldo ao usuário
+  await creditWallet(request.userId, request.amount);
+}</code></pre>
+            </section>
+
+            <!-- 13. Testes -->
+            <section id="testes">
+                <h2>13. Testes</h2>
+                
+                <h3>13.1 Estrutura de Testes</h3>
+                <div class="file-tree">
+<span class="folder">web/src/</span>
+├── <span class="folder">modules/</span>
+│   ├── <span class="folder">upload/__tests__/</span>        # Testes do módulo upload
+│   │   ├── <span class="file">fileValidator.test.ts</span>
+│   │   ├── <span class="file">avatarUploadStrategy.test.ts</span>
+│   │   ├── <span class="file">chatAttachmentUploadStrategy.test.ts</span>
+│   │   └── <span class="file">uploadFacade.test.ts</span>
+│   │
+│   └── <span class="folder">chat/__tests__/</span>          # Testes do módulo chat
+│       ├── <span class="file">chatService.test.ts</span>
+│       └── <span class="file">types.test.ts</span>
+│
+└── <span class="folder">tests/</span>                       # Testes E2E (Playwright)
+    └── <span class="file">admin-realtime.spec.ts</span>
+                </div>
+                
+                <h3>13.2 Executando Testes</h3>
+                <pre><code># Testes unitários
+npm run test
+
+# Testes específicos
+npm run test -- src/modules/upload
+
+# Watch mode
+npm run test -- --watch
+
+# Coverage
+npm run test -- --coverage
+
+# Testes E2E
+npm run test:e2e</code></pre>
+            </section>
+
+            <!-- 14. Deploy -->
+            <section id="deploy">
+                <h2>14. Deploy e Infraestrutura</h2>
+                
+                <h3>14.1 Arquitetura de Deploy</h3>
+                <div class="diagram">
+┌─────────────────────────────────────────────────────────────┐
+│                         VERCEL                               │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │                 Next.js Application                  │   │
+│  │  - Edge Functions                                    │   │
+│  │  - Server Components                                 │   │
+│  │  - API Routes                                        │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ HTTPS
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                          VPS                                 │
+│  ┌─────────────────┐    ┌─────────────────────────────┐    │
+│  │      Nginx      │───►│      Node Service           │    │
+│  │  (Reverse Proxy)│    │  (PM2 managed)              │    │
+│  └─────────────────┘    └─────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ HTTPS
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     SUPABASE CLOUD                           │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐     │
+│  │  PostgreSQL │  │   Storage   │  │    Realtime     │     │
+│  └─────────────┘  └─────────────┘  └─────────────────┘     │
+└─────────────────────────────────────────────────────────────┘
+                </div>
+                
+                <h3>14.2 Deploy no Vercel</h3>
+                <pre><code># Instalar Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+
+# Deploy produção
+vercel --prod</code></pre>
+                
+                <h3>14.3 Deploy do Node Service (VPS)</h3>
+                <pre><code># Conectar na VPS
+ssh user@your-vps-ip
+
+# Navegar para o projeto
+cd /var/www/aviator-engine
+
+# Atualizar código
+git pull origin main
+
+# Instalar dependências
+cd node-service
+npm install
+
+# Build
+npm run build
+
+# Reiniciar com PM2
+pm2 restart aviator-engine</code></pre>
+                
+                <h3>14.4 Configuração Nginx</h3>
+                <pre><code># /etc/nginx/sites-available/aviator-engine.conf
+server {
+    listen 80;
+    server_name api.seudominio.com;
+    
+    location / {
+        proxy_pass http://localhost:3001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}</code></pre>
+            </section>
+
+            <!-- 15. Troubleshooting -->
+            <section id="troubleshooting">
+                <h2>15. Manutenção e Troubleshooting</h2>
+                
+                <h3>15.1 Logs</h3>
+                <pre><code># Logs em tempo real
+pm2 logs aviator-engine
+
+# Últimas 100 linhas
+pm2 logs aviator-engine --lines 100
+
+# Logs de erro
+pm2 logs aviator-engine --err</code></pre>
+                
+                <h3>15.2 Problemas Comuns</h3>
+                
+                <div class="alert alert-danger">
+                    <strong>Erro de Hydration</strong><br>
+                    "Hydration failed because the server rendered HTML didn't match the client"
+                </div>
+                <p><strong>Solução:</strong> Usar <span class="inline-code">dynamic()</span> com <span class="inline-code">ssr: false</span> para componentes com estado dinâmico</p>
+                <pre><code>const DynamicComponent = dynamic(() => import('./Component'), {
+  ssr: false,
+  loading: () => &lt;Skeleton /&gt;
+});</code></pre>
+                
+                <div class="alert alert-danger">
+                    <strong>Erro RLS (Row Level Security)</strong><br>
+                    "new row violates row-level security policy"
+                </div>
+                <p><strong>Solução:</strong> Verificar políticas RLS no Supabase Dashboard e usar Server Actions com <span class="inline-code">getSupabaseServerClient()</span></p>
+                
+                <h3>15.3 Comandos Úteis</h3>
+                <pre><code># Frontend
+npm run dev          # Desenvolvimento
+npm run build        # Build produção
+npm run lint         # Linting
+npm run test         # Testes
+
+# Node Service
+npm run dev          # Desenvolvimento
+npm run build        # Build
+pm2 start            # Iniciar produção
+pm2 restart all      # Reiniciar
+pm2 logs             # Ver logs
+
+# Supabase
+npx supabase start   # Local
+npx supabase db push # Push migrations
+npx supabase gen types typescript # Gerar tipos</code></pre>
+            </section>
+        </div>
+        
+        <footer>
+            <p><strong>Documentação Técnica - Plataforma Aviator</strong></p>
+            <p>Última atualização: Dezembro 2025</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">Documento confidencial - Uso restrito à equipe de desenvolvimento</p>
+        </footer>
+    </div>
+</body>
+</html>

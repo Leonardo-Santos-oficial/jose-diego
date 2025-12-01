@@ -18,6 +18,7 @@ import {
 import { chatActionInitialState, type ChatActionState } from '@/app/actions/chat-state';
 import { Button } from '@/components/components/ui/button';
 import { ChatRealtimeClient } from '@/lib/realtime/chatClient';
+import { ChatMessageAttachment } from './ChatMessageAttachment';
 
 const dateTime = new Intl.DateTimeFormat('pt-BR', {
   day: '2-digit',
@@ -274,9 +275,19 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
                         {message.senderRole === 'admin' ? 'Admin' : 'Usuário'} •{' '}
                         {timeOnly.format(new Date(message.createdAt))}
                       </header>
-                      <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed">
-                        {message.body}
-                      </p>
+                      {message.body && (
+                        <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed">
+                          {message.body}
+                        </p>
+                      )}
+                      {message.attachmentUrl && message.attachmentType && (
+                        <ChatMessageAttachment
+                          attachmentUrl={message.attachmentUrl}
+                          attachmentType={message.attachmentType}
+                          attachmentName={message.attachmentName ?? undefined}
+                          isOwnMessage={message.senderRole === 'admin'}
+                        />
+                      )}
                     </article>
                   </li>
                 ))}

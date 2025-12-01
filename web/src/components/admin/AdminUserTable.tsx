@@ -23,14 +23,14 @@ export function AdminUserTable({ users }: AdminUserTableProps) {
   );
 
   return (
-    <section className="rounded-3xl border border-slate-800/60 bg-slate-950/80 p-4 shadow-[0_25px_80px_rgba(2,6,23,0.35)] md:p-6">
-      <div className="flex flex-wrap items-baseline justify-between gap-4">
+    <section className="rounded-2xl border border-slate-800/60 bg-slate-950/80 p-3 shadow-[0_25px_80px_rgba(2,6,23,0.35)] sm:rounded-3xl sm:p-4 md:p-6">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 sm:gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-slate-50">
-            Admin • Usuários e Carteiras
-          </h1>
-          <p className="text-sm text-slate-400">
-            Aplicar comandos de crédito/débito com rastreio em tempo real.
+          <h2 className="text-lg font-semibold text-slate-50 sm:text-xl">
+            Usuários e Carteiras
+          </h2>
+          <p className="text-xs text-slate-400 sm:text-sm">
+            Comandos de crédito/débito.
           </p>
         </div>
       </div>
@@ -130,23 +130,23 @@ function UserCard({ user }: UserRowProps) {
   );
 
   return (
-    <div className="rounded-2xl border border-slate-800/40 bg-slate-900/40 p-4">
-      <div className="mb-4 flex items-start justify-between gap-4">
+    <div className="rounded-xl border border-slate-800/40 bg-slate-900/40 p-3 sm:rounded-2xl sm:p-4">
+      <div className="mb-3 flex items-start justify-between gap-2 sm:mb-4 sm:gap-4">
         <div className="flex flex-col overflow-hidden">
-          <strong className="truncate text-sm text-slate-50">{user.email}</strong>
-          <span className="text-xs uppercase tracking-wider text-slate-500">
+          <strong className="truncate text-xs text-slate-50 sm:text-sm">{user.email}</strong>
+          <span className="text-[10px] uppercase tracking-wider text-slate-500 sm:text-xs">
             {user.role}
           </span>
         </div>
         <div className="shrink-0 text-right">
-          <div className="text-base font-semibold text-emerald-300">
+          <div className="text-sm font-semibold text-emerald-300 sm:text-base">
             {currency.format(user.balance)}
           </div>
-          <div className="text-xs text-slate-400">{user.displayName ?? '—'}</div>
+          <div className="text-[10px] text-slate-400 sm:text-xs">{user.displayName ?? '—'}</div>
         </div>
       </div>
 
-      <form className="flex flex-col gap-3" action={formAction}>
+      <form className="flex flex-col gap-2 sm:gap-3" action={formAction}>
         <input type="hidden" name="userId" value={user.id} />
         <div className="flex gap-2">
           <Input
@@ -155,22 +155,22 @@ function UserCard({ user }: UserRowProps) {
             name="delta"
             placeholder="± R$"
             required
-            className="w-1/3"
+            className="w-24 text-xs sm:w-1/3 sm:text-sm"
           />
           <Input
             type="text"
             name="reason"
             placeholder="Motivo"
-            className="flex-1"
+            className="flex-1 text-xs sm:text-sm"
           />
         </div>
-        <Button type="submit" className="w-full">
+        <Button type="submit" size="sm" className="w-full text-xs sm:text-sm">
           Executar
         </Button>
       </form>
       {state.status !== 'idle' && (
         <p
-          className={`mt-2 text-xs ${
+          className={`mt-2 text-[10px] sm:text-xs ${
             state.status === 'success' ? 'text-emerald-300' : 'text-rose-300'
           }`}
         >

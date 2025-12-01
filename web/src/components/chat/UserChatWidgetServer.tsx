@@ -28,6 +28,7 @@ export async function UserChatWidgetServer({
 
   return (
     <UserChatWidget
+      userId={userId}
       userName={userName}
       initialThreadId={snapshot.thread.id}
       initialMessages={snapshot.messages}

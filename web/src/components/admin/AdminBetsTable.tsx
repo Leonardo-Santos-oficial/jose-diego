@@ -30,42 +30,44 @@ export function AdminBetsTable({
   totalPages,
 }: AdminBetsTableProps) {
   return (
-    <section className="rounded-3xl border border-slate-800/60 bg-slate-950/80 p-4 shadow-[0_25px_80px_rgba(2,6,23,0.35)] md:p-6">
-      <div className="mb-6 flex items-center justify-between">
+    <section className="rounded-2xl border border-slate-800/60 bg-slate-950/80 p-3 shadow-[0_25px_80px_rgba(2,6,23,0.35)] sm:rounded-3xl sm:p-4 md:p-6">
+      <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-50">
-            Admin • Histórico de Apostas
-          </h1>
-          <p className="text-sm text-slate-400">
-            Registro global de todas as apostas realizadas na plataforma.
+          <h2 className="text-lg font-semibold text-slate-50 sm:text-xl">
+            Histórico de Apostas
+          </h2>
+          <p className="text-xs text-slate-400 sm:text-sm">
+            Registro global de apostas.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2 rounded-lg bg-slate-900/60 p-2 sm:bg-transparent sm:p-0">
           <Button
             variant="outline"
             size="icon"
             disabled={currentPage <= 1}
             asChild
+            className="size-8 sm:size-9"
           >
             <Link
-              href={currentPage > 1 ? `/admin/bets?page=${currentPage - 1}` : '#'}
+              href={currentPage > 1 ? `/admin?page=${currentPage - 1}` : '#'}
               aria-disabled={currentPage <= 1}
             >
               <ChevronLeft className="size-4" />
             </Link>
           </Button>
-          <span className="text-sm text-slate-400">
-            Pág {currentPage} de {totalPages}
+          <span className="text-xs text-slate-400 sm:text-sm">
+            {currentPage}/{totalPages}
           </span>
           <Button
             variant="outline"
             size="icon"
             disabled={currentPage >= totalPages}
             asChild
+            className="size-8 sm:size-9"
           >
             <Link
               href={
-                currentPage < totalPages ? `/admin/bets?page=${currentPage + 1}` : '#'
+                currentPage < totalPages ? `/admin?page=${currentPage + 1}` : '#'
               }
               aria-disabled={currentPage >= totalPages}
             >
