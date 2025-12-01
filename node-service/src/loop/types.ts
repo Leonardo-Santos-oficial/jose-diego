@@ -12,13 +12,19 @@ export interface GameLoopConfig {
   settleDelayMs: number;
   tickIntervalMs: number;
   historySize: number;
+  /** Maximum crash multiplier allowed - CRITICAL for RTP compliance */
+  maxCrashMultiplier: number;
+  /** Minimum crash multiplier allowed */
+  minCrashMultiplier: number;
 }
 
 export const defaultLoopConfig: GameLoopConfig = {
-  bettingWindowMs: 4_000,
+  bettingWindowMs: 10_000,
   settleDelayMs: 1_000,
   tickIntervalMs: 100,
-  historySize: 30
+  historySize: 30,
+  maxCrashMultiplier: 35,
+  minCrashMultiplier: 1.0,
 };
 
 export type HistoryBucket = 'blue' | 'purple' | 'pink';

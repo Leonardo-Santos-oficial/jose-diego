@@ -161,7 +161,7 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
   }
 
   return (
-    <section className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-slate-950/80 p-4 shadow-[0_0_70px_rgba(15,118,110,0.15)] md:p-6 lg:flex-row">
+    <section className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-slate-950/80 p-6 shadow-[0_0_70px_rgba(15,118,110,0.15)] lg:flex-row">
       <aside
         className={`w-full max-w-sm space-y-3 border-b border-slate-800/60 pb-4 lg:border-b-0 lg:border-r lg:pr-4 ${
           showMobileList ? 'block' : 'hidden'
@@ -177,7 +177,7 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
                   setSelectedThreadId(thread.id);
                   setShowMobileList(false);
                 }}
-                className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
+                className={`w-full min-h-[60px] rounded-2xl border px-4 py-3 text-left transition ${
                   thread.id === selectedThreadId
                     ? 'border-teal-400/60 bg-teal-500/10 text-white'
                     : 'border-white/5 bg-slate-900/50 text-slate-300 hover:border-white/20'
@@ -215,10 +215,10 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden -ml-2"
+                className="lg:hidden -ml-2 min-h-[44px] min-w-[44px]"
                 onClick={() => setShowMobileList(true)}
               >
-                <ArrowLeft className="size-5 text-slate-400" />
+                <ArrowLeft className="size-6 text-slate-400" />
               </Button>
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-400">

@@ -161,7 +161,7 @@ export function ProfileForm({
                 type="button"
                 onClick={() => setWithdrawTab('pix')}
                 className={cn(
-                  "flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2",
+                  "flex-1 py-3 px-4 min-h-[44px] rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2",
                   withdrawTab === 'pix'
                     ? "bg-gradient-to-r from-[#E31C58] to-[#FF6B6B] text-white shadow-lg"
                     : "text-gray-400 hover:text-white hover:bg-[#2A2A32]"
@@ -174,7 +174,7 @@ export function ProfileForm({
                 type="button"
                 onClick={() => setWithdrawTab('bank')}
                 className={cn(
-                  "flex-1 py-2.5 px-4 rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2",
+                  "flex-1 py-3 px-4 min-h-[44px] rounded-md text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2",
                   withdrawTab === 'bank'
                     ? "bg-gradient-to-r from-[#E31C58] to-[#FF6B6B] text-white shadow-lg"
                     : "text-gray-400 hover:text-white hover:bg-[#2A2A32]"
@@ -263,7 +263,7 @@ export function ProfileForm({
                 <div className="space-y-2">
                   <Label className="text-gray-300">Tipo de Conta</Label>
                   <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className="flex items-center gap-2 cursor-pointer min-h-[44px] px-3 py-2 rounded-lg hover:bg-[#2A2A32]/50 transition-colors">
                       <input
                         type="radio"
                         name="bankAccountType"
@@ -274,7 +274,7 @@ export function ProfileForm({
                       />
                       <span className="text-gray-300 text-sm">Corrente</span>
                     </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className="flex items-center gap-2 cursor-pointer min-h-[44px] px-3 py-2 rounded-lg hover:bg-[#2A2A32]/50 transition-colors">
                       <input
                         type="radio"
                         name="bankAccountType"

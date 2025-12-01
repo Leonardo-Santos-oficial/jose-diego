@@ -27,7 +27,7 @@ export function AviatorHistoryRail({ history }: AviatorHistoryRailProps) {
         {items.map((entry) => (
           <div
             key={entry.roundId}
-            className="inline-flex shrink-0 items-center justify-center rounded-full bg-slate-800 px-2 py-1 text-[10px] font-bold lg:px-3 lg:text-xs"
+            className="inline-flex shrink-0 items-center justify-center rounded-full bg-slate-800 px-3 py-1.5 text-xs font-bold min-h-[32px] lg:px-3 lg:text-xs"
             style={{
               color: bucketPalette[entry.bucket],
               backgroundColor: `${bucketPalette[entry.bucket]}20`,

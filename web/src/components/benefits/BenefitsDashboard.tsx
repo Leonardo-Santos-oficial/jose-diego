@@ -67,28 +67,28 @@ export function BenefitsDashboard({ initialSummary, isAuthenticated }: BenefitsD
         progressToNextLevel={summary.progressToNextLevel}
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-          <Gift className="size-8 text-emerald-400" />
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-3">
+        <div className="flex items-center gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 md:p-5">
+          <Gift className="size-8 text-emerald-400 md:size-10" />
           <div>
-            <p className="text-2xl font-bold text-emerald-400">{summary.availableBenefits.length}</p>
-            <p className="text-sm text-slate-400">Disponíveis</p>
+            <p className="text-xl font-bold text-emerald-400 md:text-2xl">{summary.availableBenefits.length}</p>
+            <p className="text-sm text-slate-400 md:text-base">Disponíveis</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/10 p-4">
-          <History className="size-8 text-blue-400" />
+        <div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/10 p-4 md:p-5">
+          <History className="size-8 text-blue-400 md:size-10" />
           <div>
-            <p className="text-2xl font-bold text-blue-400">{summary.claimedBenefits.length}</p>
-            <p className="text-sm text-slate-400">Resgatados</p>
+            <p className="text-xl font-bold text-blue-400 md:text-2xl">{summary.claimedBenefits.length}</p>
+            <p className="text-sm text-slate-400 md:text-base">Resgatados</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
-          <Coins className="size-8 text-amber-400" />
+        <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 md:p-5">
+          <Coins className="size-8 text-amber-400 md:size-10" />
           <div>
-            <p className="text-2xl font-bold text-amber-400">
+            <p className="text-xl font-bold text-amber-400 md:text-2xl">
               R$ {summary.totalEarned.toFixed(2)}
             </p>
-            <p className="text-sm text-slate-400">Total Ganho</p>
+            <p className="text-sm text-slate-400 md:text-base">Total Ganho</p>
           </div>
         </div>
       </div>
@@ -96,24 +96,22 @@ export function BenefitsDashboard({ initialSummary, isAuthenticated }: BenefitsD
       <div className="flex gap-2 border-b border-slate-700">
         <button
           onClick={() => setActiveTab('available')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
-            activeTab === 'available'
+          className={`flex min-h-[48px] items-center gap-2 px-4 py-3 text-sm font-medium transition-colors md:text-base ${activeTab === 'available'
               ? 'border-b-2 border-emerald-500 text-emerald-400'
               : 'text-slate-400 hover:text-slate-300'
           }`}
         >
-          <Gift className="size-4" />
+          <Gift className="size-5" />
           Disponíveis ({summary.availableBenefits.length})
         </button>
         <button
           onClick={() => setActiveTab('history')}
-          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
-            activeTab === 'history'
+          className={`flex min-h-[48px] items-center gap-2 px-4 py-3 text-sm font-medium transition-colors md:text-base ${activeTab === 'history'
               ? 'border-b-2 border-blue-500 text-blue-400'
               : 'text-slate-400 hover:text-slate-300'
           }`}
         >
-          <History className="size-4" />
+          <History className="size-5" />
           Histórico ({summary.claimedBenefits.length})
         </button>
       </div>

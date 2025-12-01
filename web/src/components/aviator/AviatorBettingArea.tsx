@@ -15,7 +15,7 @@ export function AviatorBettingArea(props: AviatorBetPanelProps) {
         <button
           onClick={() => setActiveTab(0)}
           className={cn(
-            'flex-1 rounded-lg py-2 text-sm font-medium transition',
+            'flex-1 rounded-lg py-3 min-h-[44px] text-base font-medium transition',
             activeTab === 0
               ? 'bg-slate-800 text-white shadow-sm'
               : 'text-slate-400 hover:text-slate-200'
@@ -26,7 +26,7 @@ export function AviatorBettingArea(props: AviatorBetPanelProps) {
         <button
           onClick={() => setActiveTab(1)}
           className={cn(
-            'flex-1 rounded-lg py-2 text-sm font-medium transition',
+            'flex-1 rounded-lg py-3 min-h-[44px] text-base font-medium transition',
             activeTab === 1
               ? 'bg-slate-800 text-white shadow-sm'
               : 'text-slate-400 hover:text-slate-200'

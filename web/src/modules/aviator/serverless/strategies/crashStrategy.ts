@@ -16,12 +16,18 @@ export interface CrashStrategy {
 
 export class ProvablyFairStrategy implements CrashStrategy {
   pickTargetMultiplier(settings: EngineSettings = DEFAULT_ENGINE_SETTINGS): CrashResult {
-    // 0. Check for forced result
+    // Get max multiplier from settings (critical for RTP control)
+    const maxMultiplier = settings.maxCrashMultiplier ?? 35;
+    const minMultiplier = settings.minCrashMultiplier ?? 1.0;
+
+    // 0. Check for forced result (admin override)
     if (settings.forcedResult != null && settings.forcedResult > 0) {
       const seed = randomBytes(32).toString('hex');
       const hash = createHash('sha256').update(seed).digest('hex');
+      // Even forced results must respect the max limit
+      const clampedForced = Math.min(Math.max(settings.forcedResult, minMultiplier), maxMultiplier);
       return {
-        multiplier: settings.forcedResult,
+        multiplier: clampedForced,
         seed,
         hash,
       };
@@ -38,36 +44,22 @@ export class ProvablyFairStrategy implements CrashStrategy {
     const h = parseInt(seed.slice(0, 13), 16);
     const e = Math.pow(2, 52);
     
-    // Standard crash game formula: E / (E - h)
-    // But we need to handle the "house edge" (instant crash at 1.00x)
-    // Usually 1% to 4% of games crash instantly.
-    
-    // Let's use a simpler logic often used in these demos:
-    // 0.99 / (1 - random)
-    
     // Using the seed to generate a uniform float [0, 1)
     const randomFloat = h / e;
 
-    // House Edge: 1% chance of instant crash (default)
-    // If randomFloat is very close to 1, result is huge.
-    // Formula: multiplier = (100 * E - h) / (E - h) / 100 ... simplified:
-    
+    // RTP (Return To Player) determines house edge
     const rtp = settings.rtp ?? 97.0;
     const houseEdge = (100 - rtp) / 100; // e.g. 3% = 0.03
     
-    // Calculate multiplier
-    // X = (1 - houseEdge) / (1 - U)
+    // Calculate multiplier using formula: X = (1 - houseEdge) / (1 - U)
     const rawMultiplier = (1 - houseEdge) / (1 - randomFloat);
     
-    // Clamp to 1.00 if it's less (shouldn't happen with this formula but safety first)
-    // And round to 2 decimal places
+    // Round to 2 decimal places
     let multiplier = Math.floor(rawMultiplier * 100) / 100;
 
-    // Safety clamp
-    if (multiplier < 1) multiplier = 1;
-    
-    // Cap at a reasonable max for the demo (e.g., 10000x) to prevent overflow issues
-    if (multiplier > 10000) multiplier = 10000;
+    // CRITICAL: Apply strict min/max limits from settings
+    if (multiplier < minMultiplier) multiplier = minMultiplier;
+    if (multiplier > maxMultiplier) multiplier = maxMultiplier;
 
     return {
       multiplier,

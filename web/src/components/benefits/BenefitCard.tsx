@@ -52,24 +52,24 @@ export function BenefitCard({ benefit, onClaimed }: BenefitCardProps) {
 
   return (
     <article className={`
-      relative flex flex-col gap-4 rounded-2xl border bg-gradient-to-b p-5 transition-all
+      relative flex flex-col gap-4 rounded-2xl border bg-gradient-to-b p-4 transition-all md:p-5
       ${colorClass}
       ${isAvailable ? 'hover:scale-[1.02] hover:shadow-lg' : 'opacity-70'}
     `}>
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="text-3xl">{icon}</span>
+          <span className="text-2xl md:text-3xl">{icon}</span>
           <div>
-            <h3 className="font-semibold text-slate-100">
+            <h3 className="text-base font-semibold text-slate-100 md:text-lg">
               {benefit.benefitType?.name ?? 'Benefício'}
             </h3>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-slate-400 md:text-base">
               {benefit.benefitType?.description}
             </p>
           </div>
         </div>
-        <div className="text-right">
-          <span className="text-lg font-bold text-emerald-400">{rewardDisplay}</span>
+        <div className="text-right flex-shrink-0">
+          <span className="text-base font-bold text-emerald-400 md:text-lg">{rewardDisplay}</span>
         </div>
       </div>
 
@@ -79,16 +79,16 @@ export function BenefitCard({ benefit, onClaimed }: BenefitCardProps) {
           <button
             type="submit"
             disabled={isPending}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 py-2 text-sm font-medium text-white transition-all hover:bg-emerald-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full min-h-[48px] items-center justify-center gap-2 rounded-lg bg-emerald-500 py-3 text-sm font-medium text-white transition-all hover:bg-emerald-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 md:text-base"
           >
             {isPending ? (
               <>
-                <Clock className="size-4 animate-spin" />
+                <Clock className="size-5 animate-spin" />
                 Resgatando...
               </>
             ) : (
               <>
-                <Gift className="size-4" />
+                <Gift className="size-5" />
                 Resgatar Agora
               </>
             )}
@@ -97,16 +97,16 @@ export function BenefitCard({ benefit, onClaimed }: BenefitCardProps) {
       )}
 
       {isClaimed && (
-        <div className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500/20 py-2 text-emerald-400">
-          <Check className="size-4" />
-          <span className="text-sm font-medium">Resgatado</span>
+        <div className="flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-emerald-500/20 py-2 text-emerald-400">
+          <Check className="size-5" />
+          <span className="text-sm font-medium md:text-base">Resgatado</span>
         </div>
       )}
 
       {isLocked && (
-        <div className="flex items-center justify-center gap-2 rounded-lg bg-slate-500/20 py-2 text-slate-400">
-          <Lock className="size-4" />
-          <span className="text-sm font-medium">Bloqueado</span>
+        <div className="flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-slate-500/20 py-2 text-slate-400">
+          <Lock className="size-5" />
+          <span className="text-sm font-medium md:text-base">Bloqueado</span>
         </div>
       )}
 

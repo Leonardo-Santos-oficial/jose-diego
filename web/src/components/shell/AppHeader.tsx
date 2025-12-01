@@ -1,14 +1,20 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { Menu, LogOut } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTransition } from 'react';
 import { signOutAction } from '@/app/actions/auth';
 import { Button } from '@/components/components/ui/button';
-import { DepositDialog } from '@/components/wallet/DepositDialog';
 import { RequestWithdrawDialogClient } from '@/components/wallet/RequestWithdrawDialogClient';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/components/ui/sheet';
 import { SidebarNav } from './SidebarNav';
+
+// Dynamic import para evitar erro de hidratação do Radix UI Dialog
+const DepositDialog = dynamic(
+  () => import('@/components/wallet/DepositDialog').then((mod) => mod.DepositDialog),
+  { ssr: false }
+);
 
 type AppHeaderProps = {
   isAuthenticated: boolean;
@@ -40,12 +46,12 @@ export function AppHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between gap-4 border-b border-slate-800/60 bg-slate-950/80 px-4 py-4 backdrop-blur-xl lg:px-6">
+    <header className="sticky top-0 z-50 flex items-center justify-between gap-4 border-b border-slate-800/60 bg-slate-950/80 px-4 py-3 backdrop-blur-xl lg:py-4 lg:px-6">
       <div className="flex items-center gap-4">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-slate-400 hover:text-white">
-              <Menu className="size-6" />
+            <Button variant="ghost" size="icon" className="h-12 w-12 min-h-[48px] min-w-[48px] text-slate-400 hover:text-white">
+              <Menu className="size-7" />
               <span className="sr-only">Menu</span>
             </Button>
           </SheetTrigger>
@@ -66,10 +72,10 @@ export function AppHeader({
                 size="icon"
                 onClick={handleLogout}
                 disabled={isSigningOut}
-                className="h-6 w-6 text-slate-400 hover:text-rose-400"
+                className="h-10 w-10 min-h-[44px] min-w-[44px] text-slate-400 hover:text-rose-400"
                 title="Sair"
               >
-                <LogOut className="size-4" />
+                <LogOut className="size-5" />
                 <span className="sr-only">Sair</span>
               </Button>
             )}
@@ -93,7 +99,7 @@ export function AppHeader({
               <Button
                 variant="default"
                 size="sm"
-                className="h-8 w-8 rounded-full p-0 lg:h-auto lg:w-auto lg:px-5"
+                className="h-12 w-12 min-h-[48px] min-w-[48px] rounded-full p-0 text-2xl font-bold lg:h-auto lg:w-auto lg:px-5 lg:text-base"
               >
                 <span className="lg:hidden">+</span>
                 <span className="hidden lg:inline">Depositar</span>

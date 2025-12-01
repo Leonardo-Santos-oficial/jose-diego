@@ -130,23 +130,23 @@ function UserCard({ user }: UserRowProps) {
   );
 
   return (
-    <div className="rounded-xl border border-slate-800/40 bg-slate-900/40 p-3 sm:rounded-2xl sm:p-4">
+    <div className="rounded-xl border border-slate-800/40 bg-slate-900/40 p-4 sm:rounded-2xl sm:p-4">
       <div className="mb-3 flex items-start justify-between gap-2 sm:mb-4 sm:gap-4">
         <div className="flex flex-col overflow-hidden">
-          <strong className="truncate text-xs text-slate-50 sm:text-sm">{user.email}</strong>
-          <span className="text-[10px] uppercase tracking-wider text-slate-500 sm:text-xs">
+          <strong className="truncate text-sm text-slate-50 sm:text-sm">{user.email}</strong>
+          <span className="text-xs uppercase tracking-wider text-slate-500 sm:text-xs">
             {user.role}
           </span>
         </div>
         <div className="shrink-0 text-right">
-          <div className="text-sm font-semibold text-emerald-300 sm:text-base">
+          <div className="text-base font-semibold text-emerald-300 sm:text-base">
             {currency.format(user.balance)}
           </div>
-          <div className="text-[10px] text-slate-400 sm:text-xs">{user.displayName ?? '—'}</div>
+          <div className="text-xs text-slate-400 sm:text-xs">{user.displayName ?? '—'}</div>
         </div>
       </div>
 
-      <form className="flex flex-col gap-2 sm:gap-3" action={formAction}>
+      <form className="flex flex-col gap-3 sm:gap-3" action={formAction}>
         <input type="hidden" name="userId" value={user.id} />
         <div className="flex gap-2">
           <Input
@@ -155,22 +155,22 @@ function UserCard({ user }: UserRowProps) {
             name="delta"
             placeholder="± R$"
             required
-            className="w-24 text-xs sm:w-1/3 sm:text-sm"
+            className="w-28 text-base sm:w-1/3 sm:text-sm"
           />
           <Input
             type="text"
             name="reason"
             placeholder="Motivo"
-            className="flex-1 text-xs sm:text-sm"
+            className="flex-1 text-base sm:text-sm"
           />
         </div>
-        <Button type="submit" size="sm" className="w-full text-xs sm:text-sm">
+        <Button type="submit" size="sm" className="w-full min-h-[44px] text-base sm:min-h-0 sm:text-sm">
           Executar
         </Button>
       </form>
       {state.status !== 'idle' && (
         <p
-          className={`mt-2 text-[10px] sm:text-xs ${
+          className={`mt-2 text-sm sm:text-xs ${
             state.status === 'success' ? 'text-emerald-300' : 'text-rose-300'
           }`}
         >

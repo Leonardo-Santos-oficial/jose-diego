@@ -43,7 +43,7 @@ export function AviatorHud({
           <span className="text-[10px] font-medium text-emerald-400/80 group-hover:text-emerald-400">
             Provably Fair
           </span>
-          <span className="hidden group-hover:block text-[10px] text-white/50 font-mono ml-1 max-w-[100px] truncate">
+          <span className="hidden group-hover:block text-xs text-white/50 font-mono ml-1 max-w-[100px] truncate md:text-[10px]">
             {gameState.hash.substring(0, 8)}...
           </span>
         </div>

@@ -69,14 +69,21 @@ class FlyingState extends GameState {
 
   tick(deltaMs: number): void {
     const current = this.machine.getContext().multiplier;
+    const crashTarget = this.machine.getContext().crashTarget;
+    
+    // CRITICAL: Apply max multiplier limit to prevent runaway values
+    const maxMultiplier = this.machine.config.maxCrashMultiplier ?? 35;
+    const safeCrashTarget = Math.min(crashTarget, maxMultiplier);
+    
     const next = current + deltaMs * 0.001;
-    const capped = Math.min(next, this.machine.getContext().crashTarget);
+    const capped = Math.min(next, safeCrashTarget, maxMultiplier);
+    
     this.machine.updateContext({ multiplier: capped });
     this.machine.publishState({});
     
     void this.machine.processAutoCashout(capped);
 
-    if (capped >= this.machine.getContext().crashTarget) {
+    if (capped >= safeCrashTarget) {
       this.machine.transitionTo('crashed');
     }
   }
@@ -255,8 +262,12 @@ export class GameStateMachine {
   }
 
   private createRoundContext(): MachineContext {
-    // Pass current RTP to the strategy for crash calculation
-    const crash = this.deps.strategy.nextCrash({ rtp: this.currentRtp });
+    // Pass current RTP and max multiplier to the strategy for crash calculation
+    const crash = this.deps.strategy.nextCrash({ 
+      rtp: this.currentRtp,
+      maxCrashMultiplier: this.config.maxCrashMultiplier,
+      minCrashMultiplier: this.config.minCrashMultiplier,
+    });
     const roundId = randomUUID();
     
     // Use admin-forced crash target if set, otherwise use strategy result
@@ -265,6 +276,13 @@ export class GameStateMachine {
       crashTarget = this.nextRoundCrashTarget;
       this.nextRoundCrashTarget = undefined; // Clear after use
     }
+    
+    // CRITICAL: Always validate crashTarget against configured limits
+    const minMultiplier = this.config.minCrashMultiplier ?? 1.0;
+    const maxMultiplier = this.config.maxCrashMultiplier ?? 35;
+    
+    if (crashTarget < minMultiplier) crashTarget = minMultiplier;
+    if (crashTarget > maxMultiplier) crashTarget = maxMultiplier;
     
     // Create round in database asynchronously
     // We don't await here as the constructor is sync, but the round will be created

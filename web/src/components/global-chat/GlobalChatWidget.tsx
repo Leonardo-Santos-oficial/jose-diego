@@ -85,8 +85,8 @@ export function GlobalChatWidget() {
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           Chat ao Vivo
         </CardTitle>
-        <Button variant="ghost" size="icon" className="h-6 w-6 text-slate-400 hover:text-white p-0">
-          {isMinimized ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px] min-w-[44px] text-slate-400 hover:text-white p-0">
+          {isMinimized ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
         </Button>
       </CardHeader>
       
@@ -129,14 +129,14 @@ export function GlobalChatWidget() {
               <Input
                 name="body"
                 placeholder="Digite sua mensagem..."
-                className="bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-500 h-9 text-sm"
+                className="bg-slate-800 border-slate-700 text-slate-100 placeholder:text-slate-500 h-10 text-sm"
                 autoComplete="off"
               />
               <Button 
                 type="submit" 
                 size="sm" 
                 disabled={isPending}
-                className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-3"
+                className="bg-blue-600 hover:bg-blue-700 text-white h-10 px-4 text-sm"
               >
                 {isPending ? '...' : 'Enviar'}
               </Button>

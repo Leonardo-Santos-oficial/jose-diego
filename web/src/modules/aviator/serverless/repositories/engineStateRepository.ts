@@ -422,13 +422,35 @@ function mapStateRow(row: EngineStateRow, fallbackSettings: EngineSettings): Eng
   const serverSeed = typeof rawSettings['serverSeed'] === 'string' ? rawSettings['serverSeed'] : undefined;
   const serverHash = typeof rawSettings['serverHash'] === 'string' ? rawSettings['serverHash'] : undefined;
 
+  // CRITICAL: Sanitize multipliers from database to prevent runaway values
+  const maxMultiplier = settings.maxCrashMultiplier ?? 35;
+  const minMultiplier = settings.minCrashMultiplier ?? 1.0;
+  
+  let currentMultiplier = Number(row.current_multiplier ?? 1);
+  let targetMultiplier = Number(row.target_multiplier ?? 2);
+  
+  // Validate and clamp values to prevent bug where multiplier goes crazy
+  if (!Number.isFinite(currentMultiplier) || currentMultiplier < 1) {
+    currentMultiplier = 1;
+  }
+  if (currentMultiplier > maxMultiplier) {
+    currentMultiplier = maxMultiplier;
+  }
+  
+  if (!Number.isFinite(targetMultiplier) || targetMultiplier < minMultiplier) {
+    targetMultiplier = minMultiplier;
+  }
+  if (targetMultiplier > maxMultiplier) {
+    targetMultiplier = maxMultiplier;
+  }
+
   return {
     id: row.id,
     roundId: row.current_round_id ?? '',
     phase: row.phase,
     phaseStartedAt: row.phase_started_at,
-    currentMultiplier: Number(row.current_multiplier ?? 1),
-    targetMultiplier: Number(row.target_multiplier ?? 2),
+    currentMultiplier,
+    targetMultiplier,
     settings,
     serverSeed,
     serverHash,

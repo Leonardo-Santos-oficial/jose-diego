@@ -7,6 +7,10 @@ export interface CrashResult {
 export interface CrashOptions {
   /** RTP percentage (0-100). Default is 97. Lower RTP = more house edge = lower multipliers */
   rtp?: number;
+  /** Maximum crash multiplier allowed. Default is 35. */
+  maxCrashMultiplier?: number;
+  /** Minimum crash multiplier allowed. Default is 1.0. */
+  minCrashMultiplier?: number;
 }
 
 export interface CrashStrategy {

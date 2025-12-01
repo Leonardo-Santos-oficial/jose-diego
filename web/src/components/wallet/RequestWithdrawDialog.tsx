@@ -47,7 +47,7 @@ export function RequestWithdrawDialog({ userId }: RequestWithdrawDialogProps) {
         <Button
           type="button"
           variant="secondary"
-          className="rounded-full border border-slate-700 px-3 lg:px-5"
+          className="h-11 min-h-[44px] rounded-full border border-slate-700 px-3 text-sm lg:px-5"
           disabled={disabled}
         >
           <span className="lg:hidden">Saque</span>

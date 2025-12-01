@@ -17,8 +17,8 @@ export function AviatorMobileMenu({ userId }: { userId: string }) {
 
   if (!isMounted) {
     return (
-      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-white">
-        <Menu className="h-5 w-5" />
+      <Button variant="ghost" size="icon" className="h-12 w-12 min-h-[48px] min-w-[48px] text-slate-400 hover:text-white">
+        <Menu className="h-7 w-7" />
         <span className="sr-only">Menu</span>
       </Button>
     );
@@ -27,8 +27,8 @@ export function AviatorMobileMenu({ userId }: { userId: string }) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-white">
-          <Menu className="h-5 w-5" />
+        <Button variant="ghost" size="icon" className="h-12 w-12 min-h-[48px] min-w-[48px] text-slate-400 hover:text-white">
+          <Menu className="h-7 w-7" />
           <span className="sr-only">Menu</span>
         </Button>
       </SheetTrigger>

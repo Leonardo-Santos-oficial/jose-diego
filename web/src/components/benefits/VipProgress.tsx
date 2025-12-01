@@ -23,41 +23,41 @@ export function VipProgress({ vipLevel, currentTier, nextTier, progressToNextLev
   const colors = tierColors[currentTier.level] ?? tierColors[0];
 
   return (
-    <section className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6">
-      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex size-16 items-center justify-center rounded-full bg-slate-800 border-2 border-slate-700">
-            <span className="text-3xl">{currentTier.icon}</span>
+    <section className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4 md:p-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:gap-6">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="flex size-14 items-center justify-center rounded-full bg-slate-800 border-2 border-slate-700 md:size-16">
+            <span className="text-2xl md:text-3xl">{currentTier.icon}</span>
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <Trophy className={`size-5 ${colors.accent}`} />
-              <h2 className="text-xl font-bold text-white">
+              <Trophy className={`size-5 md:size-6 ${colors.accent}`} />
+              <h2 className="text-lg font-bold text-white md:text-xl">
                 Nível <span className={colors.accent}>{currentTier.name}</span>
               </h2>
             </div>
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-slate-300 md:text-base">
               {vipLevel.points.toLocaleString()} pontos acumulados
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-800/50 px-4 py-2">
-            <TrendingUp className="size-4 text-emerald-500" />
+        <div className="flex flex-wrap gap-2 md:gap-3">
+          <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-800/50 px-3 py-2 md:px-4">
+            <TrendingUp className="size-5 text-emerald-500 md:size-5" />
             <div className="text-right">
-              <p className="text-xs text-slate-300">Total Apostado</p>
-              <p className="font-semibold text-white">
+              <p className="text-xs text-slate-300 md:text-sm">Total Apostado</p>
+              <p className="text-sm font-semibold text-white md:text-base">
                 R$ {vipLevel.totalWagered.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
             </div>
           </div>
           {currentTier.cashbackRate > 0 && (
-            <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-800/50 px-4 py-2">
-              <Star className="size-4 text-amber-500" />
+            <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-800/50 px-3 py-2 md:px-4">
+              <Star className="size-5 text-amber-500 md:size-5" />
               <div className="text-right">
-                <p className="text-xs text-slate-300">Cashback</p>
-                <p className="font-semibold text-white">{currentTier.cashbackRate}%</p>
+                <p className="text-xs text-slate-300 md:text-sm">Cashback</p>
+                <p className="text-sm font-semibold text-white md:text-base">{currentTier.cashbackRate}%</p>
               </div>
             </div>
           )}

@@ -29,13 +29,13 @@ export function AviatorHeader({ userId }: AviatorHeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-white/10 bg-slate-950/80 px-4 backdrop-blur-md">
-      <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-white/10 bg-slate-950/80 px-4 backdrop-blur-md md:h-16">
+      <div className="flex items-center gap-2 md:gap-3">
         <AviatorMobileMenu userId={userId} />
 
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold tracking-tight text-rose-500">AVIATOR</span>
-          <span className="rounded bg-rose-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-rose-500">Demo</span>
+        <div className="flex items-center gap-1 md:gap-2">
+          <span className="text-base font-bold tracking-tight text-rose-500 md:text-lg">AVIATOR</span>
+          <span className="rounded bg-rose-500/10 px-1 py-0.5 text-[9px] font-bold uppercase text-rose-500 md:px-1.5 md:text-[10px]">Demo</span>
         </div>
       </div>
 
@@ -53,11 +53,11 @@ export function AviatorHeader({ userId }: AviatorHeaderProps) {
             <RequestWithdrawDialogClient userId={userId} />
         </div>
 
-        <div className="flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1.5 border border-white/5">
-          <Wallet className="h-3.5 w-3.5 text-emerald-400" />
+        <div className="flex items-center gap-2 rounded-full bg-slate-900 px-3 py-2 border border-white/5 md:px-4 md:py-2.5">
+          <Wallet className="h-5 w-5 text-emerald-400 md:h-6 md:w-6" />
           <div className="flex flex-col leading-none">
-             <span className="text-[10px] font-medium text-slate-400">Saldo</span>
-             <span className="text-sm font-bold text-white">
+             <span className="text-[10px] font-medium text-slate-400 md:text-xs">Saldo</span>
+             <span className="text-sm font-bold text-white md:text-base">
                {currency.format(walletSnapshot?.balance ?? 0)}
              </span>
           </div>
@@ -68,10 +68,10 @@ export function AviatorHeader({ userId }: AviatorHeaderProps) {
           size="icon"
           onClick={handleLogout}
           disabled={isSigningOut}
-          className="h-8 w-8 text-slate-400 hover:text-rose-400"
+          className="h-10 w-10 min-h-[44px] min-w-[44px] text-slate-400 hover:text-rose-400"
           title="Sair"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-5 w-5" />
           <span className="sr-only">Sair</span>
         </Button>
       </div>

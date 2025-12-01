@@ -18,7 +18,7 @@ export async function AdminChatAnalyticsSection() {
   }
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-slate-950/80 p-4 text-slate-100 shadow-[0_0_60px_rgba(15,118,110,0.15)] md:p-6">
+    <section className="rounded-3xl border border-white/10 bg-slate-950/80 p-6 text-slate-100 shadow-[0_0_60px_rgba(15,118,110,0.15)]">
       <header className="mb-4">
         <p className="text-xs uppercase tracking-[0.3em] text-teal-300">
           Analytics do chat

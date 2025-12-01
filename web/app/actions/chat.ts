@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { htmlSanitizer } from '@/lib/security/htmlSanitizer';
-import { getCurrentSession } from '@/lib/auth/session';
+import { getCurrentSession, getDisplayName } from '@/lib/auth/session';
 import { isAdminSession } from '@/lib/auth/roles';
 import type { ChatActionState } from '@/app/actions/chat-state';
 import { ChatService } from '@/modules/chat/services/chatService';
@@ -34,7 +34,7 @@ const metadataSchema = z.object({
 
 const userCommand = new SendChatMessageCommand();
 const adminChatService = new ChatService(async () => getSupabaseServiceRoleClient());
-const adminCommand = new SendChatMessageCommand(adminChatService);
+const adminCommand = new SendChatMessageCommand({ chatService: adminChatService });
 
 export async function sendChatMessageAction(
   _prevState: ChatActionState,
@@ -44,6 +44,7 @@ export async function sendChatMessageAction(
 
   const session = await getCurrentSession();
   const userId = session?.id;
+  const userName = getDisplayName(session);
 
   if (!userId) {
     return { status: 'error', message: 'Faça login para usar o chat.' };
@@ -61,12 +62,12 @@ export async function sendChatMessageAction(
     return { status: 'error', message: firstIssue };
   }
 
-  // Simple HTML strip to avoid heavy dependencies on server
   const sanitizedBody = parsed.data.body.replace(/<[^>]*>?/gm, '');
 
   try {
     const result = await userCommand.executeForUser({
       userId,
+      userName,
       body: sanitizedBody,
       attachmentUrl: parsed.data.attachmentUrl ?? undefined,
       attachmentType: parsed.data.attachmentType ?? undefined,

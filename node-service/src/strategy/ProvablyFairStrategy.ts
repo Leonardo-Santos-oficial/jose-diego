@@ -1,8 +1,16 @@
 import { createHash, randomBytes } from 'node:crypto';
 import type { CrashResult, CrashStrategy, CrashOptions } from './crashStrategy.js';
 
+// Default limits - CRITICAL for RTP compliance
+const DEFAULT_MAX_MULTIPLIER = 35;
+const DEFAULT_MIN_MULTIPLIER = 1.0;
+
 export class ProvablyFairStrategy implements CrashStrategy {
   nextCrash(options?: CrashOptions): CrashResult {
+    // Get limits from options or use strict defaults
+    const maxMultiplier = options?.maxCrashMultiplier ?? DEFAULT_MAX_MULTIPLIER;
+    const minMultiplier = options?.minCrashMultiplier ?? DEFAULT_MIN_MULTIPLIER;
+
     // 1. Generate a random server seed (32 bytes hex)
     const seed = randomBytes(32).toString('hex');
 
@@ -19,7 +27,6 @@ export class ProvablyFairStrategy implements CrashStrategy {
 
     // RTP (Return To Player) determines the house edge
     // RTP of 97% means 3% house edge
-    // RTP of 5% means 95% house edge (very aggressive)
     const rtp = options?.rtp ?? 97; // Default RTP is 97%
     const houseEdge = (100 - rtp) / 100; // Convert percentage to decimal
     
@@ -30,11 +37,9 @@ export class ProvablyFairStrategy implements CrashStrategy {
     // Round to 2 decimal places
     let multiplier = Math.floor(rawMultiplier * 100) / 100;
 
-    // Safety clamp - minimum is 1.00x
-    if (multiplier < 1) multiplier = 1;
-    
-    // Cap at a reasonable max (e.g., 10000x) to prevent overflow issues
-    if (multiplier > 10000) multiplier = 10000;
+    // CRITICAL: Apply strict min/max limits to prevent runaway multipliers
+    if (multiplier < minMultiplier) multiplier = minMultiplier;
+    if (multiplier > maxMultiplier) multiplier = maxMultiplier;
 
     return {
       multiplier,

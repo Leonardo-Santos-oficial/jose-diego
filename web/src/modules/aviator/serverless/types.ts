@@ -23,7 +23,7 @@ export interface EngineSettings {
 }
 
 export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
-  bettingWindowMs: 4000,
+  bettingWindowMs: 10000,
   flightDurationMs: 8000,
   resetDelayMs: 1500,
   historySize: 30,

@@ -72,10 +72,19 @@ export class AviatorEngineFacade {
     // Since we don't have the state object yet, we can't update it easily.
     // Let's fetch state first.
 
+    // IMPORTANT: First get existing state to use its settings (including RTP from admin panel)
+    // This ensures we always use the configured RTP, not the default
     let state = await this.repo.ensureState(
+      // Placeholder crashResult - will be regenerated with correct settings if needed
       this.strategy.pickTargetMultiplier(this.settings),
       this.settings
     );
+    
+    // If state was just created or needs a new round, regenerate crash with correct settings from DB
+    if (state.settings?.rtp !== undefined && state.settings.rtp !== this.settings.rtp) {
+      // The state has custom RTP from admin panel, make sure it's being used
+      // This is handled in the 'crashed' phase transition below
+    }
 
     // Now apply commands to the fetched state/settings
     for (const cmd of commands) {
@@ -262,8 +271,16 @@ function calculateMultiplier(
 ): number {
   const elapsed = elapsedMs(state.phaseStartedAt, now);
   const flightProgress = Math.min(elapsed / settings.flightDurationMs, 1);
-  const multiplier = 1 + flightProgress * (state.targetMultiplier - 1);
-  return Number(Math.max(multiplier, 1).toFixed(2));
+  
+  // CRITICAL: Ensure targetMultiplier is within valid bounds
+  const maxMultiplier = settings.maxCrashMultiplier ?? 35;
+  const safeTargetMultiplier = Math.min(state.targetMultiplier, maxMultiplier);
+  
+  const multiplier = 1 + flightProgress * (safeTargetMultiplier - 1);
+  
+  // Double safety: cap the final result
+  const cappedMultiplier = Math.min(Math.max(multiplier, 1), maxMultiplier);
+  return Number(cappedMultiplier.toFixed(2));
 }
 
 function elapsedMs(startIso: string, now: Date): number {

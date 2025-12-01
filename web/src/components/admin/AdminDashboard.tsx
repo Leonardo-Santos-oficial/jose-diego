@@ -12,10 +12,10 @@ import { AdminBetsTable } from './AdminBetsTable';
 import { AdminWithdrawalsPanel } from './AdminWithdrawalsPanel';
 
 const TABS: AdminTabConfig[] = [
-  { id: 'users', label: 'Usuários', icon: <Users className="size-4" /> },
-  { id: 'game', label: 'Controle do Jogo', icon: <Gamepad2 className="size-4" /> },
-  { id: 'bets', label: 'Apostas', icon: <Receipt className="size-4" /> },
-  { id: 'withdrawals', label: 'Saques', icon: <Wallet className="size-4" /> },
+  { id: 'users', label: 'Usuários', icon: <Users className="size-6" /> },
+  { id: 'game', label: 'Controle do Jogo', icon: <Gamepad2 className="size-6" /> },
+  { id: 'bets', label: 'Apostas', icon: <Receipt className="size-6" /> },
+  { id: 'withdrawals', label: 'Saques', icon: <Wallet className="size-6" /> },
 ];
 
 interface AdminDashboardProps {
