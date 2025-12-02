@@ -46,8 +46,8 @@ export function AppHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between gap-4 border-b border-slate-800/60 bg-slate-950/80 px-4 py-3 backdrop-blur-xl lg:py-4 lg:px-6">
-      <div className="flex items-center gap-4">
+    <header className="sticky top-0 z-50 flex w-full items-center justify-between gap-2 border-b border-slate-800/60 bg-slate-950/80 px-2 py-2 backdrop-blur-xl sm:gap-4 sm:px-4 sm:py-3 lg:py-4 lg:px-6">
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="h-12 w-12 min-h-[48px] min-w-[48px] text-slate-400 hover:text-white">
@@ -61,9 +61,9 @@ export function AppHeader({
           </SheetContent>
         </Sheet>
 
-        <div>
-          <div className="flex items-center gap-2">
-            <p className="text-base font-semibold text-slate-50 lg:text-xl">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <p className="truncate text-sm font-semibold text-slate-50 sm:text-base lg:text-xl">
               {isAuthenticated ? userName : 'Visitante'}
             </p>
             {isAuthenticated && (
@@ -80,21 +80,21 @@ export function AppHeader({
               </Button>
             )}
           </div>
-          <p className="hidden text-sm text-slate-300 sm:block">
+          <p className="hidden truncate text-xs text-slate-300 sm:block sm:text-sm">
             {isAuthenticated ? userEmail : 'Faça login para liberar a carteira'}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 rounded-2xl bg-slate-900/70 px-3 py-2 lg:gap-6 lg:px-6 lg:py-4">
+      <div className="flex flex-shrink-0 items-center gap-1 rounded-xl bg-slate-900/70 px-2 py-1.5 sm:gap-2 sm:rounded-2xl sm:px-3 sm:py-2 lg:gap-6 lg:px-6 lg:py-4">
         <div className="text-right">
           <span className="hidden text-xs uppercase tracking-[0.28em] text-slate-300 lg:block">
             Saldo virtual
           </span>
-          <p className="text-sm font-semibold text-slate-50 lg:text-2xl">{balance}</p>
+          <p className="whitespace-nowrap text-xs font-semibold text-slate-50 sm:text-sm lg:text-2xl">{balance}</p>
         </div>
         {isAuthenticated && (
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2">
             <DepositDialog>
               <Button
                 variant="default"

@@ -13,8 +13,8 @@ export default async function BenefitsPage() {
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-50">
-      <div className="mx-auto max-w-6xl px-4 py-10">
-        <header className="mb-8 flex items-center justify-between">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:py-10">
+        <header className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
           <Button variant="ghost" asChild className="gap-2 text-slate-400 hover:text-white">
             <Link href="/">
               <ArrowLeft className="size-4" />
@@ -31,32 +31,32 @@ export default async function BenefitsPage() {
           )}
         </header>
 
-        <div className="mb-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-emerald-400">
+        <div className="mb-8 sm:mb-12">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400 sm:px-4 sm:py-1.5 sm:text-xs">
             <Crown className="size-3" />
             Programa de Benefícios
           </div>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+          <h1 className="mt-3 text-2xl font-bold tracking-tight sm:mt-4 sm:text-3xl lg:text-4xl">
             Seus Benefícios Exclusivos
           </h1>
-          <p className="mt-2 max-w-2xl text-slate-400">
+          <p className="mt-2 text-sm text-slate-400 sm:text-base lg:max-w-2xl">
             Quanto mais você joga, mais benefícios desbloqueia! Resgate bônus, 
             acumule pontos e suba de nível para vantagens exclusivas.
           </p>
         </div>
 
-        <main className="space-y-16">
+        <main className="space-y-10 sm:space-y-16">
           <BenefitsDashboard 
             initialSummary={summary} 
             isAuthenticated={isAuthenticated} 
           />
 
-          <div className="border-t border-slate-800 pt-16">
+          <div className="border-t border-slate-800 pt-10 sm:pt-16">
             <BenefitsSection />
           </div>
         </main>
 
-        <footer className="mt-20 border-t border-white/5 pt-10 text-center text-sm text-slate-400">
+        <footer className="mt-12 border-t border-white/5 pt-6 text-center text-xs text-slate-400 sm:mt-20 sm:pt-10 sm:text-sm">
           <p>&copy; {new Date().getFullYear()} Aviator Game. Todos os direitos reservados.</p>
         </footer>
       </div>
