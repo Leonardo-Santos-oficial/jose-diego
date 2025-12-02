@@ -591,24 +591,88 @@ function ThreadReplyForm({ threadId, onMessageAppended }: ThreadReplyFormProps) 
   );
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [localStatus, setLocalStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const statusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Ref estável para o callback
+  const onMessageAppendedRef = useRef(onMessageAppended);
+  onMessageAppendedRef.current = onMessageAppended;
+  
+  // Track qual mensagem já foi processada para evitar duplicatas
+  const processedMessageRef = useRef<string | null>(null);
+  // Track o timestamp do último state processado
+  const lastProcessedTimestampRef = useRef<number>(0);
 
+  // Processar resposta bem-sucedida
   useEffect(() => {
-    if (state.status === 'success' && state.lastMessage && state.threadId === threadId) {
-      onMessageAppended(state.lastMessage);
+    // Só processar se a mensagem ainda não foi processada
+    const messageId = state.lastMessage?.id;
+    const stateTimestamp = state.timestamp ?? 0;
+    
+    if (
+      state.status === 'success' && 
+      state.lastMessage && 
+      state.threadId === threadId &&
+      messageId &&
+      messageId !== processedMessageRef.current &&
+      stateTimestamp > lastProcessedTimestampRef.current
+    ) {
+      processedMessageRef.current = messageId;
+      lastProcessedTimestampRef.current = stateTimestamp;
+      onMessageAppendedRef.current(state.lastMessage);
       formRef.current?.reset();
       textareaRef.current?.focus();
+      
+      // Mostrar feedback temporário
+      setLocalStatus('success');
+      if (statusTimeoutRef.current) {
+        clearTimeout(statusTimeoutRef.current);
+      }
+      statusTimeoutRef.current = setTimeout(() => {
+        setLocalStatus('idle');
+      }, 2000);
+    } else if (state.status === 'error' && state.threadId === threadId) {
+      setLocalStatus('error');
+      if (statusTimeoutRef.current) {
+        clearTimeout(statusTimeoutRef.current);
+      }
+      statusTimeoutRef.current = setTimeout(() => {
+        setLocalStatus('idle');
+      }, 5000);
     }
-  }, [state, threadId, onMessageAppended]);
+  }, [state.status, state.lastMessage?.id, state.threadId, state.timestamp, threadId]);
+
+  // Limpar timeout ao desmontar
+  useEffect(() => {
+    return () => {
+      if (statusTimeoutRef.current) {
+        clearTimeout(statusTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Reset status quando muda de thread
+  useEffect(() => {
+    setLocalStatus('idle');
+    processedMessageRef.current = null; // Resetar para a nova thread
+  }, [threadId]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      formRef.current?.requestSubmit();
+      if (!pending) {
+        formRef.current?.requestSubmit();
+      }
     }
   };
 
+  const handleSubmit = (formData: FormData) => {
+    setLocalStatus('idle');
+    formAction(formData);
+  };
+
   return (
-    <form ref={formRef} action={formAction} className="border-t border-white/10 bg-gradient-to-r from-slate-900/50 to-slate-800/30 p-4">
+    <form ref={formRef} action={handleSubmit} className="border-t border-white/10 bg-gradient-to-r from-slate-900/50 to-slate-800/30 p-4">
       <input type="hidden" name="threadId" value={threadId} />
       <div className="flex items-end gap-3">
         <div className="relative flex-1">
@@ -619,25 +683,34 @@ function ThreadReplyForm({ threadId, onMessageAppended }: ThreadReplyFormProps) 
             maxLength={1000}
             placeholder="Digite sua resposta... (Enter para enviar)"
             onKeyDown={handleKeyDown}
-            className="w-full resize-none rounded-2xl border-2 border-white/10 bg-slate-800/70 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-teal-400/50 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+            className="w-full resize-none rounded-2xl border-2 border-white/10 bg-slate-800/70 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-teal-400/50 focus:outline-none focus:ring-2 focus:ring-teal-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={pending}
           />
+          {pending && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-teal-400 border-t-transparent" />
+            </div>
+          )}
         </div>
         <Button
           type="submit"
           disabled={pending}
-          className="h-12 w-12 rounded-2xl bg-gradient-to-br from-teal-400 via-teal-500 to-teal-600 p-0 shadow-xl shadow-teal-500/40 hover:from-teal-300 hover:via-teal-400 hover:to-teal-500 hover:shadow-teal-500/60 transition-all duration-200 hover:scale-105 disabled:opacity-50"
+          className="h-12 w-12 rounded-2xl bg-gradient-to-br from-teal-400 via-teal-500 to-teal-600 p-0 shadow-xl shadow-teal-500/40 hover:from-teal-300 hover:via-teal-400 hover:to-teal-500 hover:shadow-teal-500/60 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <Send className="h-5 w-5 text-white" />
+          {pending ? (
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+          ) : (
+            <Send className="h-5 w-5 text-white" />
+          )}
         </Button>
       </div>
-      {state.status === 'error' && state.threadId === threadId && state.message && (
+      {localStatus === 'error' && state.message && (
         <div className="mt-3 flex items-center gap-2 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
           <AlertCircle className="h-4 w-4" />
           {state.message}
         </div>
       )}
-      {state.status === 'success' && state.threadId === threadId && (
+      {localStatus === 'success' && (
         <div className="mt-3 flex items-center gap-2 rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
           <CheckCircle2 className="h-4 w-4" />
           Mensagem enviada com sucesso!

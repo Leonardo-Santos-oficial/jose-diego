@@ -146,6 +146,7 @@ export async function sendAdminMessageAction(
       message: 'Resposta enviada.',
       threadId: result.thread.id,
       lastMessage: result.message,
+      timestamp: Date.now(),
     } satisfies ChatActionState;
   } catch (error) {
     console.error('[chat] erro ao enviar mensagem do admin', error);

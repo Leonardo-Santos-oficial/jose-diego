@@ -5,6 +5,7 @@ export type ChatActionState = {
   message?: string;
   threadId?: string;
   lastMessage?: ChatMessage;
+  timestamp?: number;
 };
 
 export const chatActionInitialState: ChatActionState = {
