@@ -125,10 +125,10 @@ export function ChatAttachmentInput({
         onClick={handleClick}
         disabled={disabled || isUploading}
         className={cn(
-          'p-2 rounded-lg transition-colors',
+          'p-2.5 rounded-lg transition-colors',
           disabled || isUploading
             ? 'text-slate-600 cursor-not-allowed'
-            : 'text-slate-400 hover:text-teal-400 hover:bg-slate-800/60'
+            : 'text-slate-300 hover:text-teal-400 hover:bg-slate-800/60'
         )}
         aria-label="Anexar arquivo"
       >

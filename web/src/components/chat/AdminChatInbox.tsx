@@ -31,7 +31,7 @@ import {
 } from '@/app/actions/chat';
 import { chatActionInitialState, type ChatActionState } from '@/app/actions/chat-state';
 import { Button } from '@/components/components/ui/button';
-import { ChatRealtimeClient } from '@/lib/realtime/chatClient';
+import { ChatRealtimeClient, type UserPresenceMap } from '@/lib/realtime/chatClient';
 import { ChatMessageAttachment } from './ChatMessageAttachment';
 
 const dateTime = new Intl.DateTimeFormat('pt-BR', {
@@ -46,19 +46,49 @@ const timeOnly = new Intl.DateTimeFormat('pt-BR', {
   minute: '2-digit',
 });
 
-const relativeTime = (date: Date): string => {
-  const now = new Date();
-  const diff = now.getTime() - date.getTime();
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (minutes < 1) return 'Agora';
-  if (minutes < 60) return `${minutes}min`;
-  if (hours < 24) return `${hours}h`;
-  if (days < 7) return `${days}d`;
+// Formato estático para SSR - evita hydration mismatch
+const formatDateShort = (date: Date): string => {
   return dateTime.format(date);
 };
+
+// Componente para tempo relativo - só calcula no cliente
+// Renderiza vazio no servidor e no cliente inicial para evitar hydration mismatch
+function RelativeTime({ date }: { date: Date }) {
+  const [relativeStr, setRelativeStr] = useState<string | null>(null);
+
+  useEffect(() => {
+    const calculateRelative = () => {
+      const now = new Date();
+      const diff = now.getTime() - date.getTime();
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+
+      if (minutes < 1) return 'Agora';
+      if (minutes < 60) return `${minutes}min`;
+      if (hours < 24) return `${hours}h`;
+      if (days < 7) return `${days}d`;
+      return formatDateShort(date);
+    };
+
+    setRelativeStr(calculateRelative());
+
+    // Atualizar a cada minuto
+    const interval = setInterval(() => {
+      setRelativeStr(calculateRelative());
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [date]);
+
+  // Renderiza null no servidor e cliente inicial (antes do useEffect rodar)
+  // Isso garante que ambos renderizam a mesma coisa
+  if (relativeStr === null) {
+    return null;
+  }
+
+  return <>{relativeStr}</>;
+}
 
 type ThreadWithMessages = ChatThread & {
   messages: ChatMessage[];
@@ -84,6 +114,7 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
   const [isClosing, startClosing] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
   const [showMetadata, setShowMetadata] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<UserPresenceMap>(new Map());
 
   const selectedThread = useMemo(() => {
     return threads.find((thread) => thread.id === selectedThreadId) ?? null;
@@ -138,6 +169,13 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
     });
   };
 
+  // Extrair IDs de usuários únicos para rastrear presença
+  const userIds = useMemo(() => {
+    return threads
+      .map((thread) => thread.userId)
+      .filter((id): id is string => id !== null);
+  }, [threads]);
+
   useEffect(() => {
     const realtime = new ChatRealtimeClient();
 
@@ -186,22 +224,28 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
       });
     });
 
+    // Subscribe to presence updates
+    const unsubscribePresence = realtime.subscribeToPresence(userIds, (presenceMap) => {
+      setOnlineUsers(presenceMap);
+    });
+
     return () => {
       unsubscribeMessages();
       unsubscribeThreads();
+      unsubscribePresence();
       realtime.dispose();
     };
-  }, [selectedThreadId]);
+  }, [selectedThreadId, userIds]);
 
   if (threads.length === 0) {
     return (
       <section className="flex min-h-[500px] items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950/90 to-slate-900/70 p-8">
         <div className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-800/50">
-            <MessageCircle className="h-8 w-8 text-slate-500" />
+            <MessageCircle className="h-8 w-8 text-slate-400" />
           </div>
           <h3 className="text-lg font-medium text-white">Nenhuma conversa aberta</h3>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-300">
             Quando usuários iniciarem conversas, elas aparecerão aqui.
           </p>
         </div>
@@ -229,14 +273,14 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
             </span>
           </div>
           {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+          <div className="relative z-10">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Buscar conversas..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-slate-900/50 py-2 pl-9 pr-4 text-sm text-white placeholder:text-slate-500 focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
+              className="w-full rounded-xl border border-slate-600 bg-slate-800 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-slate-500 focus:border-teal-400 focus:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/40"
             />
           </div>
         </div>
@@ -250,6 +294,7 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
               const userName = thread.user?.displayName || thread.user?.email?.split('@')[0] || 'Anônimo';
               const userInitial = userName.charAt(0).toUpperCase();
               const hasUnread = lastMessage?.senderRole === 'user';
+              const isOnline = thread.userId ? onlineUsers.get(thread.userId) ?? false : false;
 
               return (
                 <li key={thread.id}>
@@ -261,25 +306,43 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
                     }}
                     className={`group relative w-full rounded-xl p-3 text-left transition-all duration-200 ${
                       isSelected
-                        ? 'bg-gradient-to-r from-teal-500/20 to-teal-500/5 shadow-lg shadow-teal-500/5'
-                        : 'hover:bg-white/5'
+                        ? 'bg-gradient-to-r from-teal-500/25 to-teal-500/10 border-2 border-teal-400/50 shadow-lg shadow-teal-500/10'
+                        : 'border-2 border-transparent hover:bg-white/5 hover:border-white/10'
                     }`}
                   >
                     {/* Indicador de seleção */}
                     {isSelected && (
-                      <div className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-teal-400" />
+                      <div className="absolute left-0 top-1/2 h-10 w-1.5 -translate-y-1/2 rounded-r-full bg-teal-400 shadow-lg shadow-teal-400/50" />
                     )}
 
                     <div className="flex items-start gap-3">
                       {/* Avatar */}
-                      <div className={`relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${
-                        isSelected ? 'bg-teal-500/30' : 'bg-slate-700/50'
+                      <div className={`relative flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border-2 ${
+                        isSelected 
+                          ? 'bg-gradient-to-br from-teal-400 to-teal-600 border-teal-300/50 shadow-lg shadow-teal-500/30' 
+                          : 'bg-slate-700/70 border-slate-600/50'
                       }`}>
-                        <span className={`text-sm font-semibold ${isSelected ? 'text-teal-300' : 'text-slate-300'}`}>
+                        <span className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-slate-200'}`}>
                           {userInitial}
                         </span>
+                        {/* Indicador de status online/offline */}
+                        <span 
+                          className={`absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full border-[2.5px] border-slate-900 ${
+                            isOnline 
+                              ? 'bg-emerald-400 shadow-lg shadow-emerald-400/70' 
+                              : 'bg-red-600 shadow-lg shadow-red-600/60'
+                          }`}
+                          title={isOnline ? 'Online' : 'Offline'}
+                        >
+                          {isOnline ? (
+                            <span className="h-2 w-2 rounded-full bg-emerald-200 animate-pulse" />
+                          ) : (
+                            <span className="h-2 w-2 rounded-full bg-red-300 animate-pulse" />
+                          )}
+                        </span>
+                        {/* Indicador de mensagem não lida (posição diferente) */}
                         {hasUnread && (
-                          <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-slate-950 bg-teal-400" />
+                          <span className="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full border-2 border-slate-900 bg-amber-400 animate-pulse shadow-md shadow-amber-400/50" />
                         )}
                       </div>
 
@@ -289,19 +352,19 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
                           <span className={`truncate text-sm font-medium ${isSelected ? 'text-white' : 'text-slate-200'}`}>
                             {userName}
                           </span>
-                          <span className="flex-shrink-0 text-xs text-slate-500">
-                            {relativeTime(new Date(thread.updatedAt))}
+                          <span className="flex-shrink-0 text-xs text-slate-400">
+                            <RelativeTime date={new Date(thread.updatedAt)} />
                           </span>
                         </div>
-                        <p className={`mt-0.5 truncate text-xs ${
-                          hasUnread ? 'font-medium text-slate-300' : 'text-slate-500'
+                        <p className={`mt-1 truncate text-xs ${
+                          hasUnread ? 'font-medium text-white' : 'text-slate-400'
                         }`}>
-                          {lastMessage?.body || 'Sem mensagens'}
+                          {lastMessage?.body || <span className="italic text-slate-500">Sem mensagens</span>}
                         </p>
                         {thread.metadata.lastAgentName && (
-                          <div className="mt-1 flex items-center gap-1">
-                            <UserCheck className="h-3 w-3 text-slate-600" />
-                            <span className="text-xs text-slate-600">{thread.metadata.lastAgentName}</span>
+                          <div className="mt-1.5 flex items-center gap-1.5">
+                            <UserCheck className="h-3.5 w-3.5 text-teal-400/70" />
+                            <span className="text-xs text-slate-300">{thread.metadata.lastAgentName}</span>
                           </div>
                         )}
                       </div>
@@ -314,8 +377,8 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
 
           {filteredThreads.length === 0 && searchQuery && (
             <div className="py-8 text-center">
-              <Search className="mx-auto h-8 w-8 text-slate-600" />
-              <p className="mt-2 text-sm text-slate-500">Nenhuma conversa encontrada</p>
+              <Search className="mx-auto h-8 w-8 text-slate-400" />
+              <p className="mt-2 text-sm text-slate-300">Nenhuma conversa encontrada</p>
             </div>
           )}
         </div>
@@ -336,21 +399,49 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
                 <ArrowLeft className="h-5 w-5 text-slate-400" />
               </Button>
 
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-teal-500/30 to-teal-600/20">
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-teal-500/30 to-teal-600/20">
                 <span className="text-sm font-semibold text-teal-300">
                   {(selectedThread.user?.displayName || selectedThread.user?.email || 'A').charAt(0).toUpperCase()}
+                </span>
+                {/* Indicador de status online/offline no header */}
+                <span 
+                  className={`absolute -bottom-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full border-[2.5px] border-slate-900 ${
+                    selectedThread.userId && onlineUsers.get(selectedThread.userId)
+                      ? 'bg-emerald-400 shadow-lg shadow-emerald-400/70' 
+                      : 'bg-red-600 shadow-lg shadow-red-600/60'
+                  }`}
+                  title={selectedThread.userId && onlineUsers.get(selectedThread.userId) ? 'Online' : 'Offline'}
+                >
+                  {selectedThread.userId && onlineUsers.get(selectedThread.userId) ? (
+                    <span className="h-2 w-2 rounded-full bg-emerald-200 animate-pulse" />
+                  ) : (
+                    <span className="h-2 w-2 rounded-full bg-red-300 animate-pulse" />
+                  )}
                 </span>
               </div>
 
               <div>
-                <h3 className="flex items-center gap-2 text-base font-semibold text-white">
+                <h3 className="flex flex-wrap items-center gap-2 text-base font-semibold text-white">
                   {selectedThread.user?.displayName || selectedThread.user?.email?.split('@')[0] || 'Usuário'}
-                  <span className="rounded bg-slate-800 px-1.5 py-0.5 text-xs font-normal text-slate-500">
+                  {/* Badge de status inline */}
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                    selectedThread.userId && onlineUsers.get(selectedThread.userId)
+                      ? 'bg-emerald-500/30 text-emerald-200 ring-1 ring-emerald-400/50'
+                      : 'bg-red-600/30 text-red-200 ring-1 ring-red-500/50'
+                  }`}>
+                    <span className={`h-2.5 w-2.5 rounded-full ${
+                      selectedThread.userId && onlineUsers.get(selectedThread.userId)
+                        ? 'bg-emerald-400 animate-pulse shadow-sm shadow-emerald-400/50'
+                        : 'bg-red-500 animate-pulse shadow-sm shadow-red-500/50'
+                    }`} />
+                    {selectedThread.userId && onlineUsers.get(selectedThread.userId) ? 'Online' : 'Offline'}
+                  </span>
+                  <span className="rounded bg-slate-800 px-1.5 py-0.5 text-xs font-normal text-slate-400">
                     #{selectedThread.id.slice(0, 6)}
                   </span>
                 </h3>
-                <div className="flex items-center gap-3 text-xs text-slate-500">
-                  <span className="flex items-center gap-1">
+                <div className="flex items-center gap-3 text-xs text-slate-400">
+                  <span className="flex items-center gap-1" suppressHydrationWarning>
                     <Clock className="h-3 w-3" />
                     {dateTime.format(new Date(selectedThread.createdAt))}
                   </span>
@@ -391,8 +482,8 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
                 {selectedThread.messages.length === 0 ? (
                   <div className="flex h-full items-center justify-center">
                     <div className="text-center">
-                      <MessageCircle className="mx-auto h-12 w-12 text-slate-700" />
-                      <p className="mt-3 text-sm text-slate-500">Nenhuma mensagem ainda</p>
+                      <MessageCircle className="mx-auto h-12 w-12 text-slate-500" />
+                      <p className="mt-3 text-sm text-slate-400">Nenhuma mensagem ainda</p>
                     </div>
                   </div>
                 ) : (
@@ -406,7 +497,7 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
                         <div key={message.id}>
                           {showTimestamp && (
                             <div className="mb-4 flex justify-center">
-                              <span className="rounded-full bg-slate-800/50 px-3 py-1 text-xs text-slate-500">
+                              <span className="rounded-full bg-slate-800/50 px-3 py-1 text-xs text-slate-400" suppressHydrationWarning>
                                 {dateTime.format(new Date(message.createdAt))}
                               </span>
                             </div>
@@ -436,9 +527,14 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
                                   </div>
                                 )}
                               </div>
-                              <div className={`mt-1 flex items-center gap-1.5 text-xs text-slate-500 ${isAdmin ? 'justify-end' : ''}`}>
-                                <span>{timeOnly.format(new Date(message.createdAt))}</span>
-                                {isAdmin && <CheckCircle2 className="h-3 w-3 text-teal-400" />}
+                              <div className={`mt-1.5 flex items-center gap-2 text-xs ${isAdmin ? 'justify-end text-teal-300/70' : 'text-slate-400'}`}>
+                                <span className="font-medium" suppressHydrationWarning>{timeOnly.format(new Date(message.createdAt))}</span>
+                                {isAdmin && (
+                                  <span className="flex items-center gap-1 rounded-full bg-teal-500/20 px-1.5 py-0.5">
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-teal-400" />
+                                    <span className="text-[10px] font-medium text-teal-300">Enviado</span>
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -470,10 +566,10 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
         <div className="hidden flex-1 items-center justify-center lg:flex">
           <div className="text-center">
             <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-800/30">
-              <MessageCircle className="h-10 w-10 text-slate-600" />
+              <MessageCircle className="h-10 w-10 text-slate-500" />
             </div>
-            <h3 className="text-lg font-medium text-slate-400">Selecione uma conversa</h3>
-            <p className="mt-1 text-sm text-slate-600">
+            <h3 className="text-lg font-medium text-slate-300">Selecione uma conversa</h3>
+            <p className="mt-1 text-sm text-slate-400">
               Escolha uma thread na lista para visualizar
             </p>
           </div>
@@ -512,7 +608,7 @@ function ThreadReplyForm({ threadId, onMessageAppended }: ThreadReplyFormProps) 
   };
 
   return (
-    <form ref={formRef} action={formAction} className="border-t border-white/5 bg-slate-900/30 p-4">
+    <form ref={formRef} action={formAction} className="border-t border-white/10 bg-gradient-to-r from-slate-900/50 to-slate-800/30 p-4">
       <input type="hidden" name="threadId" value={threadId} />
       <div className="flex items-end gap-3">
         <div className="relative flex-1">
@@ -521,30 +617,30 @@ function ThreadReplyForm({ threadId, onMessageAppended }: ThreadReplyFormProps) 
             name="body"
             rows={2}
             maxLength={1000}
-            placeholder="Digite sua resposta... (Enter para enviar, Shift+Enter para quebra de linha)"
+            placeholder="Digite sua resposta... (Enter para enviar)"
             onKeyDown={handleKeyDown}
-            className="w-full resize-none rounded-xl border border-white/10 bg-slate-800/50 px-4 py-3 pr-12 text-sm text-white placeholder:text-slate-500 focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
+            className="w-full resize-none rounded-2xl border-2 border-white/10 bg-slate-800/70 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-teal-400/50 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
             disabled={pending}
           />
         </div>
         <Button
           type="submit"
           disabled={pending}
-          className="h-11 w-11 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 p-0 shadow-lg shadow-teal-500/20 hover:from-teal-400 hover:to-teal-500"
+          className="h-12 w-12 rounded-2xl bg-gradient-to-br from-teal-400 via-teal-500 to-teal-600 p-0 shadow-xl shadow-teal-500/40 hover:from-teal-300 hover:via-teal-400 hover:to-teal-500 hover:shadow-teal-500/60 transition-all duration-200 hover:scale-105 disabled:opacity-50"
         >
-          <Send className="h-5 w-5" />
+          <Send className="h-5 w-5 text-white" />
         </Button>
       </div>
       {state.status === 'error' && state.threadId === threadId && state.message && (
-        <div className="mt-2 flex items-center gap-2 text-sm text-rose-400">
+        <div className="mt-3 flex items-center gap-2 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
           <AlertCircle className="h-4 w-4" />
           {state.message}
         </div>
       )}
       {state.status === 'success' && state.threadId === threadId && (
-        <div className="mt-2 flex items-center gap-2 text-sm text-emerald-400">
+        <div className="mt-3 flex items-center gap-2 rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
           <CheckCircle2 className="h-4 w-4" />
-          Mensagem enviada
+          Mensagem enviada com sucesso!
         </div>
       )}
     </form>
@@ -601,11 +697,11 @@ function ThreadMetadataForm({ thread }: ThreadMetadataFormProps) {
         <div className="mt-2 space-y-1.5 text-xs text-slate-400">
           <div className="flex justify-between">
             <span>Criada em</span>
-            <span className="text-slate-300">{dateTime.format(new Date(thread.createdAt))}</span>
+            <span className="text-slate-300" suppressHydrationWarning>{dateTime.format(new Date(thread.createdAt))}</span>
           </div>
           <div className="flex justify-between">
             <span>Última atividade</span>
-            <span className="text-slate-300">{dateTime.format(new Date(thread.updatedAt))}</span>
+            <span className="text-slate-300" suppressHydrationWarning>{dateTime.format(new Date(thread.updatedAt))}</span>
           </div>
           <div className="flex justify-between">
             <span>Mensagens</span>
@@ -628,7 +724,7 @@ function ThreadMetadataForm({ thread }: ThreadMetadataFormProps) {
             defaultValue={thread.metadata.notes ?? ''}
             rows={4}
             maxLength={1000}
-            className="w-full resize-none rounded-xl border border-white/10 bg-slate-800/50 px-3 py-2.5 text-sm text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
+            className="w-full resize-none rounded-xl border border-white/10 bg-slate-800/50 px-3 py-2.5 text-sm text-white placeholder:text-slate-400 focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
             placeholder="Adicione notas sobre este atendimento..."
             disabled={pending}
           />

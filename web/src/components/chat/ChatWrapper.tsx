@@ -38,7 +38,7 @@ export function ChatWrapper({ children }: { children: React.ReactNode }) {
             : "translate-y-10 opacity-0 scale-95 pointer-events-none"
         )}
       >
-        <div className="flex flex-col h-full overflow-hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl">
+        <div className="flex flex-col h-full rounded-2xl border border-white/10 bg-slate-950 shadow-2xl">
           {/* Header */}
           <div className="flex-shrink-0 flex items-center justify-between border-b border-white/5 bg-slate-900/50 px-4 py-3">
             <h3 className="font-semibold text-white">Suporte ao Vivo</h3>

@@ -97,6 +97,22 @@ export function UserChatWidget({
     chatActionInitialState
   );
 
+  // Track user presence - sempre que o widget estiver montado
+  useEffect(() => {
+    const realtime = new ChatRealtimeClient();
+    let untrackPresence: (() => void) | undefined;
+    
+    realtime.trackPresence(userId).then((untrack) => {
+      untrackPresence = untrack;
+    });
+
+    return () => {
+      untrackPresence?.();
+      realtime.dispose();
+    };
+  }, [userId]);
+
+  // Subscribe to thread messages when we have a threadId
   useEffect(() => {
     if (!threadId) {
       return;
@@ -173,12 +189,12 @@ export function UserChatWidget({
             type="submit"
             disabled={pending || isUploading}
             size="sm"
-            className="rounded-full h-10 w-10 p-0"
+            className="rounded-full h-10 w-10 p-0 bg-teal-500 hover:bg-teal-600 shadow-none [&_svg]:!size-5"
           >
             {pending ? (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
             ) : (
-              <SendIcon className="h-4 w-4" />
+              <SendIcon className="h-5 w-5" />
             )}
           </Button>
         </div>
