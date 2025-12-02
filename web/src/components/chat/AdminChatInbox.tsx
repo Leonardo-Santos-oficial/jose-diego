@@ -599,7 +599,7 @@ function ThreadReplyForm({ threadId, onMessageAppended }: ThreadReplyFormProps) 
   onMessageAppendedRef.current = onMessageAppended;
   
   // Track qual mensagem já foi processada para evitar duplicatas
-  const processedMessageRef = useRef<string | null>(null);
+  const processedMessageRef = useRef<number | null>(null);
   // Track o timestamp do último state processado
   const lastProcessedTimestampRef = useRef<number>(0);
 
