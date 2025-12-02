@@ -67,52 +67,82 @@ export function BenefitsDashboard({ initialSummary, isAuthenticated }: BenefitsD
         progressToNextLevel={summary.progressToNextLevel}
       />
 
-      <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
-        <div className="flex flex-col items-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-center sm:flex-row sm:gap-3 sm:p-4 sm:text-left md:p-5">
-          <Gift className="size-6 text-emerald-400 sm:size-8 md:size-10" />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 md:gap-5">
+        <div 
+          className="flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/15 to-emerald-600/5 p-4 shadow-lg transition-transform hover:scale-[1.02] sm:gap-4 sm:p-5"
+          role="status"
+          aria-label={`${summary.availableBenefits.length} benefícios disponíveis`}
+        >
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 sm:size-14">
+            <Gift className="size-7 text-emerald-400 sm:size-8" aria-hidden="true" />
+          </div>
           <div>
-            <p className="text-lg font-bold text-emerald-400 sm:text-xl md:text-2xl">{summary.availableBenefits.length}</p>
-            <p className="text-xs text-slate-400 sm:text-sm md:text-base">Disponíveis</p>
+            <p className="text-2xl font-bold text-emerald-400 sm:text-3xl">{summary.availableBenefits.length}</p>
+            <p className="text-sm text-slate-400">Disponíveis</p>
           </div>
         </div>
-        <div className="flex flex-col items-center gap-1.5 rounded-xl border border-blue-500/20 bg-blue-500/10 p-3 text-center sm:flex-row sm:gap-3 sm:p-4 sm:text-left md:p-5">
-          <History className="size-6 text-blue-400 sm:size-8 md:size-10" />
+        <div 
+          className="flex items-center gap-3 rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-500/15 to-blue-600/5 p-4 shadow-lg transition-transform hover:scale-[1.02] sm:gap-4 sm:p-5"
+          role="status"
+          aria-label={`${summary.claimedBenefits.length} benefícios resgatados`}
+        >
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-blue-500/20 sm:size-14">
+            <History className="size-7 text-blue-400 sm:size-8" aria-hidden="true" />
+          </div>
           <div>
-            <p className="text-lg font-bold text-blue-400 sm:text-xl md:text-2xl">{summary.claimedBenefits.length}</p>
-            <p className="text-xs text-slate-400 sm:text-sm md:text-base">Resgatados</p>
+            <p className="text-2xl font-bold text-blue-400 sm:text-3xl">{summary.claimedBenefits.length}</p>
+            <p className="text-sm text-slate-400">Resgatados</p>
           </div>
         </div>
-        <div className="flex flex-col items-center gap-1.5 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 text-center sm:flex-row sm:gap-3 sm:p-4 sm:text-left md:p-5">
-          <Coins className="size-6 text-amber-400 sm:size-8 md:size-10" />
+        <div 
+          className="flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/15 to-amber-600/5 p-4 shadow-lg transition-transform hover:scale-[1.02] sm:gap-4 sm:p-5"
+          role="status"
+          aria-label={`Total ganho: R$ ${summary.totalEarned.toFixed(2)}`}
+        >
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 sm:size-14">
+            <Coins className="size-7 text-amber-400 sm:size-8" aria-hidden="true" />
+          </div>
           <div>
-            <p className="text-base font-bold text-amber-400 sm:text-xl md:text-2xl">
+            <p className="text-xl font-bold text-amber-400 sm:text-2xl">
               R$ {summary.totalEarned.toFixed(2)}
             </p>
-            <p className="text-xs text-slate-400 sm:text-sm md:text-base">Total Ganho</p>
+            <p className="text-sm text-slate-400">Total Ganho</p>
           </div>
         </div>
       </div>
 
-      <div className="flex gap-1 border-b border-slate-700 sm:gap-2">
+      <div className="flex gap-2 rounded-xl bg-slate-800/50 p-1.5 sm:gap-3 sm:p-2" role="tablist" aria-label="Filtrar benefícios">
         <button
           onClick={() => setActiveTab('available')}
-          className={`flex min-h-[44px] flex-1 items-center justify-center gap-1.5 px-2 py-2.5 text-xs font-medium transition-colors sm:flex-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm md:text-base ${activeTab === 'available'
-              ? 'border-b-2 border-emerald-500 text-emerald-400'
-              : 'text-slate-400 hover:text-slate-300'
+          role="tab"
+          aria-selected={activeTab === 'available'}
+          aria-controls="available-benefits-panel"
+          className={`flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-medium transition-all sm:flex-none sm:gap-2.5 sm:px-5 sm:py-3 sm:text-base ${activeTab === 'available'
+              ? 'bg-emerald-500/20 text-emerald-400 shadow-lg'
+              : 'text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
           }`}
         >
-          <Gift className="size-4 sm:size-5" />
-          <span className="hidden xs:inline">Disponíveis</span> ({summary.availableBenefits.length})
+          <Gift className="size-5 sm:size-6" aria-hidden="true" />
+          <span>Disponíveis</span>
+          <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${activeTab === 'available' ? 'bg-emerald-500/30' : 'bg-slate-700'}`}>
+            {summary.availableBenefits.length}
+          </span>
         </button>
         <button
           onClick={() => setActiveTab('history')}
-          className={`flex min-h-[44px] flex-1 items-center justify-center gap-1.5 px-2 py-2.5 text-xs font-medium transition-colors sm:flex-none sm:gap-2 sm:px-4 sm:py-3 sm:text-sm md:text-base ${activeTab === 'history'
-              ? 'border-b-2 border-blue-500 text-blue-400'
-              : 'text-slate-400 hover:text-slate-300'
+          role="tab"
+          aria-selected={activeTab === 'history'}
+          aria-controls="history-benefits-panel"
+          className={`flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-medium transition-all sm:flex-none sm:gap-2.5 sm:px-5 sm:py-3 sm:text-base ${activeTab === 'history'
+              ? 'bg-blue-500/20 text-blue-400 shadow-lg'
+              : 'text-slate-400 hover:bg-slate-700/50 hover:text-slate-300'
           }`}
         >
-          <History className="size-4 sm:size-5" />
-          <span className="hidden xs:inline">Histórico</span> ({summary.claimedBenefits.length})
+          <History className="size-5 sm:size-6" aria-hidden="true" />
+          <span>Histórico</span>
+          <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${activeTab === 'history' ? 'bg-blue-500/30' : 'bg-slate-700'}`}>
+            {summary.claimedBenefits.length}
+          </span>
         </button>
       </div>
 

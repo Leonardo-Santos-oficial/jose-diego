@@ -188,6 +188,38 @@ begin
   values (p_round_id, p_user_id, p_amount, p_autocashout)
   returning id into v_ticket_id;
 
+  -- UPDATE VIP PROGRESS: Increment total_wagered and points
+  insert into user_vip_levels (user_id, level, total_wagered, total_deposited, points)
+  values (p_user_id, 0, p_amount, 0, floor(p_amount / 10))
+  on conflict (user_id) do update
+  set total_wagered = user_vip_levels.total_wagered + p_amount,
+      points = user_vip_levels.points + floor(p_amount / 10);
+
+  -- Check and update VIP level if threshold reached
+  update user_vip_levels
+  set level = case
+    when total_wagered >= 50000 then 5
+    when total_wagered >= 20000 then 4
+    when total_wagered >= 5000 then 3
+    when total_wagered >= 1000 then 2
+    when total_wagered >= 100 then 1
+    else 0
+  end,
+  level_updated_at = case 
+    when level < (
+      case
+        when total_wagered >= 50000 then 5
+        when total_wagered >= 20000 then 4
+        when total_wagered >= 5000 then 3
+        when total_wagered >= 1000 then 2
+        when total_wagered >= 100 then 1
+        else 0
+      end
+    ) then now()
+    else level_updated_at
+  end
+  where user_id = p_user_id;
+
   return query select v_ticket_id, v_wallet.balance, v_wallet.updated_at;
 end;
 $$;
