@@ -11,6 +11,7 @@ import type { CrashStrategy } from '../strategy/crashStrategy.js';
 import type { AutoCashoutService } from '../services/autoCashoutService.js';
 import type { RoundService } from '../services/roundService.js';
 import type { EngineStateService } from '../services/engineStateService.js';
+import { logger } from '../logger.js';
 
 interface MachineContext {
   roundId: string;
@@ -115,7 +116,7 @@ export class GameStateMachine {
   private state: GameState;
   private context: MachineContext;
   private history: HistoryEntry[] = [];
-  public readonly config: GameLoopConfig;
+  public config: GameLoopConfig; // Changed to mutable to allow settings update
   private currentRtp: number = 97; // Default RTP
 
   constructor(private readonly deps: MachineDependencies) {
@@ -131,11 +132,32 @@ export class GameStateMachine {
     if (!this.deps.engineStateService) return;
     try {
       const settings = await this.deps.engineStateService.getSettings();
-      if (settings?.rtp !== undefined) {
-        this.currentRtp = settings.rtp;
+      if (settings) {
+        // Load RTP
+        if (settings.rtp !== undefined) {
+          this.currentRtp = settings.rtp;
+        }
+        // Load crash multiplier limits
+        if (settings.minCrashMultiplier !== undefined) {
+          this.config = { ...this.config, minCrashMultiplier: settings.minCrashMultiplier };
+        }
+        if (settings.maxCrashMultiplier !== undefined) {
+          this.config = { ...this.config, maxCrashMultiplier: settings.maxCrashMultiplier };
+        }
+        // Load pending nextCrashTarget (for when server restarts with pending forced result)
+        if (settings.nextCrashTarget !== undefined && settings.nextCrashTarget > 0) {
+          this.nextRoundCrashTarget = settings.nextCrashTarget;
+          logger.info({ nextCrashTarget: settings.nextCrashTarget }, 'Loaded pending crash target from database');
+        }
+        logger.info({ 
+          rtp: this.currentRtp, 
+          minCrashMultiplier: this.config.minCrashMultiplier,
+          maxCrashMultiplier: this.config.maxCrashMultiplier,
+          nextCrashTarget: this.nextRoundCrashTarget
+        }, 'Engine settings loaded from database');
       }
     } catch {
-      // Use default RTP if unable to load
+      // Use default settings if unable to load
     }
   }
 
@@ -222,6 +244,20 @@ export class GameStateMachine {
     this.nextRoundCrashTarget = multiplier;
   }
 
+  private async clearNextCrashTargetInDatabase(): Promise<void> {
+    if (!this.deps.engineStateService) return;
+    try {
+      const settings = await this.deps.engineStateService.getSettings();
+      if (settings && settings.nextCrashTarget !== undefined) {
+        // Remove nextCrashTarget from settings
+        const { nextCrashTarget: _, ...settingsWithoutTarget } = settings as any;
+        await this.deps.engineStateService.clearNextCrashTarget();
+      }
+    } catch (error) {
+      logger.error({ error }, 'Failed to clear nextCrashTarget from database');
+    }
+  }
+
   onCrashEntered(): void {
     this.recordHistoryEntry();
     // Update round status in database
@@ -274,7 +310,10 @@ export class GameStateMachine {
     let crashTarget = crash.multiplier;
     if (this.nextRoundCrashTarget !== undefined) {
       crashTarget = this.nextRoundCrashTarget;
+      logger.info({ forcedCrashTarget: crashTarget }, 'Using forced crash target for this round');
       this.nextRoundCrashTarget = undefined; // Clear after use
+      // Clear from database too to prevent reuse after restart
+      void this.clearNextCrashTargetInDatabase();
     }
     
     // CRITICAL: Always validate crashTarget against configured limits

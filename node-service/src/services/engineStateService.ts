@@ -6,6 +6,7 @@ export interface EngineStateService {
   updatePausedState(paused: boolean): Promise<void>;
   updateRtp(rtp: number): Promise<void>;
   setNextCrashTarget(multiplier: number): Promise<void>;
+  clearNextCrashTarget(): Promise<void>;
   getSettings(): Promise<EngineSettings | null>;
 }
 
@@ -13,6 +14,8 @@ export interface EngineSettings {
   paused: boolean;
   rtp: number;
   nextCrashTarget?: number;
+  minCrashMultiplier?: number;
+  maxCrashMultiplier?: number;
 }
 
 export class SupabaseEngineStateService implements EngineStateService {
@@ -73,6 +76,28 @@ export class SupabaseEngineStateService implements EngineStateService {
       logger.error({ error, multiplier }, 'Failed to set next crash target');
     } else {
       logger.info({ multiplier }, 'Next crash target set');
+    }
+  }
+
+  async clearNextCrashTarget(): Promise<void> {
+    const settings = await this.getSettings();
+    if (!settings) return;
+    
+    // Remove nextCrashTarget from settings object
+    const { nextCrashTarget: _, ...settingsWithoutTarget } = settings as any;
+    
+    const { error } = await this.supabase
+      .from('engine_state')
+      .update({ 
+        settings: settingsWithoutTarget,
+        updated_at: new Date().toISOString()
+      })
+      .not('id', 'is', null);
+
+    if (error) {
+      logger.error({ error }, 'Failed to clear next crash target');
+    } else {
+      logger.info('Next crash target cleared from database');
     }
   }
 
