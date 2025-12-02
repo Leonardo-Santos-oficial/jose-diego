@@ -72,7 +72,7 @@ class FlyingState extends GameState {
     const crashTarget = this.machine.getContext().crashTarget;
     
     // CRITICAL: Apply max multiplier limit to prevent runaway values
-    const maxMultiplier = this.machine.config.maxCrashMultiplier ?? 35;
+    const maxMultiplier = this.machine.config.maxCrashMultiplier ?? 100;
     const safeCrashTarget = Math.min(crashTarget, maxMultiplier);
     
     const next = current + deltaMs * 0.001;
@@ -279,7 +279,7 @@ export class GameStateMachine {
     
     // CRITICAL: Always validate crashTarget against configured limits
     const minMultiplier = this.config.minCrashMultiplier ?? 1.0;
-    const maxMultiplier = this.config.maxCrashMultiplier ?? 35;
+    const maxMultiplier = this.config.maxCrashMultiplier ?? 100;
     
     if (crashTarget < minMultiplier) crashTarget = minMultiplier;
     if (crashTarget > maxMultiplier) crashTarget = maxMultiplier;

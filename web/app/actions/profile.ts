@@ -23,7 +23,7 @@ const profileSchema = z.object({
   bankAccountType: z.enum(['corrente', 'poupanca']).default('corrente'),
   bankHolderName: z.string().trim().max(100).default(''),
   bankHolderCpf: z.string().trim().max(14).default(''),
-  avatarUrl: z.string().url().optional().nullable(),
+  avatarUrl: z.string().url().nullish().or(z.literal('')).transform(val => val || null),
 });
 
 export async function updateProfileAction(

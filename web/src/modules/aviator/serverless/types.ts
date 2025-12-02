@@ -28,7 +28,7 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
   resetDelayMs: 1500,
   historySize: 30,
   minCrashMultiplier: 1.2,
-  maxCrashMultiplier: 35,
+  maxCrashMultiplier: 100,
   rtp: 97.0,
 };
 

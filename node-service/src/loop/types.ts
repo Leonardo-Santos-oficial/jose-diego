@@ -23,7 +23,7 @@ export const defaultLoopConfig: GameLoopConfig = {
   settleDelayMs: 1_000,
   tickIntervalMs: 100,
   historySize: 30,
-  maxCrashMultiplier: 35,
+  maxCrashMultiplier: 100,
   minCrashMultiplier: 1.0,
 };
 

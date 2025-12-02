@@ -273,7 +273,7 @@ function calculateMultiplier(
   const flightProgress = Math.min(elapsed / settings.flightDurationMs, 1);
   
   // CRITICAL: Ensure targetMultiplier is within valid bounds
-  const maxMultiplier = settings.maxCrashMultiplier ?? 35;
+  const maxMultiplier = settings.maxCrashMultiplier ?? 100;
   const safeTargetMultiplier = Math.min(state.targetMultiplier, maxMultiplier);
   
   const multiplier = 1 + flightProgress * (safeTargetMultiplier - 1);

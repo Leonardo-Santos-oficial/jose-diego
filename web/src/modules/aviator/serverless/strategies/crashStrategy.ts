@@ -17,14 +17,14 @@ export interface CrashStrategy {
 export class ProvablyFairStrategy implements CrashStrategy {
   pickTargetMultiplier(settings: EngineSettings = DEFAULT_ENGINE_SETTINGS): CrashResult {
     // Get max multiplier from settings (critical for RTP control)
-    const maxMultiplier = settings.maxCrashMultiplier ?? 35;
+    const maxMultiplier = settings.maxCrashMultiplier ?? 100;
     const minMultiplier = settings.minCrashMultiplier ?? 1.0;
 
     // 0. Check for forced result (admin override)
     if (settings.forcedResult != null && settings.forcedResult > 0) {
       const seed = randomBytes(32).toString('hex');
       const hash = createHash('sha256').update(seed).digest('hex');
-      // Even forced results must respect the max limit
+      // Forced results can go up to the max limit
       const clampedForced = Math.min(Math.max(settings.forcedResult, minMultiplier), maxMultiplier);
       return {
         multiplier: clampedForced,
@@ -47,15 +47,29 @@ export class ProvablyFairStrategy implements CrashStrategy {
     // Using the seed to generate a uniform float [0, 1)
     const randomFloat = h / e;
 
-    // RTP (Return To Player) determines house edge
-    const rtp = settings.rtp ?? 97.0;
-    const houseEdge = (100 - rtp) / 100; // e.g. 3% = 0.03
+    // RTP (Return To Player) determines the distribution of crash points
+    // Higher RTP = more player-friendly (higher average multipliers)
+    // Lower RTP = more house-friendly (lower average multipliers)
+    const rtp = Math.max(1, Math.min(99, settings.rtp ?? 97)); // Clamp between 1-99%
     
-    // Calculate multiplier using formula: X = (1 - houseEdge) / (1 - U)
-    const rawMultiplier = (1 - houseEdge) / (1 - randomFloat);
+    // The formula calculates crash point based on RTP
+    // Using geometric distribution: crash_point = 1 / (1 - rand * (RTP/100))
+    const rtpFactor = rtp / 100;
+    
+    // Calculate the crash point
+    const crashThreshold = randomFloat * rtpFactor;
+    
+    let multiplier: number;
+    if (crashThreshold >= 0.99) {
+      // Very rare high multiplier
+      multiplier = maxMultiplier;
+    } else {
+      // Standard formula adjusted for RTP
+      multiplier = 1 / (1 - crashThreshold);
+    }
     
     // Round to 2 decimal places
-    let multiplier = Math.floor(rawMultiplier * 100) / 100;
+    multiplier = Math.floor(multiplier * 100) / 100;
 
     // CRITICAL: Apply strict min/max limits from settings
     if (multiplier < minMultiplier) multiplier = minMultiplier;

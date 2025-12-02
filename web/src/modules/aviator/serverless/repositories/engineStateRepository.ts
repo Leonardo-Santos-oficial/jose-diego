@@ -423,7 +423,7 @@ function mapStateRow(row: EngineStateRow, fallbackSettings: EngineSettings): Eng
   const serverHash = typeof rawSettings['serverHash'] === 'string' ? rawSettings['serverHash'] : undefined;
 
   // CRITICAL: Sanitize multipliers from database to prevent runaway values
-  const maxMultiplier = settings.maxCrashMultiplier ?? 35;
+  const maxMultiplier = settings.maxCrashMultiplier ?? 100;
   const minMultiplier = settings.minCrashMultiplier ?? 1.0;
   
   let currentMultiplier = Number(row.current_multiplier ?? 1);
