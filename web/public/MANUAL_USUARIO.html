@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual do Usuário - Plataforma Aviator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        }
+        
+        header {
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+        }
+        
+        .toc h2 {
+            color: #e94560;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .toc ul {
+            list-style: none;
+            columns: 2;
+        }
+        
+        .toc li {
+            margin-bottom: 10px;
+        }
+        
+        .toc a {
+            color: #16213e;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .toc a:hover {
+            color: #e94560;
+        }
+        
+        .toc .number {
+            background: #e94560;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        section {
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        section:last-child {
+            border-bottom: none;
+        }
+        
+        h2 {
+            color: #e94560;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #e94560;
+            display: inline-block;
+        }
+        
+        h3 {
+            color: #16213e;
+            font-size: 1.3em;
+            margin: 25px 0 15px 0;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .highlight-box.danger {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border-left-color: #dc3545;
+        }
+        
+        .highlight-box.success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border-left-color: #28a745;
+        }
+        
+        .highlight-box.info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            border-left-color: #17a2b8;
+        }
+        
+        .highlight-box h4 {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step-list {
+            counter-reset: step-counter;
+            list-style: none;
+            margin-left: 0;
+        }
+        
+        .step-list li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 50px;
+            margin-bottom: 20px;
+        }
+        
+        .step-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #e94560;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            border-color: #e94560;
+            transform: translateY(-5px);
+        }
+        
+        .feature-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        
+        .feature-card h4 {
+            color: #16213e;
+            margin-bottom: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background: #16213e;
+            color: white;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .faq-item {
+            background: #f8f9fa;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .faq-question {
+            background: #16213e;
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .faq-answer {
+            padding: 20px;
+        }
+        
+        footer {
+            background: #16213e;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        footer p {
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+        }
+        
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+            header {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .toc ul {
+                columns: 1;
+            }
+            header h1 {
+                font-size: 1.8em;
+            }
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✈️ Manual do Usuário</h1>
+            <p>Plataforma Aviator - Guia Completo</p>
+        </header>
+        
+        <div class="content">
+            <!-- Índice -->
+            <div class="toc">
+                <h2>📑 Índice</h2>
+                <ul>
+                    <li><a href="#introducao"><span class="number">1</span> Introdução</a></li>
+                    <li><a href="#primeiros-passos"><span class="number">2</span> Primeiros Passos</a></li>
+                    <li><a href="#interface"><span class="number">3</span> Interface Principal</a></li>
+                    <li><a href="#como-jogar"><span class="number">4</span> Como Jogar</a></li>
+                    <li><a href="#perfil"><span class="number">5</span> Perfil e Carteira</a></li>
+                    <li><a href="#suporte"><span class="number">6</span> Suporte</a></li>
+                    <li><a href="#saques"><span class="number">7</span> Saques</a></li>
+                    <li><a href="#beneficios"><span class="number">8</span> Benefícios</a></li>
+                    <li><a href="#faq"><span class="number">9</span> FAQ</a></li>
+                    <li><a href="#termos"><span class="number">10</span> Termos Importantes</a></li>
+                </ul>
+            </div>
+            
+            <!-- Seção 1: Introdução -->
+            <section id="introducao">
+                <h2>1. Introdução</h2>
+                <p>Bem-vindo à plataforma <strong>Aviator</strong>! Este é um jogo de entretenimento baseado em multiplicadores, onde você pode fazer apostas e decidir o momento certo de retirar seus ganhos antes que o avião "caia".</p>
+                
+                <div class="highlight-box info">
+                    <h4>ℹ️ Sobre o Aviator</h4>
+                    <p>O Aviator é um jogo de crash onde um multiplicador aumenta continuamente. Seu objetivo é fazer "cash out" (retirar) antes que o avião caia. Quanto mais tempo esperar, maior o multiplicador - mas também maior o risco!</p>
+                </div>
+                
+                <h3>Principais Funcionalidades</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="icon">🎮</div>
+                        <h4>Jogo em Tempo Real</h4>
+                        <p>Acompanhe o multiplicador subindo ao vivo</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">💰</div>
+                        <h4>Carteira Virtual</h4>
+                        <p>Gerencie seu saldo facilmente</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">💬</div>
+                        <h4>Chat Global</h4>
+                        <p>Interaja com outros jogadores</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🎁</div>
+                        <h4>Programa de Benefícios</h4>
+                        <p>Ganhe recompensas por jogar</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Seção 2: Primeiros Passos -->
+            <section id="primeiros-passos">
+                <h2>2. Primeiros Passos</h2>
+                
+                <h3>2.1 Criando sua Conta</h3>
+                <ol class="step-list">
+                    <li>Acesse a plataforma pelo navegador</li>
+                    <li>Clique em <strong>"Criar Conta"</strong> ou <strong>"Registrar"</strong></li>
+                    <li>Preencha seus dados:
+                        <ul>
+                            <li>E-mail válido</li>
+                            <li>Senha segura (mínimo 6 caracteres)</li>
+                            <li>Nome de exibição</li>
+                        </ul>
+                    </li>
+                    <li>Confirme seu e-mail (se solicitado)</li>
+                    <li>Pronto! Sua conta foi criada</li>
+                </ol>
+                
+                <h3>2.2 Fazendo Login</h3>
+                <ol class="step-list">
+                    <li>Acesse a plataforma</li>
+                    <li>Insira seu e-mail e senha</li>
+                    <li>Clique em <strong>"Entrar"</strong></li>
+                </ol>
+                
+                <div class="highlight-box">
+                    <h4>💡 Dica de Segurança</h4>
+                    <p>Nunca compartilhe sua senha com terceiros. Nossa equipe nunca solicitará sua senha por e-mail ou chat.</p>
+                </div>
+            </section>
+            
+            <!-- Seção 3: Interface -->
+            <section id="interface">
+                <h2>3. Interface Principal</h2>
+                
+                <h3>3.1 Tela do Jogo</h3>
+                <table>
+                    <tr>
+                        <th>Elemento</th>
+                        <th>Descrição</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Área do Avião</strong></td>
+                        <td>Exibe o avião e o multiplicador atual</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Painel de Apostas</strong></td>
+                        <td>Onde você define o valor e faz sua aposta</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Histórico</strong></td>
+                        <td>Mostra os resultados das últimas rodadas</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Chat Global</strong></td>
+                        <td>Converse com outros jogadores</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Saldo</strong></td>
+                        <td>Seu saldo disponível (canto superior)</td>
+                    </tr>
+                </table>
+                
+                <h3>3.2 Menu de Navegação</h3>
+                <ul>
+                    <li><strong>🏠 Início</strong> - Tela principal do jogo</li>
+                    <li><strong>👤 Perfil</strong> - Suas configurações e dados</li>
+                    <li><strong>💳 Carteira</strong> - Gerenciar saldo e saques</li>
+                    <li><strong>🎁 Benefícios</strong> - Programa de recompensas</li>
+                    <li><strong>💬 Suporte</strong> - Falar com atendimento</li>
+                </ul>
+            </section>
+            
+            <!-- Seção 4: Como Jogar -->
+            <section id="como-jogar">
+                <h2>4. Como Jogar</h2>
+                
+                <h3>4.1 Regras Básicas</h3>
+                <div class="highlight-box success">
+                    <h4>🎯 Objetivo do Jogo</h4>
+                    <p>Faça uma aposta, observe o multiplicador subir e clique em <strong>CASH OUT</strong> antes que o avião caia para garantir seus ganhos!</p>
+                </div>
+                
+                <h3>4.2 Passo a Passo</h3>
+                <ol class="step-list">
+                    <li><strong>Fase de Apostas</strong><br>Quando aparecer "FAÇA SUA APOSTA", defina o valor que deseja apostar</li>
+                    <li><strong>Confirmar Aposta</strong><br>Clique no botão <strong>"APOSTAR"</strong></li>
+                    <li><strong>Acompanhar o Voo</strong><br>O avião decola e o multiplicador começa a subir (1.00x, 1.10x, 1.50x...)</li>
+                    <li><strong>Fazer Cash Out</strong><br>Clique em <strong>"CASH OUT"</strong> quando quiser retirar</li>
+                    <li><strong>Aguardar Resultado</strong><br>Se o avião cair antes do cash out, você perde a aposta</li>
+                </ol>
+                
+                <h3>4.3 Cálculo de Ganhos</h3>
+                <table>
+                    <tr>
+                        <th>Aposta</th>
+                        <th>Multiplicador</th>
+                        <th>Ganho</th>
+                    </tr>
+                    <tr>
+                        <td>R$ 10,00</td>
+                        <td>2.00x</td>
+                        <td>R$ 20,00</td>
+                    </tr>
+                    <tr>
+                        <td>R$ 10,00</td>
+                        <td>5.50x</td>
+                        <td>R$ 55,00</td>
+                    </tr>
+                    <tr>
+                        <td>R$ 25,00</td>
+                        <td>3.00x</td>
+                        <td>R$ 75,00</td>
+                    </tr>
+                </table>
+                
+                <div class="highlight-box danger">
+                    <h4>⚠️ Atenção</h4>
+                    <p>Se o avião cair antes de você fazer cash out, <strong>você perde o valor apostado</strong>. Jogue com responsabilidade!</p>
+                </div>
+                
+                <h3>4.4 Dicas para Iniciantes</h3>
+                <ul>
+                    <li>Comece com apostas pequenas para entender a dinâmica</li>
+                    <li>Observe o histórico de rodadas anteriores</li>
+                    <li>Defina um limite de perdas antes de começar</li>
+                    <li>Faça cash out em multiplicadores menores para ganhos mais seguros</li>
+                    <li>Não tente recuperar perdas aumentando apostas drasticamente</li>
+                </ul>
+            </section>
+            
+            <!-- Seção 5: Perfil -->
+            <section id="perfil">
+                <h2>5. Perfil e Carteira</h2>
+                
+                <h3>5.1 Acessando seu Perfil</h3>
+                <p>Clique no ícone do seu perfil no canto superior direito ou acesse pelo menu <strong>"Perfil"</strong>.</p>
+                
+                <h3>5.2 Informações do Perfil</h3>
+                <table>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Descrição</th>
+                    </tr>
+                    <tr>
+                        <td>Foto de Perfil</td>
+                        <td>Sua foto ou avatar (clique para alterar)</td>
+                    </tr>
+                    <tr>
+                        <td>Nome de Exibição</td>
+                        <td>Nome que aparece no chat e ranking</td>
+                    </tr>
+                    <tr>
+                        <td>E-mail</td>
+                        <td>Seu e-mail de cadastro</td>
+                    </tr>
+                </table>
+                
+                <h3>5.3 Alterando sua Foto de Perfil</h3>
+                <ol class="step-list">
+                    <li>Acesse seu <strong>Perfil</strong></li>
+                    <li>Clique na foto atual ou no ícone de câmera</li>
+                    <li>Selecione uma imagem do seu dispositivo</li>
+                    <li>Aguarde o upload ser concluído</li>
+                    <li>Sua nova foto será exibida automaticamente</li>
+                </ol>
+                
+                <div class="highlight-box info">
+                    <h4>📷 Requisitos da Foto</h4>
+                    <ul>
+                        <li>Formatos aceitos: JPG, PNG, WebP, GIF</li>
+                        <li>Tamanho máximo: 2MB</li>
+                    </ul>
+                </div>
+                
+                <h3>5.4 Carteira Virtual</h3>
+                <p>Sua carteira mostra o saldo disponível para apostas. O saldo é atualizado automaticamente após cada rodada.</p>
+                
+                <h3>5.5 Configurando Dados de Saque</h3>
+                <p>Para solicitar saques, você precisa configurar seus dados bancários:</p>
+                
+                <h4>Opção 1: PIX</h4>
+                <ul>
+                    <li>Informe sua chave PIX (CPF, e-mail, telefone ou aleatória)</li>
+                </ul>
+                
+                <h4>Opção 2: Transferência Bancária</h4>
+                <ul>
+                    <li>Nome do banco</li>
+                    <li>Agência</li>
+                    <li>Número da conta</li>
+                    <li>Tipo de conta (corrente/poupança)</li>
+                    <li>Nome do titular</li>
+                    <li>CPF do titular</li>
+                </ul>
+            </section>
+            
+            <!-- Seção 6: Suporte -->
+            <section id="suporte">
+                <h2>6. Suporte</h2>
+                
+                <h3>6.1 Chat de Suporte</h3>
+                <p>Precisa de ajuda? Nossa equipe está disponível para atendê-lo através do chat de suporte.</p>
+                
+                <h3>6.2 Como Acessar</h3>
+                <ol class="step-list">
+                    <li>Clique no ícone de chat (💬) no canto inferior direito</li>
+                    <li>O chat de suporte será aberto</li>
+                    <li>Digite sua mensagem e envie</li>
+                    <li>Aguarde a resposta de um atendente</li>
+                </ol>
+                
+                <h3>6.3 Enviando Fotos e Prints</h3>
+                <p>Você pode enviar imagens para ajudar a explicar seu problema:</p>
+                <ol class="step-list">
+                    <li>No chat, clique no ícone de anexo (📎)</li>
+                    <li>Selecione a imagem do seu dispositivo</li>
+                    <li>A imagem será enviada junto com sua mensagem</li>
+                </ol>
+                
+                <div class="highlight-box info">
+                    <h4>📷 Tipos de Arquivos Aceitos</h4>
+                    <ul>
+                        <li>Imagens: JPG, PNG, WebP, GIF</li>
+                        <li>Documentos: PDF</li>
+                        <li>Tamanho máximo: 10MB</li>
+                    </ul>
+                </div>
+                
+                <h3>6.4 Dicas para um Bom Atendimento</h3>
+                <ul>
+                    <li>Descreva seu problema de forma clara</li>
+                    <li>Inclua prints de tela quando relevante</li>
+                    <li>Informe dados como data/hora do ocorrido</li>
+                    <li>Aguarde a resposta - não envie mensagens repetidas</li>
+                </ul>
+            </section>
+            
+            <!-- Seção 7: Saques -->
+            <section id="saques">
+                <h2>7. Saques</h2>
+                
+                <div class="highlight-box" style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left-color: #ff8c00;">
+                    <h4>🚧 Funcionalidade em Desenvolvimento</h4>
+                    <p><strong>Importante:</strong> Atualmente, a plataforma opera apenas com <strong>saldo virtual</strong> para fins de demonstração e testes.</p>
+                    <p>Os métodos de pagamento reais (PIX e Transferência Bancária) <strong>ainda não estão disponíveis</strong>. Eles serão habilitados somente quando:</p>
+                    <ul>
+                        <li>Os administradores da plataforma autorizarem oficialmente</li>
+                        <li>Uma plataforma de pagamento homologada for integrada</li>
+                        <li>Todos os requisitos legais e regulatórios forem atendidos</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Por enquanto, utilize a plataforma para conhecer todas as funcionalidades com saldo virtual!</strong></p>
+                </div>
+                
+                <h3>7.1 Solicitando um Saque (Quando Disponível)</h3>
+                <ol class="step-list">
+                    <li>Acesse <strong>Perfil > Carteira</strong></li>
+                    <li>Verifique se seus dados de saque estão configurados</li>
+                    <li>Clique em <strong>"Solicitar Saque"</strong></li>
+                    <li>Informe o valor desejado</li>
+                    <li>Confirme a solicitação</li>
+                </ol>
+                
+                <h3>7.2 Métodos de Saque (Previstos)</h3>
+                <p><em>Os métodos abaixo estarão disponíveis após a integração com a plataforma de pagamento:</em></p>
+                <table>
+                    <tr>
+                        <th>Método</th>
+                        <th>Prazo</th>
+                        <th>Valor Mínimo</th>
+                        <th>Status</th>
+                    </tr>
+                    <tr>
+                        <td>PIX</td>
+                        <td>Até 24h úteis</td>
+                        <td>R$ 20,00</td>
+                        <td><span style="color: #ff8c00; font-weight: bold;">⏳ Em breve</span></td>
+                    </tr>
+                    <tr>
+                        <td>Transferência Bancária</td>
+                        <td>Até 3 dias úteis</td>
+                        <td>R$ 50,00</td>
+                        <td><span style="color: #ff8c00; font-weight: bold;">⏳ Em breve</span></td>
+                    </tr>
+                </table>
+                
+                <h3>7.3 Status do Saque</h3>
+                <table>
+                    <tr>
+                        <th>Status</th>
+                        <th>Significado</th>
+                    </tr>
+                    <tr>
+                        <td><span style="color: #ffc107;">⏳ Pendente</span></td>
+                        <td>Aguardando análise</td>
+                    </tr>
+                    <tr>
+                        <td><span style="color: #17a2b8;">✅ Aprovado</span></td>
+                        <td>Aprovado, aguardando pagamento</td>
+                    </tr>
+                    <tr>
+                        <td><span style="color: #28a745;">💰 Pago</span></td>
+                        <td>Pagamento realizado</td>
+                    </tr>
+                    <tr>
+                        <td><span style="color: #dc3545;">❌ Recusado</span></td>
+                        <td>Não aprovado (verifique motivo)</td>
+                    </tr>
+                </table>
+                
+                <div class="highlight-box">
+                    <h4>💡 Importante</h4>
+                    <ul>
+                        <li>Verifique se seus dados bancários estão corretos</li>
+                        <li>Saques são processados em dias úteis</li>
+                        <li>Em caso de recusa, entre em contato com o suporte</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <!-- Seção 8: Benefícios -->
+            <section id="beneficios">
+                <h2>8. Programa de Benefícios</h2>
+                
+                <h3>8.1 Como Funciona</h3>
+                <p>Quanto mais você joga, mais benefícios acumula! O programa de benefícios recompensa jogadores ativos com bônus e vantagens exclusivas.</p>
+                
+                <h3>8.2 Tipos de Benefícios</h3>
+                <ul>
+                    <li><strong>🎁 Bônus de Boas-Vindas</strong> - Para novos jogadores</li>
+                    <li><strong>💎 Cashback</strong> - Receba parte das suas apostas de volta</li>
+                    <li><strong>🏆 Níveis VIP</strong> - Benefícios crescentes conforme você joga</li>
+                    <li><strong>🎉 Promoções Especiais</strong> - Ofertas por tempo limitado</li>
+                </ul>
+                
+                <h3>8.3 Resgatando Benefícios</h3>
+                <ol class="step-list">
+                    <li>Acesse a seção <strong>"Benefícios"</strong> no menu</li>
+                    <li>Visualize os benefícios disponíveis</li>
+                    <li>Clique em <strong>"Resgatar"</strong> no benefício desejado</li>
+                    <li>O valor será creditado na sua carteira</li>
+                </ol>
+            </section>
+            
+            <!-- Seção 9: FAQ -->
+            <section id="faq">
+                <h2>9. Perguntas Frequentes (FAQ)</h2>
+                
+                <div class="faq-item">
+                    <div class="faq-question">❓ Como faço para adicionar saldo?</div>
+                    <div class="faq-answer">Acesse a seção de Carteira e clique em "Depositar". Siga as instruções para realizar o depósito via PIX ou outros métodos disponíveis.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">❓ Qual o valor mínimo para apostar?</div>
+                    <div class="faq-answer">O valor mínimo de aposta é de R$ 1,00.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">❓ Por que meu saque foi recusado?</div>
+                    <div class="faq-answer">Os motivos mais comuns são: dados bancários incorretos, saldo insuficiente ou documentação pendente. Entre em contato com o suporte para mais detalhes.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">❓ Posso cancelar uma aposta?</div>
+                    <div class="faq-answer">Não é possível cancelar uma aposta após confirmada. Você só pode fazer cash out enquanto o avião estiver voando.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">❓ O jogo é justo?</div>
+                    <div class="faq-answer">Sim! Utilizamos um sistema de geração aleatória certificado. O multiplicador de cada rodada é determinado antes mesmo das apostas serem feitas.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">❓ Como altero minha senha?</div>
+                    <div class="faq-answer">Acesse Perfil > Segurança > Alterar Senha. Você precisará informar a senha atual e a nova senha.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">❓ Esqueci minha senha, o que faço?</div>
+                    <div class="faq-answer">Na tela de login, clique em "Esqueci minha senha" e siga as instruções para recuperação por e-mail.</div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">❓ Posso ter mais de uma conta?</div>
+                    <div class="faq-answer">Não. Cada usuário pode ter apenas uma conta. Contas duplicadas podem ser suspensas.</div>
+                </div>
+            </section>
+            
+            <!-- Seção 10: Termos -->
+            <section id="termos">
+                <h2>10. Termos Importantes</h2>
+                
+                <h3>10.1 Glossário</h3>
+                <table>
+                    <tr>
+                        <th>Termo</th>
+                        <th>Definição</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Aposta</strong></td>
+                        <td>Valor que você arrisca em uma rodada</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cash Out</strong></td>
+                        <td>Ação de retirar seus ganhos antes do crash</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Crash</strong></td>
+                        <td>Momento em que o avião "cai" e a rodada termina</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Multiplicador</strong></td>
+                        <td>Valor que multiplica sua aposta (ex: 2.00x)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Rodada</strong></td>
+                        <td>Ciclo completo do jogo (apostas → voo → crash)</td>
+                    </tr>
+                </table>
+                
+                <h3>10.2 Jogo Responsável</h3>
+                <div class="highlight-box danger">
+                    <h4>⚠️ Jogue com Responsabilidade</h4>
+                    <ul>
+                        <li>Defina um limite de gastos antes de jogar</li>
+                        <li>Nunca aposte mais do que pode perder</li>
+                        <li>Faça pausas regulares</li>
+                        <li>Não jogue para recuperar perdas</li>
+                        <li>Se sentir que está perdendo o controle, procure ajuda</li>
+                    </ul>
+                </div>
+                
+                <h3>10.3 Contato</h3>
+                <p>Para dúvidas, sugestões ou problemas:</p>
+                <ul>
+                    <li><strong>Chat de Suporte</strong> - Disponível na plataforma</li>
+                    <li><strong>E-mail</strong> - suporte@aviator.com</li>
+                </ul>
+            </section>
+        </div>
+        
+        <footer>
+            <p><strong>Plataforma Aviator</strong></p>
+            <p>Jogue com responsabilidade. Proibido para menores de 18 anos.</p>
+            <p style="margin-top: 15px; opacity: 0.7;">Última atualização: Dezembro 2025</p>
+        </footer>
+    </div>
+</body>
+</html>
