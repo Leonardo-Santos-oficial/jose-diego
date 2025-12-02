@@ -111,17 +111,17 @@ export const PlayerPlane = memo(function PlayerPlane({ multiplier, state }: Play
     bottomPos = -30; // Abaixo da tela
     rotation = 90; // Rotação de queda (nariz para baixo)
   } else if (phase === 'takeoff') {
-    // Decolagem - começa RETO (0°) e vai inclinando para cima gradualmente
+    // Decolagem - começa RETO e permanece reto
     leftPos = 5 + (takeoffProgress * (CRUISE_POSITION.left - 5));
     bottomPos = 10 + (takeoffProgress * (CRUISE_POSITION.bottom - 10));
-    // Começa em 0° e vai até -25° (nariz para cima) gradualmente
-    rotation = -(takeoffProgress * 25);
+    // Avião totalmente reto (0°)
+    rotation = 0;
   } else {
     // Cruzeiro - posição fixa com oscilação suave
     leftPos = CRUISE_POSITION.left + oscillation.x;
     bottomPos = CRUISE_POSITION.bottom + oscillation.y;
-    // Mantém inclinação de subida com leve oscilação (-25° base)
-    rotation = -25 + oscillation.rotation;
+    // Avião totalmente reto com leve oscilação mínima
+    rotation = oscillation.rotation * 0.3; // Oscilação bem sutil
   }
 
   const style: React.CSSProperties = {
@@ -292,7 +292,7 @@ export const PlayerPlane = memo(function PlayerPlane({ multiplier, state }: Play
           </>
         )}
         
-        {/* Avião SVG */}
+        {/* Avião SVG - rotacionado para ficar reto (horizontal) */}
         <svg 
           viewBox="0 0 512 512" 
           className={`w-full h-full transition-all duration-300 ${
@@ -301,6 +301,7 @@ export const PlayerPlane = memo(function PlayerPlane({ multiplier, state }: Play
               : 'fill-rose-500 stroke-white'
           } stroke-[8]`}
           style={{
+            transform: 'rotate(45deg)', // Compensa a inclinação natural do ícone
             filter: isFlying 
               ? 'drop-shadow(0 4px 12px rgba(244,63,94,0.5))' 
               : isCrashed 
