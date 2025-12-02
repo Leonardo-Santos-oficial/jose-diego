@@ -8,7 +8,21 @@ import {
   useState,
   useTransition,
 } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import {
+  ArrowLeft,
+  Send,
+  X,
+  MessageCircle,
+  Clock,
+  User,
+  CheckCircle2,
+  AlertCircle,
+  Paperclip,
+  MoreVertical,
+  Search,
+  UserCheck,
+  StickyNote,
+} from 'lucide-react';
 import type { ChatMessage, ChatThread } from '@/modules/chat/types';
 import {
   sendAdminMessageAction,
@@ -32,6 +46,20 @@ const timeOnly = new Intl.DateTimeFormat('pt-BR', {
   minute: '2-digit',
 });
 
+const relativeTime = (date: Date): string => {
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (minutes < 1) return 'Agora';
+  if (minutes < 60) return `${minutes}min`;
+  if (hours < 24) return `${hours}h`;
+  if (days < 7) return `${days}d`;
+  return dateTime.format(date);
+};
+
 type ThreadWithMessages = ChatThread & {
   messages: ChatMessage[];
   user?: {
@@ -54,10 +82,23 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
   const [selectedThreadId, setSelectedThreadId] = useState(initialThreads[0]?.id ?? null);
   const [showMobileList, setShowMobileList] = useState(true);
   const [isClosing, startClosing] = useTransition();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showMetadata, setShowMetadata] = useState(false);
 
   const selectedThread = useMemo(() => {
     return threads.find((thread) => thread.id === selectedThreadId) ?? null;
   }, [threads, selectedThreadId]);
+
+  const filteredThreads = useMemo(() => {
+    if (!searchQuery.trim()) return threads;
+    const query = searchQuery.toLowerCase();
+    return threads.filter(
+      (thread) =>
+        thread.user?.displayName?.toLowerCase().includes(query) ||
+        thread.user?.email?.toLowerCase().includes(query) ||
+        thread.messages.some((msg) => msg.body.toLowerCase().includes(query))
+    );
+  }, [threads, searchQuery]);
 
   const updateThreadMessages = (threadId: string, message: ChatMessage) => {
     setThreads((prev) => {
@@ -154,158 +195,288 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
 
   if (threads.length === 0) {
     return (
-      <section className="rounded-3xl border border-white/10 bg-slate-950/70 p-6 text-center text-sm text-slate-400">
-        Nenhuma conversa aberta no momento.
+      <section className="flex min-h-[500px] items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950/90 to-slate-900/70 p-8">
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-800/50">
+            <MessageCircle className="h-8 w-8 text-slate-500" />
+          </div>
+          <h3 className="text-lg font-medium text-white">Nenhuma conversa aberta</h3>
+          <p className="mt-1 text-sm text-slate-400">
+            Quando usuários iniciarem conversas, elas aparecerão aqui.
+          </p>
+        </div>
       </section>
     );
   }
 
   return (
-    <section className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-slate-950/80 p-6 shadow-[0_0_70px_rgba(15,118,110,0.15)] lg:flex-row">
+    <section className="flex h-[calc(100vh-200px)] min-h-[600px] max-h-[800px] overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950/95 to-slate-900/80 shadow-2xl shadow-teal-500/5">
+      {/* Sidebar - Lista de Threads */}
       <aside
-        className={`w-full max-w-sm space-y-3 border-b border-slate-800/60 pb-4 lg:border-b-0 lg:border-r lg:pr-4 ${
-          showMobileList ? 'block' : 'hidden'
-        } lg:block`}
+        className={`flex w-full flex-col border-r border-white/5 bg-slate-950/50 lg:w-80 xl:w-96 ${
+          showMobileList ? 'flex' : 'hidden'
+        } lg:flex`}
       >
-        <h2 className="text-base font-semibold text-white">Threads em aberto</h2>
-        <ul className="space-y-2">
-          {threads.map((thread) => (
-            <li key={thread.id}>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedThreadId(thread.id);
-                  setShowMobileList(false);
-                }}
-                className={`w-full min-h-[60px] rounded-2xl border px-4 py-3 text-left transition ${
-                  thread.id === selectedThreadId
-                    ? 'border-teal-400/60 bg-teal-500/10 text-white'
-                    : 'border-white/5 bg-slate-900/50 text-slate-300 hover:border-white/20'
-                }`}
-              >
-                <div className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                  {thread.status === 'open' ? 'Aberta' : 'Fechada'} •{' '}
-                  {dateTime.format(new Date(thread.updatedAt))}
-                </div>
-                <p className="mt-1 text-sm">
-                  Usuário:{' '}
-                  <span className="font-semibold">
-                    {thread.user?.displayName ??
-                      thread.user?.email ??
-                      thread.userId ??
-                      'Anônimo'}
-                  </span>
-                </p>
-                <p className="truncate text-xs text-slate-400">
-                  Última mensagem: {thread.messages.at(-1)?.body ?? 'Sem mensagens'}
-                </p>
-              </button>
-            </li>
-          ))}
-        </ul>
+        {/* Header da Sidebar */}
+        <div className="border-b border-white/5 p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-teal-400" />
+              <h2 className="text-lg font-semibold text-white">Suporte</h2>
+            </div>
+            <span className="rounded-full bg-teal-500/20 px-2.5 py-0.5 text-xs font-medium text-teal-300">
+              {threads.length} {threads.length === 1 ? 'aberta' : 'abertas'}
+            </span>
+          </div>
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Buscar conversas..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-xl border border-white/10 bg-slate-900/50 py-2 pl-9 pr-4 text-sm text-white placeholder:text-slate-500 focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
+            />
+          </div>
+        </div>
+
+        {/* Lista de Threads */}
+        <div className="flex-1 overflow-y-auto p-2">
+          <ul className="space-y-1">
+            {filteredThreads.map((thread) => {
+              const lastMessage = thread.messages.at(-1);
+              const isSelected = thread.id === selectedThreadId;
+              const userName = thread.user?.displayName || thread.user?.email?.split('@')[0] || 'Anônimo';
+              const userInitial = userName.charAt(0).toUpperCase();
+              const hasUnread = lastMessage?.senderRole === 'user';
+
+              return (
+                <li key={thread.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedThreadId(thread.id);
+                      setShowMobileList(false);
+                    }}
+                    className={`group relative w-full rounded-xl p-3 text-left transition-all duration-200 ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-teal-500/20 to-teal-500/5 shadow-lg shadow-teal-500/5'
+                        : 'hover:bg-white/5'
+                    }`}
+                  >
+                    {/* Indicador de seleção */}
+                    {isSelected && (
+                      <div className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-teal-400" />
+                    )}
+
+                    <div className="flex items-start gap-3">
+                      {/* Avatar */}
+                      <div className={`relative flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${
+                        isSelected ? 'bg-teal-500/30' : 'bg-slate-700/50'
+                      }`}>
+                        <span className={`text-sm font-semibold ${isSelected ? 'text-teal-300' : 'text-slate-300'}`}>
+                          {userInitial}
+                        </span>
+                        {hasUnread && (
+                          <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-slate-950 bg-teal-400" />
+                        )}
+                      </div>
+
+                      {/* Conteúdo */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={`truncate text-sm font-medium ${isSelected ? 'text-white' : 'text-slate-200'}`}>
+                            {userName}
+                          </span>
+                          <span className="flex-shrink-0 text-xs text-slate-500">
+                            {relativeTime(new Date(thread.updatedAt))}
+                          </span>
+                        </div>
+                        <p className={`mt-0.5 truncate text-xs ${
+                          hasUnread ? 'font-medium text-slate-300' : 'text-slate-500'
+                        }`}>
+                          {lastMessage?.body || 'Sem mensagens'}
+                        </p>
+                        {thread.metadata.lastAgentName && (
+                          <div className="mt-1 flex items-center gap-1">
+                            <UserCheck className="h-3 w-3 text-slate-600" />
+                            <span className="text-xs text-slate-600">{thread.metadata.lastAgentName}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          {filteredThreads.length === 0 && searchQuery && (
+            <div className="py-8 text-center">
+              <Search className="mx-auto h-8 w-8 text-slate-600" />
+              <p className="mt-2 text-sm text-slate-500">Nenhuma conversa encontrada</p>
+            </div>
+          )}
+        </div>
       </aside>
+
+      {/* Main - Conversa Selecionada */}
       {selectedThread ? (
-        <div
-          className={`flex-1 space-y-4 ${
-            showMobileList ? 'hidden' : 'block'
-          } lg:block`}
-        >
-          <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className={`flex flex-1 flex-col ${showMobileList ? 'hidden' : 'flex'} lg:flex`}>
+          {/* Header da Conversa */}
+          <header className="flex items-center justify-between border-b border-white/5 bg-slate-900/30 px-4 py-3 lg:px-6">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden -ml-2 min-h-[44px] min-w-[44px]"
+                className="lg:hidden -ml-2 h-10 w-10 rounded-xl"
                 onClick={() => setShowMobileList(true)}
               >
-                <ArrowLeft className="size-6 text-slate-400" />
+                <ArrowLeft className="h-5 w-5 text-slate-400" />
               </Button>
+
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-teal-500/30 to-teal-600/20">
+                <span className="text-sm font-semibold text-teal-300">
+                  {(selectedThread.user?.displayName || selectedThread.user?.email || 'A').charAt(0).toUpperCase()}
+                </span>
+              </div>
+
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                  Thread
-                </p>
-                <h3 className="text-xl font-semibold text-white">
-                  {selectedThread.user?.displayName ??
-                    selectedThread.user?.email ??
-                    'Conversa'}
-                  <span className="ml-2 text-sm font-normal text-slate-500">
-                    #{selectedThread.id.slice(0, 8)}
+                <h3 className="flex items-center gap-2 text-base font-semibold text-white">
+                  {selectedThread.user?.displayName || selectedThread.user?.email?.split('@')[0] || 'Usuário'}
+                  <span className="rounded bg-slate-800 px-1.5 py-0.5 text-xs font-normal text-slate-500">
+                    #{selectedThread.id.slice(0, 6)}
                   </span>
                 </h3>
-                <p className="text-sm text-slate-400">
-                  Usuário associado:{' '}
-                  {selectedThread.user?.displayName ??
-                    selectedThread.user?.email ??
-                    selectedThread.userId ??
-                    '—'}
-                </p>
-                <p className="text-xs text-slate-500">
-                  Responsável atual:{' '}
-                  {selectedThread.metadata.lastAgentName ?? 'Não atribuído'}
-                </p>
+                <div className="flex items-center gap-3 text-xs text-slate-500">
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {dateTime.format(new Date(selectedThread.createdAt))}
+                  </span>
+                  {selectedThread.user?.email && (
+                    <span className="hidden sm:inline">{selectedThread.user.email}</span>
+                  )}
+                </div>
               </div>
             </div>
+
             <div className="flex items-center gap-2">
               <Button
-                type="button"
-                variant="secondary"
+                variant="ghost"
+                size="icon"
+                className={`h-9 w-9 rounded-xl ${showMetadata ? 'bg-teal-500/20 text-teal-400' : 'text-slate-400 hover:text-white'}`}
+                onClick={() => setShowMetadata(!showMetadata)}
+                title="Notas e metadados"
+              >
+                <StickyNote className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 disabled={isClosing}
                 onClick={() => handleCloseThread(selectedThread.id)}
+                className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-3 text-rose-400 hover:bg-rose-500/20"
               >
-                {isClosing ? 'Encerrando...' : 'Fechar thread'}
+                <X className="mr-1.5 h-4 w-4" />
+                {isClosing ? 'Fechando...' : 'Encerrar'}
               </Button>
             </div>
           </header>
 
-          <div className="max-h-[420px] overflow-y-auto rounded-2xl border border-white/5 bg-slate-950/60 p-4">
-            {selectedThread.messages.length === 0 ? (
-              <p className="text-sm text-slate-500">Sem mensagens registradas.</p>
-            ) : (
-              <ul className="space-y-3">
-                {selectedThread.messages.map((message) => (
-                  <li key={message.id}>
-                    <article
-                      className={`rounded-2xl px-4 py-3 text-sm ${
-                        message.senderRole === 'admin'
-                          ? 'border border-teal-400/40 bg-teal-500/10 text-teal-50'
-                          : 'border border-white/10 bg-slate-900/80 text-slate-100'
-                      }`}
-                    >
-                      <header className="text-xs uppercase tracking-[0.3em] text-slate-400">
-                        {message.senderRole === 'admin' ? 'Admin' : 'Usuário'} •{' '}
-                        {timeOnly.format(new Date(message.createdAt))}
-                      </header>
-                      {message.body && (
-                        <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed">
-                          {message.body}
-                        </p>
-                      )}
-                      {message.attachmentUrl && message.attachmentType && (
-                        <ChatMessageAttachment
-                          attachmentUrl={message.attachmentUrl}
-                          attachmentType={message.attachmentType}
-                          attachmentName={message.attachmentName ?? undefined}
-                          isOwnMessage={message.senderRole === 'admin'}
-                        />
-                      )}
-                    </article>
-                  </li>
-                ))}
-              </ul>
+          <div className="flex flex-1 overflow-hidden">
+            {/* Área de Mensagens */}
+            <div className="flex flex-1 flex-col">
+              <div className="flex-1 overflow-y-auto p-4 lg:p-6">
+                {selectedThread.messages.length === 0 ? (
+                  <div className="flex h-full items-center justify-center">
+                    <div className="text-center">
+                      <MessageCircle className="mx-auto h-12 w-12 text-slate-700" />
+                      <p className="mt-3 text-sm text-slate-500">Nenhuma mensagem ainda</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {selectedThread.messages.map((message, index) => {
+                      const isAdmin = message.senderRole === 'admin';
+                      const showTimestamp = index === 0 || 
+                        new Date(message.createdAt).getTime() - new Date(selectedThread.messages[index - 1].createdAt).getTime() > 300000;
+
+                      return (
+                        <div key={message.id}>
+                          {showTimestamp && (
+                            <div className="mb-4 flex justify-center">
+                              <span className="rounded-full bg-slate-800/50 px-3 py-1 text-xs text-slate-500">
+                                {dateTime.format(new Date(message.createdAt))}
+                              </span>
+                            </div>
+                          )}
+                          <div className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`group relative max-w-[75%] ${isAdmin ? 'order-1' : ''}`}>
+                              <div
+                                className={`rounded-2xl px-4 py-3 ${
+                                  isAdmin
+                                    ? 'bg-gradient-to-br from-teal-500 to-teal-600 text-white shadow-lg shadow-teal-500/20'
+                                    : 'border border-white/10 bg-slate-800/80 text-slate-100'
+                                }`}
+                              >
+                                {message.body && (
+                                  <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                                    {message.body}
+                                  </p>
+                                )}
+                                {message.attachmentUrl && message.attachmentType && (
+                                  <div className="mt-2">
+                                    <ChatMessageAttachment
+                                      attachmentUrl={message.attachmentUrl}
+                                      attachmentType={message.attachmentType}
+                                      attachmentName={message.attachmentName ?? undefined}
+                                      isOwnMessage={isAdmin}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                              <div className={`mt-1 flex items-center gap-1.5 text-xs text-slate-500 ${isAdmin ? 'justify-end' : ''}`}>
+                                <span>{timeOnly.format(new Date(message.createdAt))}</span>
+                                {isAdmin && <CheckCircle2 className="h-3 w-3 text-teal-400" />}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Form de Resposta */}
+              <ThreadReplyForm
+                threadId={selectedThread.id}
+                onMessageAppended={(message) =>
+                  updateThreadMessages(selectedThread.id, message)
+                }
+              />
+            </div>
+
+            {/* Sidebar de Metadados */}
+            {showMetadata && (
+              <div className="hidden w-72 flex-shrink-0 border-l border-white/5 bg-slate-950/50 lg:block xl:w-80">
+                <ThreadMetadataForm thread={selectedThread} />
+              </div>
             )}
           </div>
-
-          <ThreadReplyForm
-            threadId={selectedThread.id}
-            onMessageAppended={(message) =>
-              updateThreadMessages(selectedThread.id, message)
-            }
-          />
-          <ThreadMetadataForm thread={selectedThread} />
         </div>
       ) : (
-        <div className="flex-1 rounded-2xl border border-white/5 bg-slate-900/60 p-6 text-sm text-slate-400">
-          Selecione uma thread para visualizar o histórico.
+        <div className="hidden flex-1 items-center justify-center lg:flex">
+          <div className="text-center">
+            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-800/30">
+              <MessageCircle className="h-10 w-10 text-slate-600" />
+            </div>
+            <h3 className="text-lg font-medium text-slate-400">Selecione uma conversa</h3>
+            <p className="mt-1 text-sm text-slate-600">
+              Escolha uma thread na lista para visualizar
+            </p>
+          </div>
         </div>
       )}
     </section>
@@ -333,33 +504,49 @@ function ThreadReplyForm({ threadId, onMessageAppended }: ThreadReplyFormProps) 
     }
   }, [state, threadId, onMessageAppended]);
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      formRef.current?.requestSubmit();
+    }
+  };
+
   return (
-    <form ref={formRef} action={formAction} className="space-y-3">
+    <form ref={formRef} action={formAction} className="border-t border-white/5 bg-slate-900/30 p-4">
       <input type="hidden" name="threadId" value={threadId} />
-      <textarea
-        ref={textareaRef}
-        name="body"
-        rows={3}
-        maxLength={1000}
-        placeholder="Responder usuário..."
-        className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-teal-400 focus:outline-none"
-        disabled={pending}
-      />
-      {state.status === 'error' && state.threadId === threadId && state.message ? (
-        <p className="text-sm text-rose-300" role="status">
-          {state.message}
-        </p>
-      ) : null}
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={pending} className="rounded-full px-6">
-          {pending ? 'Enviando...' : 'Enviar resposta'}
+      <div className="flex items-end gap-3">
+        <div className="relative flex-1">
+          <textarea
+            ref={textareaRef}
+            name="body"
+            rows={2}
+            maxLength={1000}
+            placeholder="Digite sua resposta... (Enter para enviar, Shift+Enter para quebra de linha)"
+            onKeyDown={handleKeyDown}
+            className="w-full resize-none rounded-xl border border-white/10 bg-slate-800/50 px-4 py-3 pr-12 text-sm text-white placeholder:text-slate-500 focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
+            disabled={pending}
+          />
+        </div>
+        <Button
+          type="submit"
+          disabled={pending}
+          className="h-11 w-11 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 p-0 shadow-lg shadow-teal-500/20 hover:from-teal-400 hover:to-teal-500"
+        >
+          <Send className="h-5 w-5" />
         </Button>
-        {state.status === 'success' && state.threadId === threadId ? (
-          <span className="text-sm text-emerald-300" role="status">
-            {state.message}
-          </span>
-        ) : null}
       </div>
+      {state.status === 'error' && state.threadId === threadId && state.message && (
+        <div className="mt-2 flex items-center gap-2 text-sm text-rose-400">
+          <AlertCircle className="h-4 w-4" />
+          {state.message}
+        </div>
+      )}
+      {state.status === 'success' && state.threadId === threadId && (
+        <div className="mt-2 flex items-center gap-2 text-sm text-emerald-400">
+          <CheckCircle2 className="h-4 w-4" />
+          Mensagem enviada
+        </div>
+      )}
     </form>
   );
 }
@@ -387,52 +574,114 @@ function ThreadMetadataForm({ thread }: ThreadMetadataFormProps) {
   );
 
   return (
-    <form
-      action={formAction}
-      className="rounded-2xl border border-white/5 bg-slate-900/70 p-4 text-sm text-slate-200"
-    >
-      <input type="hidden" name="threadId" value={thread.id} />
-      <div className="flex flex-col gap-2">
-        <label className="text-xs uppercase tracking-[0.3em] text-slate-400">
-          Notas internas
+    <div className="flex h-full flex-col p-4">
+      <div className="mb-4 flex items-center gap-2">
+        <StickyNote className="h-4 w-4 text-teal-400" />
+        <h4 className="text-sm font-medium text-white">Detalhes do Atendimento</h4>
+      </div>
+
+      {/* Info do usuário */}
+      <div className="mb-4 rounded-xl bg-slate-800/30 p-3">
+        <div className="flex items-center gap-2 text-xs text-slate-400">
+          <User className="h-3.5 w-3.5" />
+          <span>Informações do Usuário</span>
+        </div>
+        <div className="mt-2 space-y-1.5 text-sm">
+          <p className="text-white">{thread.user?.displayName || 'Nome não informado'}</p>
+          <p className="text-slate-400">{thread.user?.email || 'Email não disponível'}</p>
+        </div>
+      </div>
+
+      {/* Status da thread */}
+      <div className="mb-4 rounded-xl bg-slate-800/30 p-3">
+        <div className="flex items-center gap-2 text-xs text-slate-400">
+          <Clock className="h-3.5 w-3.5" />
+          <span>Timeline</span>
+        </div>
+        <div className="mt-2 space-y-1.5 text-xs text-slate-400">
+          <div className="flex justify-between">
+            <span>Criada em</span>
+            <span className="text-slate-300">{dateTime.format(new Date(thread.createdAt))}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Última atividade</span>
+            <span className="text-slate-300">{dateTime.format(new Date(thread.updatedAt))}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Mensagens</span>
+            <span className="text-slate-300">{thread.messages.length}</span>
+          </div>
+        </div>
+      </div>
+
+      <form action={formAction} className="flex-1 space-y-4">
+        <input type="hidden" name="threadId" value={thread.id} />
+
+        {/* Notas */}
+        <div>
+          <label className="mb-2 flex items-center gap-2 text-xs text-slate-400">
+            <StickyNote className="h-3.5 w-3.5" />
+            Notas internas
+          </label>
+          <textarea
+            name="notes"
+            defaultValue={thread.metadata.notes ?? ''}
+            rows={4}
+            maxLength={1000}
+            className="w-full resize-none rounded-xl border border-white/10 bg-slate-800/50 px-3 py-2.5 text-sm text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
+            placeholder="Adicione notas sobre este atendimento..."
+            disabled={pending}
+          />
+        </div>
+
+        {/* Atribuição */}
+        <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-slate-800/30 p-3 transition hover:bg-slate-800/50">
+          <input
+            type="checkbox"
+            name="assignToSelf"
+            className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-teal-500 focus:ring-teal-500/30"
+            disabled={pending}
+          />
+          <div className="flex items-center gap-2">
+            <UserCheck className="h-4 w-4 text-slate-400" />
+            <span className="text-sm text-slate-300">Atribuir para mim</span>
+          </div>
         </label>
-        <textarea
-          name="notes"
-          defaultValue={thread.metadata.notes ?? ''}
-          rows={3}
-          maxLength={1000}
-          className="rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-teal-400 focus:outline-none"
-          placeholder="Registre detalhes importantes do atendimento"
-          disabled={pending}
-        />
-      </div>
 
-      <div className="mt-3 flex items-center gap-2 text-xs text-slate-300">
-        <input
-          id={`assign-${thread.id}`}
-          type="checkbox"
-          name="assignToSelf"
-          className="h-4 w-4 rounded border-white/20 bg-slate-900"
-          disabled={pending}
-        />
-        <label htmlFor={`assign-${thread.id}`}>Atribuir para mim</label>
-      </div>
+        {/* Responsável atual */}
+        {thread.metadata.lastAgentName && (
+          <div className="rounded-xl bg-teal-500/10 p-3">
+            <div className="flex items-center gap-2 text-xs text-teal-400">
+              <UserCheck className="h-3.5 w-3.5" />
+              <span>Responsável atual: {thread.metadata.lastAgentName}</span>
+            </div>
+          </div>
+        )}
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={pending} className="rounded-full px-5">
-          {pending ? 'Salvando...' : 'Salvar metadados'}
+        {/* Botão salvar */}
+        <Button
+          type="submit"
+          disabled={pending}
+          className="w-full rounded-xl bg-slate-700 hover:bg-slate-600"
+        >
+          {pending ? 'Salvando...' : 'Salvar alterações'}
         </Button>
-        {state.status !== 'idle' && state.message ? (
-          <span
-            className={`text-xs ${
-              state.status === 'success' ? 'text-emerald-300' : 'text-rose-300'
+
+        {state.status !== 'idle' && state.message && (
+          <div
+            className={`flex items-center justify-center gap-2 text-xs ${
+              state.status === 'success' ? 'text-emerald-400' : 'text-rose-400'
             }`}
-            role="status"
           >
+            {state.status === 'success' ? (
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            ) : (
+              <AlertCircle className="h-3.5 w-3.5" />
+            )}
             {state.message}
-          </span>
-        ) : null}
-      </div>
-    </form>
+          </div>
+        )}
+      </form>
+    </div>
   );
 }
