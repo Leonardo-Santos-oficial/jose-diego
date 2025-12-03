@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Users, Gamepad2, Receipt, Wallet } from 'lucide-react';
+import { Users, Gamepad2, Receipt, Wallet, ShieldAlert } from 'lucide-react';
 import { AdminTabs, AdminTabPanel, type AdminTabConfig } from './AdminTabs';
 import type { AdminUserSummary } from '@/modules/admin/types';
 import type { AdminBetHistoryEntry } from '@/modules/admin/services/betHistoryService';
@@ -16,6 +16,7 @@ const TABS: AdminTabConfig[] = [
   { id: 'game', label: 'Controle do Jogo', icon: <Gamepad2 className="size-6" /> },
   { id: 'bets', label: 'Apostas', icon: <Receipt className="size-6" /> },
   { id: 'withdrawals', label: 'Saques', icon: <Wallet className="size-6" /> },
+  { id: 'moderation', label: 'Moderação', icon: <ShieldAlert className="size-6" /> },
 ];
 
 interface AdminDashboardProps {
@@ -26,6 +27,7 @@ interface AdminDashboardProps {
   withdrawRequests: WithdrawRequest[];
   chatInboxSection: React.ReactNode;
   chatAnalyticsSection: React.ReactNode;
+  moderationSection: React.ReactNode;
 }
 
 export function AdminDashboard({
@@ -36,6 +38,7 @@ export function AdminDashboard({
   withdrawRequests,
   chatInboxSection,
   chatAnalyticsSection,
+  moderationSection,
 }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState('users');
 
@@ -72,6 +75,10 @@ export function AdminDashboard({
 
       <AdminTabPanel isActive={activeTab === 'withdrawals'}>
         <AdminWithdrawalsPanel requests={withdrawRequests} />
+      </AdminTabPanel>
+
+      <AdminTabPanel isActive={activeTab === 'moderation'}>
+        {moderationSection}
       </AdminTabPanel>
     </div>
   );

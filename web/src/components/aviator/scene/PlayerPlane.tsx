@@ -20,16 +20,19 @@ interface PlayerPlaneProps {
 export const PlayerPlane = memo(function PlayerPlane({ multiplier, state }: PlayerPlaneProps) {
   const isCrashed = state === 'crashed';
   const isFlying = state === 'flying';
+  const isWaiting = state === 'awaitingBets';
   const wasFlying = useRef(false);
   const flightStartTime = useRef<number | null>(null);
-  const [phase, setPhase] = useState<'takeoff' | 'cruising'>('takeoff');
+  const [phase, setPhase] = useState<'idle' | 'takeoff' | 'cruising'>('idle');
   const [takeoffProgress, setTakeoffProgress] = useState(0);
   const [oscillation, setOscillation] = useState({ x: 0, y: 0, rotation: 0 });
+  const [idleOscillation, setIdleOscillation] = useState({ y: 0, rotation: 0 });
   const animationFrameRef = useRef<number | null>(null);
 
   // Configurações de voo
   const TAKEOFF_DURATION = 1500; // ms para decolagem completa
   const CRUISE_POSITION = { left: 55, bottom: 55 }; // Posição central de cruzeiro (%)
+  const IDLE_POSITION = { left: 5, bottom: 10 }; // Posição inicial (pista)
 
   useEffect(() => {
     // Quando começa a voar
@@ -48,13 +51,18 @@ export const PlayerPlane = memo(function PlayerPlane({ multiplier, state }: Play
         cancelAnimationFrame(animationFrameRef.current);
       }
       if (!isCrashed) {
-        setPhase('takeoff');
+        setPhase('idle');
         setTakeoffProgress(0);
       }
     }
-  }, [isFlying, isCrashed]);
+    
+    // Quando está esperando apostas, fica em idle
+    if (isWaiting && !wasFlying.current) {
+      setPhase('idle');
+    }
+  }, [isFlying, isCrashed, isWaiting]);
 
-  // Loop de animação
+  // Loop de animação para voo
   useEffect(() => {
     if (!isFlying) return;
 
@@ -72,7 +80,7 @@ export const PlayerPlane = memo(function PlayerPlane({ multiplier, state }: Play
         if (progress >= 1) {
           setPhase('cruising');
         }
-      } else {
+      } else if (phase === 'cruising') {
         // Fase de cruzeiro - oscilação suave infinita (simula turbulência leve)
         const time = flightTime / 1000; // tempo em segundos
         
@@ -100,6 +108,33 @@ export const PlayerPlane = memo(function PlayerPlane({ multiplier, state }: Play
     };
   }, [isFlying, phase]);
 
+  // Animação idle (avião parado aguardando)
+  useEffect(() => {
+    if (!isWaiting || isFlying) return;
+
+    let startTime = performance.now();
+    
+    const animateIdle = (currentTime: number) => {
+      const elapsed = (currentTime - startTime) / 1000;
+      
+      // Oscilação suave de "respiração" do avião parado
+      const yOsc = Math.sin(elapsed * 1.5) * 1.5;
+      const rotOsc = Math.sin(elapsed * 1.2) * 1;
+      
+      setIdleOscillation({ y: yOsc, rotation: rotOsc });
+      
+      animationFrameRef.current = requestAnimationFrame(animateIdle);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animateIdle);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isWaiting, isFlying]);
+
   // Posicionamento
   let leftPos: number;
   let bottomPos: number;
@@ -110,10 +145,15 @@ export const PlayerPlane = memo(function PlayerPlane({ multiplier, state }: Play
     leftPos = CRUISE_POSITION.left + oscillation.x;
     bottomPos = -30; // Abaixo da tela
     rotation = 90; // Rotação de queda (nariz para baixo)
+  } else if (phase === 'idle') {
+    // Idle - avião parado na posição inicial com leve oscilação
+    leftPos = IDLE_POSITION.left;
+    bottomPos = IDLE_POSITION.bottom + idleOscillation.y;
+    rotation = idleOscillation.rotation;
   } else if (phase === 'takeoff') {
     // Decolagem - começa RETO e permanece reto
-    leftPos = 5 + (takeoffProgress * (CRUISE_POSITION.left - 5));
-    bottomPos = 10 + (takeoffProgress * (CRUISE_POSITION.bottom - 10));
+    leftPos = IDLE_POSITION.left + (takeoffProgress * (CRUISE_POSITION.left - IDLE_POSITION.left));
+    bottomPos = IDLE_POSITION.bottom + (takeoffProgress * (CRUISE_POSITION.bottom - IDLE_POSITION.bottom));
     // Avião totalmente reto (0°)
     rotation = 0;
   } else {
@@ -133,7 +173,9 @@ export const PlayerPlane = memo(function PlayerPlane({ multiplier, state }: Play
       : 'none', // Sem transition durante voo - controlado por requestAnimationFrame
   };
 
-  if (!isFlying && !isCrashed) return null;
+  // Mostrar avião em todos os estados (idle, flying, crashed)
+  // Só esconde se não tiver nenhum estado definido
+  if (!isWaiting && !isFlying && !isCrashed) return null;
 
   return (
     <div 

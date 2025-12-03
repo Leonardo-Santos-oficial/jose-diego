@@ -119,10 +119,20 @@ export async function sendAdminMessageAction(
   // Simple HTML strip to avoid heavy dependencies on server
   const sanitizedBody = parsed.data.body.replace(/<[^>]*>?/gm, '');
 
+  // Extract attachment data if present
+  const attachmentUrl = formData.get('attachmentUrl') as string | null;
+  const attachmentType = formData.get('attachmentType') as string | null;
+  const attachmentName = formData.get('attachmentName') as string | null;
+
   try {
     const result = await adminCommand.executeForAdmin({
       threadId,
       body: sanitizedBody,
+      ...(attachmentUrl && {
+        attachmentUrl,
+        attachmentType: attachmentType as 'image' | 'document' | undefined,
+        attachmentName: attachmentName ?? undefined,
+      }),
     });
 
     try {

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
 import { AdminChatInboxSection } from '@/components/chat/AdminChatInboxSection';
 import { AdminChatAnalyticsSection } from '@/components/chat/AdminChatAnalyticsSection';
+import { AdminModerationSection } from '@/components/admin/moderation/AdminModerationSection';
 import { fetchAdminUsers } from '@/modules/admin/services/dashboardService';
 import { fetchGlobalBetHistory } from '@/modules/admin/services/betHistoryService';
 import { WithdrawService } from '@/modules/withdraw/services/withdrawService';
@@ -46,6 +47,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         withdrawRequests={withdrawRequests}
         chatInboxSection={<AdminChatInboxSection />}
         chatAnalyticsSection={<AdminChatAnalyticsSection />}
+        moderationSection={<AdminModerationSection />}
       />
     </main>
   );

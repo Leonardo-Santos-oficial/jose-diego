@@ -2,6 +2,7 @@
 
 import {
   useActionState,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -22,8 +23,9 @@ import {
   Search,
   UserCheck,
   StickyNote,
+  ShieldAlert,
 } from 'lucide-react';
-import type { ChatMessage, ChatThread } from '@/modules/chat/types';
+import type { ChatMessage, ChatThread, AttachmentType } from '@/modules/chat/types';
 import {
   sendAdminMessageAction,
   closeChatThreadAction,
@@ -33,6 +35,9 @@ import { chatActionInitialState, type ChatActionState } from '@/app/actions/chat
 import { Button } from '@/components/components/ui/button';
 import { ChatRealtimeClient, type UserPresenceMap } from '@/lib/realtime/chatClient';
 import { ChatMessageAttachment } from './ChatMessageAttachment';
+import { ChatAttachmentInput } from './ChatAttachmentInput';
+import { useChatAttachmentUpload } from '@/hooks/useChatAttachmentUpload';
+import { ApplyModerationModal } from '@/components/admin/moderation/ApplyModerationModal';
 
 const dateTime = new Intl.DateTimeFormat('pt-BR', {
   day: '2-digit',
@@ -115,6 +120,7 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showMetadata, setShowMetadata] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<UserPresenceMap>(new Map());
+  const [showModerationModal, setShowModerationModal] = useState(false);
 
   const selectedThread = useMemo(() => {
     return threads.find((thread) => thread.id === selectedThreadId) ?? null;
@@ -453,6 +459,17 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
             </div>
 
             <div className="flex items-center gap-2">
+              {selectedThread.userId && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-xl text-rose-400 hover:bg-rose-500/20 hover:text-rose-300"
+                  onClick={() => setShowModerationModal(true)}
+                  title="Moderar usuário"
+                >
+                  <ShieldAlert className="h-4 w-4" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
@@ -474,6 +491,15 @@ export function AdminChatInbox({ initialThreads }: AdminChatInboxProps) {
               </Button>
             </div>
           </header>
+
+          {selectedThread.userId && (
+            <ApplyModerationModal
+              userId={selectedThread.userId}
+              userName={selectedThread.user?.displayName ?? selectedThread.user?.email ?? 'Usuário'}
+              isOpen={showModerationModal}
+              onClose={() => setShowModerationModal(false)}
+            />
+          )}
 
           <div className="flex flex-1 overflow-hidden">
             {/* Área de Mensagens */}
@@ -594,6 +620,14 @@ function ThreadReplyForm({ threadId, onMessageAppended }: ThreadReplyFormProps) 
   const [localStatus, setLocalStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const statusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
+  // Attachment upload state
+  const { state: uploadState, upload: uploadAttachment, reset: resetUpload } = useChatAttachmentUpload();
+  const [pendingAttachment, setPendingAttachment] = useState<{
+    url: string;
+    type: AttachmentType;
+    name: string;
+  } | null>(null);
+  
   // Ref estável para o callback
   const onMessageAppendedRef = useRef(onMessageAppended);
   onMessageAppendedRef.current = onMessageAppended;
@@ -622,6 +656,7 @@ function ThreadReplyForm({ threadId, onMessageAppended }: ThreadReplyFormProps) 
       onMessageAppendedRef.current(state.lastMessage);
       formRef.current?.reset();
       textareaRef.current?.focus();
+      handleClearAttachment();
       
       // Mostrar feedback temporário
       setLocalStatus('success');
@@ -655,26 +690,71 @@ function ThreadReplyForm({ threadId, onMessageAppended }: ThreadReplyFormProps) 
   useEffect(() => {
     setLocalStatus('idle');
     processedMessageRef.current = null; // Resetar para a nova thread
+    handleClearAttachment();
   }, [threadId]);
+
+  const handleFileSelect = useCallback(async (file: File) => {
+    const result = await uploadAttachment(file);
+    if (result) {
+      setPendingAttachment({
+        url: result.url,
+        type: result.attachmentType,
+        name: result.fileName,
+      });
+    }
+  }, [uploadAttachment]);
+
+  const handleClearAttachment = useCallback(() => {
+    setPendingAttachment(null);
+    resetUpload();
+  }, [resetUpload]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (!pending) {
+      if (!pending && !isUploading) {
         formRef.current?.requestSubmit();
       }
     }
   };
 
   const handleSubmit = (formData: FormData) => {
+    // Add attachment data if present
+    if (pendingAttachment) {
+      formData.set('attachmentUrl', pendingAttachment.url);
+      formData.set('attachmentType', pendingAttachment.type);
+      formData.set('attachmentName', pendingAttachment.name);
+    }
     setLocalStatus('idle');
     formAction(formData);
   };
 
+  const isUploading = uploadState.status === 'uploading';
+
   return (
     <form ref={formRef} action={handleSubmit} className="border-t border-white/10 bg-gradient-to-r from-slate-900/50 to-slate-800/30 p-4">
       <input type="hidden" name="threadId" value={threadId} />
+      
+      {/* Upload error message */}
+      {uploadState.status === 'error' && uploadState.error && (
+        <div className="mb-3 flex items-center gap-2 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
+          <AlertCircle className="h-4 w-4" />
+          {uploadState.error}
+        </div>
+      )}
+      
       <div className="flex items-end gap-3">
+        {/* Attachment input */}
+        <ChatAttachmentInput
+          isUploading={isUploading}
+          onFileSelect={handleFileSelect}
+          previewUrl={pendingAttachment?.url}
+          previewType={pendingAttachment?.type}
+          previewName={pendingAttachment?.name}
+          onClearPreview={handleClearAttachment}
+          disabled={pending}
+        />
+        
         <div className="relative flex-1">
           <textarea
             ref={textareaRef}
@@ -684,9 +764,9 @@ function ThreadReplyForm({ threadId, onMessageAppended }: ThreadReplyFormProps) 
             placeholder="Digite sua resposta... (Enter para enviar)"
             onKeyDown={handleKeyDown}
             className="w-full resize-none rounded-2xl border-2 border-white/10 bg-slate-800/70 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-teal-400/50 focus:outline-none focus:ring-2 focus:ring-teal-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={pending}
+            disabled={pending || isUploading}
           />
-          {pending && (
+          {(pending || isUploading) && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-teal-400 border-t-transparent" />
             </div>
@@ -694,7 +774,7 @@ function ThreadReplyForm({ threadId, onMessageAppended }: ThreadReplyFormProps) 
         </div>
         <Button
           type="submit"
-          disabled={pending}
+          disabled={pending || isUploading}
           className="h-12 w-12 rounded-2xl bg-gradient-to-br from-teal-400 via-teal-500 to-teal-600 p-0 shadow-xl shadow-teal-500/40 hover:from-teal-300 hover:via-teal-400 hover:to-teal-500 hover:shadow-teal-500/60 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {pending ? (
