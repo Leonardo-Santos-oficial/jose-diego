@@ -83,7 +83,7 @@ export function GlobalChatWidget({ onMinimizeChange }: GlobalChatWidgetProps = {
   }, [state]);
 
   return (
-    <div className="flex flex-col h-full w-full relative z-[60]">
+    <div className="flex flex-col h-full w-full relative">
       <Card className={cn(
         "w-full flex flex-col bg-slate-900 border-slate-800 text-slate-100 transition-all duration-300",
         isMinimized ? "h-auto flex-shrink-0" : "flex-1 min-h-0"

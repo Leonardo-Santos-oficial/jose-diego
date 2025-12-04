@@ -109,7 +109,7 @@ export function AviatorGameClient({
 
       {/* Mobile Chat Drawer (Optional - or just below betting area) */}
       <div 
-        className={`lg:hidden border-t border-white/10 bg-slate-900 flex flex-col relative z-[60] transition-all duration-300 ${isMobileChatMinimized ? 'flex-shrink-0' : ''}`}
+        className={`lg:hidden border-t border-white/10 bg-slate-900 flex flex-col relative z-10 transition-all duration-300 ${isMobileChatMinimized ? 'flex-shrink-0' : ''}`}
         style={{ height: isMobileChatMinimized ? 'auto' : 'calc(350px - 80px)' }}
       >
          <GlobalChatWidget onMinimizeChange={setIsMobileChatMinimized} />
