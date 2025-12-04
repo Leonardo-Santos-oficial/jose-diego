@@ -7,6 +7,7 @@ import { getWalletSnapshot } from '@/modules/wallet/server/getWalletSnapshot';
 import { UserChatWidgetServer } from '@/components/chat/UserChatWidgetServer';
 import { ChatWrapper } from '@/components/chat/ChatWrapper';
 import { ChatProvider } from '@/components/chat/ChatContext';
+import { Analytics } from '@vercel/analytics/next';
 
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
