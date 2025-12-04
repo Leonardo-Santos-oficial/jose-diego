@@ -47,6 +47,17 @@ type ThreadHandler = (thread: ChatThread) => void;
 
 type SubscribeReturn = () => void;
 
+// Singleton presence channel to ensure all clients share the same channel
+let presenceChannel: RealtimeChannel | null = null;
+let presenceSubscribed = false;
+
+function getPresenceChannel(supabase: SupabaseClient): RealtimeChannel {
+  if (!presenceChannel) {
+    presenceChannel = supabase.channel('chat-presence');
+  }
+  return presenceChannel;
+}
+
 export class ChatRealtimeClient {
   private channels: RealtimeChannel[] = [];
 
@@ -124,12 +135,11 @@ export class ChatRealtimeClient {
     userIds: string[],
     handler: (presenceMap: UserPresenceMap) => void
   ): SubscribeReturn {
-    // Use channel() without config to get existing channel or create new one
-    const channel = this.supabase.channel('chat-presence');
+    // Use singleton presence channel
+    const channel = getPresenceChannel(this.supabase);
 
     const updatePresence = () => {
       const state = channel.presenceState<{ user_id: string }>();
-      console.log('[Presence] State updated:', state);
       const presenceMap: UserPresenceMap = new Map();
       
       // Initialize all users as offline
@@ -138,66 +148,77 @@ export class ChatRealtimeClient {
       // Mark online users
       Object.values(state).forEach((presences) => {
         presences.forEach((presence) => {
-          console.log('[Presence] Found presence:', presence);
           if (presence.user_id && userIds.includes(presence.user_id)) {
             presenceMap.set(presence.user_id, true);
           }
         });
       });
       
-      console.log('[Presence] Final map:', Object.fromEntries(presenceMap));
       handler(presenceMap);
     };
 
     channel
       .on('presence', { event: 'sync' }, () => {
-        console.log('[Presence] Sync event');
         updatePresence();
       })
-      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        console.log('[Presence] Join event:', key, newPresences);
+      .on('presence', { event: 'join' }, () => {
         updatePresence();
       })
-      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-        console.log('[Presence] Leave event:', key, leftPresences);
+      .on('presence', { event: 'leave' }, () => {
         updatePresence();
-      })
-      .subscribe((status) => {
-        console.log('[Presence] Admin subscribe status:', status);
       });
+    
+    // Only subscribe once
+    if (!presenceSubscribed) {
+      presenceSubscribed = true;
+      channel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          // Track admin as observer to properly join the presence channel
+          await channel.track({ role: 'admin', online_at: new Date().toISOString() });
+        }
+      });
+    } else {
+      // Trigger initial update
+      updatePresence();
+    }
 
-    this.channels.push(channel);
-    return () => this.removeChannel(channel);
+    // Don't add presence channel to this.channels - it's managed globally
+    return () => {
+      // Don't remove the channel, just remove the handlers
+    };
   }
 
   /**
    * Track current user's presence in the chat
    */
   async trackPresence(userId: string): Promise<SubscribeReturn> {
-    // Use same channel name as subscribeToPresence
-    const channel = this.supabase.channel('chat-presence');
-    
-    console.log('[Presence] Tracking user:', userId);
+    // Use singleton presence channel
+    const channel = getPresenceChannel(this.supabase);
 
-    await channel.subscribe(async (status) => {
-      console.log('[Presence] User subscribe status:', status);
-      if (status === 'SUBSCRIBED') {
-        const trackResult = await channel.track({ user_id: userId, online_at: new Date().toISOString() });
-        console.log('[Presence] Track result:', trackResult);
-      }
-    });
+    // Only subscribe once
+    if (!presenceSubscribed) {
+      presenceSubscribed = true;
+      await channel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({ user_id: userId, online_at: new Date().toISOString() });
+        }
+      });
+    } else {
+      // Channel already subscribed, just track
+      await channel.track({ user_id: userId, online_at: new Date().toISOString() });
+    }
 
-    this.channels.push(channel);
     return () => {
-      console.log('[Presence] Untracking user:', userId);
       void channel.untrack();
-      this.removeChannel(channel);
     };
   }
 
   dispose(): void {
     this.channels.forEach((channel) => {
-      void this.supabase.removeChannel(channel);
+      // Don't remove presence channel - it's managed globally
+      if (channel !== presenceChannel) {
+        void this.supabase.removeChannel(channel);
+      }
     });
     this.channels = [];
   }

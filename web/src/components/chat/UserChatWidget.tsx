@@ -28,7 +28,6 @@ export function UserChatWidget({
   initialThreadId,
   initialMessages,
 }: UserChatWidgetProps) {
-  console.log('[UserChatWidget] Mounted with userId:', userId);
   const [messages, setMessages] = useState(initialMessages);
   const [threadId, setThreadId] = useState(initialThreadId);
   const formRef = useRef<HTMLFormElement>(null);
@@ -100,19 +99,14 @@ export function UserChatWidget({
 
   // Track user presence - sempre que o widget estiver montado
   useEffect(() => {
-    console.log('[UserChatWidget] useEffect trackPresence starting for userId:', userId);
     const realtime = new ChatRealtimeClient();
     let untrackPresence: (() => void) | undefined;
     
     realtime.trackPresence(userId).then((untrack) => {
-      console.log('[UserChatWidget] trackPresence resolved');
       untrackPresence = untrack;
-    }).catch((err) => {
-      console.error('[UserChatWidget] trackPresence error:', err);
     });
 
     return () => {
-      console.log('[UserChatWidget] cleanup - untracking presence');
       untrackPresence?.();
       realtime.dispose();
     };
