@@ -14,7 +14,7 @@ export function ChatWrapper({ children }: { children: React.ReactNode }) {
       <Button
         onClick={toggleChat}
         className={cn(
-          "fixed bottom-24 right-4 md:bottom-4 z-50 h-14 w-14 rounded-full shadow-2xl transition-all duration-300",
+          "fixed bottom-24 right-4 md:bottom-4 lg:bottom-24 lg:right-[316px] z-[70] h-14 w-14 rounded-full shadow-2xl transition-all duration-300",
           isOpen ? "bg-rose-500 hover:bg-rose-600" : "bg-teal-500 hover:bg-teal-600"
         )}
       >
@@ -24,7 +24,7 @@ export function ChatWrapper({ children }: { children: React.ReactNode }) {
       {/* Chat Panel - Responsive modal */}
       <div
         className={cn(
-          "fixed z-40 transition-all duration-300 ease-in-out",
+          "fixed z-[70] transition-all duration-300 ease-in-out",
           // Mobile: nearly fullscreen but with proper spacing
           "left-2 right-2 bottom-24 top-16",
           "max-h-[calc(100vh-10rem)]",

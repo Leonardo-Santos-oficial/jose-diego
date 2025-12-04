@@ -124,12 +124,12 @@ export class ChatRealtimeClient {
     userIds: string[],
     handler: (presenceMap: UserPresenceMap) => void
   ): SubscribeReturn {
-    const channel = this.supabase.channel('chat.presence', {
-      config: { presence: { key: 'user_id' } },
-    });
+    // Use channel() without config to get existing channel or create new one
+    const channel = this.supabase.channel('chat-presence');
 
     const updatePresence = () => {
       const state = channel.presenceState<{ user_id: string }>();
+      console.log('[Presence] State updated:', state);
       const presenceMap: UserPresenceMap = new Map();
       
       // Initialize all users as offline
@@ -138,20 +138,33 @@ export class ChatRealtimeClient {
       // Mark online users
       Object.values(state).forEach((presences) => {
         presences.forEach((presence) => {
+          console.log('[Presence] Found presence:', presence);
           if (presence.user_id && userIds.includes(presence.user_id)) {
             presenceMap.set(presence.user_id, true);
           }
         });
       });
       
+      console.log('[Presence] Final map:', Object.fromEntries(presenceMap));
       handler(presenceMap);
     };
 
     channel
-      .on('presence', { event: 'sync' }, updatePresence)
-      .on('presence', { event: 'join' }, updatePresence)
-      .on('presence', { event: 'leave' }, updatePresence)
-      .subscribe();
+      .on('presence', { event: 'sync' }, () => {
+        console.log('[Presence] Sync event');
+        updatePresence();
+      })
+      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+        console.log('[Presence] Join event:', key, newPresences);
+        updatePresence();
+      })
+      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+        console.log('[Presence] Leave event:', key, leftPresences);
+        updatePresence();
+      })
+      .subscribe((status) => {
+        console.log('[Presence] Admin subscribe status:', status);
+      });
 
     this.channels.push(channel);
     return () => this.removeChannel(channel);
@@ -161,18 +174,22 @@ export class ChatRealtimeClient {
    * Track current user's presence in the chat
    */
   async trackPresence(userId: string): Promise<SubscribeReturn> {
-    const channel = this.supabase.channel('chat.presence', {
-      config: { presence: { key: 'user_id' } },
-    });
+    // Use same channel name as subscribeToPresence
+    const channel = this.supabase.channel('chat-presence');
+    
+    console.log('[Presence] Tracking user:', userId);
 
     await channel.subscribe(async (status) => {
+      console.log('[Presence] User subscribe status:', status);
       if (status === 'SUBSCRIBED') {
-        await channel.track({ user_id: userId, online_at: new Date().toISOString() });
+        const trackResult = await channel.track({ user_id: userId, online_at: new Date().toISOString() });
+        console.log('[Presence] Track result:', trackResult);
       }
     });
 
     this.channels.push(channel);
     return () => {
+      console.log('[Presence] Untracking user:', userId);
       void channel.untrack();
       this.removeChannel(channel);
     };
