@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useTransition } from 'react';
+import { useEffect, useTransition, useState } from 'react';
 import { AviatorScene } from '@/components/aviator/AviatorScene';
 import { AviatorHud } from '@/components/aviator/AviatorHud';
 import { AviatorBettingArea } from '@/components/aviator/AviatorBettingArea';
@@ -34,6 +34,7 @@ export function AviatorGameClient({
   const isConnected = useAviatorStore((store) => store.isConnected);
   const syncWalletSnapshot = useAviatorStore((store) => store.syncWalletSnapshot);
   const [, startSyncTransition] = useTransition();
+  const [isMobileChatMinimized, setIsMobileChatMinimized] = useState(false);
 
   useEffect(() => {
     if (initialWalletSnapshot) {
@@ -99,14 +100,19 @@ export function AviatorGameClient({
         </div>
 
         {/* Far Right Panel: Chat (Desktop) */}
-        <div className="hidden lg:order-3 lg:flex lg:w-[300px] lg:flex-col lg:border-l lg:border-white/10 lg:bg-slate-900">
-          <GlobalChatWidget />
+        <div className="hidden lg:order-3 lg:flex lg:w-[300px] lg:flex-col lg:border-l lg:border-white/10 lg:bg-slate-900 relative z-[60]">
+          <div className="flex flex-col" style={{ height: 'calc(100% - 80px)' }}>
+            <GlobalChatWidget />
+          </div>
         </div>
       </div>
 
       {/* Mobile Chat Drawer (Optional - or just below betting area) */}
-      <div className="lg:hidden border-t border-white/10 bg-slate-900 p-4">
-         <GlobalChatWidget />
+      <div 
+        className={`lg:hidden border-t border-white/10 bg-slate-900 flex flex-col relative z-[60] transition-all duration-300 ${isMobileChatMinimized ? 'flex-shrink-0' : ''}`}
+        style={{ height: isMobileChatMinimized ? 'auto' : 'calc(350px - 80px)' }}
+      >
+         <GlobalChatWidget onMinimizeChange={setIsMobileChatMinimized} />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageCircle, X } from 'lucide-react';
+import { CircleUserRound, X } from 'lucide-react';
 import { Button } from '@/components/components/ui/button';
 import { cn } from '@/components/lib/utils';
 import { useChat } from './ChatContext';
@@ -18,7 +18,7 @@ export function ChatWrapper({ children }: { children: React.ReactNode }) {
           isOpen ? "bg-rose-500 hover:bg-rose-600" : "bg-teal-500 hover:bg-teal-600"
         )}
       >
-        {isOpen ? <X className="h-7 w-7" /> : <MessageCircle className="h-7 w-7" />}
+        {isOpen ? <X className="h-7 w-7" /> : <CircleUserRound className="h-7 w-7" />}
       </Button>
 
       {/* Chat Panel - Responsive modal */}

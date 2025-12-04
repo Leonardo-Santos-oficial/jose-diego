@@ -19,9 +19,19 @@ const initialState: GlobalChatActionState = {
   status: 'idle',
 };
 
-export function GlobalChatWidget() {
+interface GlobalChatWidgetProps {
+  onMinimizeChange?: (isMinimized: boolean) => void;
+}
+
+export function GlobalChatWidget({ onMinimizeChange }: GlobalChatWidgetProps = {}) {
   const [messages, setMessages] = useState<GlobalChatMessage[]>([]);
   const [isMinimized, setIsMinimized] = useState(false);
+
+  const handleMinimizeToggle = () => {
+    const newValue = !isMinimized;
+    setIsMinimized(newValue);
+    onMinimizeChange?.(newValue);
+  };
   const [state, formAction, isPending] = useActionState(sendGlobalMessageAction, initialState);
   const scrollRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -73,29 +83,30 @@ export function GlobalChatWidget() {
   }, [state]);
 
   return (
-    <Card className={cn(
-      "w-full flex flex-col bg-slate-900 border-slate-800 text-slate-100 transition-all duration-300",
-      isMinimized ? "h-auto" : "h-full lg:h-[400px]"
-    )}>
-      <CardHeader 
-        className="py-3 px-4 border-b border-slate-800 flex flex-row items-center justify-between cursor-pointer hover:bg-slate-800/50 transition-colors"
-        onClick={() => setIsMinimized(!isMinimized)}
-      >
-        <CardTitle className="text-sm font-medium flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          Chat ao Vivo
-        </CardTitle>
-        <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px] min-w-[44px] text-slate-400 hover:text-white p-0">
-          {isMinimized ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-        </Button>
-      </CardHeader>
-      
-      {!isMinimized && (
-        <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-          <div 
-            ref={scrollRef}
-            className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-slate-700"
-          >
+    <div className="flex flex-col h-full w-full relative z-[60]">
+      <Card className={cn(
+        "w-full flex flex-col bg-slate-900 border-slate-800 text-slate-100 transition-all duration-300",
+        isMinimized ? "h-auto flex-shrink-0" : "flex-1 min-h-0"
+      )}>
+        <CardHeader 
+          className="py-3 px-4 border-b border-slate-800 flex flex-row items-center justify-between cursor-pointer hover:bg-slate-800/50 transition-colors flex-shrink-0"
+          onClick={handleMinimizeToggle}
+        >
+          <CardTitle className="text-sm font-medium flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            Chat ao Vivo
+          </CardTitle>
+          <Button variant="ghost" size="icon" className="h-10 w-10 min-h-[44px] min-w-[44px] text-slate-400 hover:text-white p-0">
+            {isMinimized ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+          </Button>
+        </CardHeader>
+        
+        {!isMinimized && (
+          <CardContent className="flex-1 flex flex-col p-0 min-h-0 overflow-hidden">
+            <div 
+              ref={scrollRef}
+              className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900"
+            >
             {messages.length === 0 && (
               <div className="text-center text-slate-500 text-xs mt-10">
                 Seja o primeiro a falar!
@@ -124,7 +135,7 @@ export function GlobalChatWidget() {
             ))}
           </div>
 
-          <div className="p-3 border-t border-slate-800 bg-slate-900/50">
+          <div className="p-3 border-t border-slate-800 bg-slate-900/95 flex-shrink-0">
             <form ref={formRef} action={formAction} className="flex gap-2">
               <Input
                 name="body"
@@ -148,5 +159,6 @@ export function GlobalChatWidget() {
         </CardContent>
       )}
     </Card>
+    </div>
   );
 }
