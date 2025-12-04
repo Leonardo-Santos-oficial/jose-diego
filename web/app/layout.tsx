@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { Analytics } from '@vercel/analytics/react';
 import { AppShell } from '@/components/shell/AppShell';
 import { getCurrentSession, getDisplayName } from '@/lib/auth/session';
 import { getWalletSnapshot } from '@/modules/wallet/server/getWalletSnapshot';
@@ -91,6 +92,7 @@ export default async function RootLayout({
             )}
           </AppShell>
         </ChatProvider>
+        <Analytics />
       </body>
     </html>
   );
