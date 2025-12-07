@@ -4,11 +4,25 @@ import path from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Domínios permitidos (adicione novos domínios aqui ou via ALLOWED_DOMAINS env var)
+const allowedDomains = process.env.ALLOWED_DOMAINS 
+  ? process.env.ALLOWED_DOMAINS.split(',').map(d => d.trim())
+  : [
+      'gradbellagio.bet',
+      'grandbellagio.io',
+      'grandbellagio.gg',
+      'grandbellagio.com.br',
+      'grandbellagio.online',
+      'jose-diego.vercel.app'
+    ];
+
+const domainsForCSP = allowedDomains.map(d => `https://${d} https://www.${d}`).join(' ');
+
 const ContentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel.app",
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://*.vercel.app ${domainsForCSP}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "img-src 'self' data: blob: https://jose-diego.vercel.app https://*.supabase.co",
+  `img-src 'self' data: blob: https://*.supabase.co ${domainsForCSP}`,
   "font-src 'self' https://fonts.gstatic.com data:",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://vercel.live",
   "frame-ancestors 'self'",

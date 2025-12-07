@@ -11,7 +11,7 @@ import { ChatProvider } from '@/components/chat/ChatContext';
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://aviator-demo.example.com';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://gradbellagio.bet';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

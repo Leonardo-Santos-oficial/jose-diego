@@ -1,5 +1,5 @@
 import Fastify, { type FastifyInstance } from 'fastify';
-import { env } from './config/env.js';
+import { env, allowedOrigins } from './config/env.js';
 import { registerCommandRoutes } from './routes/commands.js';
 import { registerOverrideRoutes } from './routes/overrides.js';
 import type { CommandService } from './services/commandService.js';
@@ -9,12 +9,6 @@ interface ServerDependencies {
   commandService: CommandService;
   loopController: LoopController;
 }
-
-const ALLOWED_ORIGINS = [
-  'https://jose-diego.vercel.app',
-  'http://localhost:3000',
-  'http://localhost:5173'
-];
 
 export function createServer({ commandService, loopController }: ServerDependencies): FastifyInstance {
   const app = Fastify({
@@ -26,7 +20,7 @@ export function createServer({ commandService, loopController }: ServerDependenc
   app.addHook('onRequest', async (request, reply) => {
     const origin = request.headers.origin;
     
-    if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    if (origin && allowedOrigins.includes(origin)) {
       reply.header('Access-Control-Allow-Origin', origin);
     }
     
