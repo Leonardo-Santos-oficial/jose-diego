@@ -1,10 +1,23 @@
 import { getSupabaseServerClient } from '@/lib/supabase/serverClient';
+import { globalCache, buildCacheKey } from '@/lib/cache';
 import type { BenefitType, UserBenefit, VipLevel, ClaimBenefitResult, BenefitsSummary } from '../types';
 import { VIP_TIERS } from '../types';
 import { mapToBenefitType, mapToUserBenefit } from '../mappers';
 
+const CACHE_TTL = {
+  BENEFIT_TYPES_MS: 5 * 60 * 1000,
+  VIP_LEVEL_MS: 30 * 1000,
+} as const;
+
 export class BenefitsService {
   static async getAvailableBenefitTypes(): Promise<BenefitType[]> {
+    const cacheKey = 'benefit_types:active';
+    const cached = globalCache.get<BenefitType[]>(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
     const supabase = await getSupabaseServerClient();
     const { data, error } = await supabase
       .from('benefit_types')
@@ -13,7 +26,11 @@ export class BenefitsService {
       .order('category', { ascending: true });
 
     if (error) throw new Error(`Failed to fetch benefit types: ${error.message}`);
-    return (data ?? []).map(mapToBenefitType);
+    
+    const result = (data ?? []).map(mapToBenefitType);
+    globalCache.set(cacheKey, result, CACHE_TTL.BENEFIT_TYPES_MS);
+    
+    return result;
   }
 
   static async getUserBenefits(userId: string): Promise<UserBenefit[]> {
@@ -29,13 +46,20 @@ export class BenefitsService {
   }
 
   static async getVipLevel(userId: string): Promise<VipLevel> {
+    const cacheKey = buildCacheKey('vip_level', userId);
+    const cached = globalCache.get<VipLevel>(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
     const supabase = await getSupabaseServerClient();
     const { data, error } = await supabase
       .rpc('get_or_create_vip_level', { p_user_id: userId });
 
     if (error) throw new Error(`Failed to fetch VIP level: ${error.message}`);
     
-    return {
+    const result: VipLevel = {
       userId: data.user_id,
       level: data.level,
       totalWagered: data.total_wagered,
@@ -43,6 +67,10 @@ export class BenefitsService {
       points: data.points,
       levelUpdatedAt: data.level_updated_at,
     };
+
+    globalCache.set(cacheKey, result, CACHE_TTL.VIP_LEVEL_MS);
+
+    return result;
   }
 
   static async initializeUserBenefits(userId: string): Promise<void> {

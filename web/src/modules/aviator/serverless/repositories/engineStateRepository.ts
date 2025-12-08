@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseServiceRoleClient } from '@/lib/supabase/serviceRoleClient';
+import { globalCache, buildCacheKey } from '@/lib/cache';
 import type { GameHistoryEntry, GamePhase } from '@/types/aviator';
 import {
   DEFAULT_ENGINE_SETTINGS,
@@ -13,6 +14,10 @@ import type { CrashResult } from '@/modules/aviator/serverless/strategies/crashS
 const ENGINE_STATE_TABLE = 'engine_state';
 const GAME_ROUNDS_TABLE = 'game_rounds';
 const BETS_TABLE = 'bets';
+
+const CACHE_TTL = {
+  GAME_HISTORY_MS: 10 * 1000,
+} as const;
 
 export interface EngineStateRepository {
   ensureState(crashResult: CrashResult, settings?: EngineSettings): Promise<EngineState>;
@@ -244,6 +249,13 @@ export class SupabaseEngineStateRepository implements EngineStateRepository {
   }
 
   async fetchHistory(limit: number): Promise<GameHistoryEntry[]> {
+    const cacheKey = buildCacheKey('game_history', limit);
+    const cached = globalCache.get<GameHistoryEntry[]>(cacheKey);
+
+    if (cached) {
+      return cached;
+    }
+
     const { data, error } = await this.client
       .from(GAME_ROUNDS_TABLE)
       .select('id, crash_multiplier, finished_at')
@@ -255,7 +267,7 @@ export class SupabaseEngineStateRepository implements EngineStateRepository {
       throw new Error(`Falha ao buscar histórico: ${error.message}`);
     }
 
-    return (data ?? []).map((row) => {
+    const result = (data ?? []).map((row) => {
       const multiplier = Number(row.crash_multiplier ?? 1);
       return {
         roundId: row.id,
@@ -264,6 +276,10 @@ export class SupabaseEngineStateRepository implements EngineStateRepository {
         bucket: resolveHistoryBucket(multiplier),
       } satisfies GameHistoryEntry;
     });
+
+    globalCache.set(cacheKey, result, CACHE_TTL.GAME_HISTORY_MS);
+
+    return result;
   }
 
   async listAutoCashoutCandidates(

@@ -76,6 +76,40 @@ class SupabaseWithdrawRepository implements WithdrawRepository {
   }
 
   async updateStatus(id: string, status: WithdrawStatus): Promise<WithdrawRequest> {
+    const request = await this.getById(id);
+    if (!request) {
+      throw new Error('Solicitação de saque não encontrada.');
+    }
+
+    if (status === 'approved') {
+      const { data: wallet, error: walletError } = await this.client
+        .from('wallets')
+        .select('balance')
+        .eq('user_id', request.userId)
+        .single();
+
+      if (walletError) {
+        throw new Error(`Falha ao buscar carteira: ${walletError.message}`);
+      }
+
+      const currentBalance = Number(wallet?.balance ?? 0);
+      if (currentBalance < request.amount) {
+        throw new Error(`Saldo insuficiente. Saldo: R$ ${currentBalance.toFixed(2)}, Saque: R$ ${request.amount.toFixed(2)}`);
+      }
+
+      const { error: deductError } = await this.client
+        .from('wallets')
+        .update({ 
+          balance: currentBalance - request.amount,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', request.userId);
+
+      if (deductError) {
+        throw new Error(`Falha ao deduzir saldo: ${deductError.message}`);
+      }
+    }
+
     const { data, error } = await this.client
       .from('withdraw_requests')
       .update({ status, updated_at: new Date().toISOString() })
