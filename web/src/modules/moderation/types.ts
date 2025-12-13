@@ -57,3 +57,19 @@ export interface ModerationStrategy {
   validate(input: ApplyModerationInput): void;
   getExpirationDate(durationMinutes?: number): Date | null;
 }
+
+export type UserDataPurgeResult = {
+  userId: string;
+  deleted: {
+    globalChatMessages: number;
+    chatMessages: number;
+    chatThreads: number;
+    withdrawRequests: number;
+    bets: number;
+  };
+};
+
+export interface UserDataPurgeRepository {
+  purgeUserData(userId: string): Promise<UserDataPurgeResult>;
+}
+

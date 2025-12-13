@@ -7,11 +7,13 @@ import {
   Ban,
   ShieldOff,
   ShieldAlert,
+  Trash2,
   X,
 } from 'lucide-react';
 import { Button } from '@/components/components/ui/button';
 import {
   applyModerationAction,
+  purgeUserPlatformData,
 } from '@/app/actions/moderation';
 import { moderationActionInitialState } from '@/app/actions/moderation-state';
 import type { ModerationActionType } from '@/modules/moderation';
@@ -82,6 +84,13 @@ export function ApplyModerationModal({
   const [selectedAction, setSelectedAction] = useState<ModerationActionType | null>(null);
   const [reason, setReason] = useState('');
   const [duration, setDuration] = useState(60);
+  const [showPurgeConfirm, setShowPurgeConfirm] = useState(false);
+  const [purgeState, setPurgeState] = useState<
+    | { status: 'idle' }
+    | { status: 'success'; message: string; details: string }
+    | { status: 'error'; message: string }
+  >({ status: 'idle' });
+  const [purgePending, setPurgePending] = useState(false);
 
   const [state, formAction, pending] = useActionState(
     applyModerationAction,
@@ -97,6 +106,14 @@ export function ApplyModerationModal({
       setDuration(60);
     }
   }, [state.status, onClose, onActionApplied]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setShowPurgeConfirm(false);
+      setPurgeState({ status: 'idle' });
+      setPurgePending(false);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -121,6 +138,90 @@ export function ApplyModerationModal({
           >
             <X className="h-5 w-5" />
           </button>
+        </div>
+
+        <div className="mb-6 rounded-xl border border-white/10 bg-slate-900/40 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-white">Limpar dados do usuário</p>
+              <p className="text-xs text-slate-400">
+                Apaga conversas do suporte, chat global e pedidos (saques/apostas).
+              </p>
+            </div>
+
+            {!showPurgeConfirm ? (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setShowPurgeConfirm(true)}
+                disabled={purgePending || pending}
+                className="sm:self-end"
+              >
+                <Trash2 className="h-4 w-4" />
+                Apagar tudo
+              </Button>
+            ) : (
+              <div className="flex gap-2 sm:self-end">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setShowPurgeConfirm(false)}
+                  disabled={purgePending}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  disabled={purgePending}
+                  onClick={async () => {
+                    setPurgePending(true);
+                    setPurgeState({ status: 'idle' });
+                    const result = await purgeUserPlatformData(userId);
+                    if (result.status === 'success') {
+                      const details =
+                        `Chat global: ${result.deleted.globalChatMessages} • ` +
+                        `Suporte msgs: ${result.deleted.chatMessages} • ` +
+                        `Suporte threads: ${result.deleted.chatThreads} • ` +
+                        `Saques: ${result.deleted.withdrawRequests} • ` +
+                        `Apostas: ${result.deleted.bets}`;
+                      setPurgeState({
+                        status: 'success',
+                        message: result.message,
+                        details,
+                      });
+                      setShowPurgeConfirm(false);
+                      onActionApplied?.();
+                    } else {
+                      setPurgeState({ status: 'error', message: result.message });
+                    }
+                    setPurgePending(false);
+                  }}
+                >
+                  Confirmar
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {showPurgeConfirm && (
+            <p className="mt-3 rounded-lg bg-rose-500/10 px-3 py-2 text-xs text-rose-300">
+              Atenção: esta ação é permanente e não pode ser desfeita.
+            </p>
+          )}
+
+          {purgeState.status === 'success' && (
+            <div className="mt-3 rounded-lg bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300">
+              <p className="font-medium">{purgeState.message}</p>
+              <p className="mt-1 text-emerald-200/80">{purgeState.details}</p>
+            </div>
+          )}
+
+          {purgeState.status === 'error' && (
+            <div className="mt-3 rounded-lg bg-rose-500/10 px-3 py-2 text-xs text-rose-300">
+              {purgeState.message}
+            </div>
+          )}
         </div>
 
         {!selectedAction ? (

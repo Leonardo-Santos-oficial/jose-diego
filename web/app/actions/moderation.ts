@@ -5,11 +5,13 @@ import { z } from 'zod';
 import { getCurrentSession } from '@/lib/auth/session';
 import { isAdminSession } from '@/lib/auth/roles';
 import { ModerationService } from '@/modules/moderation';
+import { UserDataPurgeService } from '@/modules/moderation';
 import { getSupabaseServiceRoleClient } from '@/lib/supabase/serviceRoleClient';
 import type { ModerationActionType } from '@/modules/moderation';
 import type { ModerationActionState } from './moderation-state';
 
 const moderationService = new ModerationService();
+const userDataPurgeService = new UserDataPurgeService();
 
 export type UserSearchResult = {
   id: string;
@@ -228,5 +230,53 @@ export async function searchUsersForModeration(
   } catch (error) {
     console.error('[moderation] erro ao buscar usuários', error);
     return [];
+  }
+}
+
+const purgeUserSchema = z.object({
+  userId: z.string().uuid('ID do usuário inválido.'),
+});
+
+export type PurgeUserPlatformDataResult =
+  | {
+      status: 'success';
+      message: string;
+      deleted: {
+        globalChatMessages: number;
+        chatMessages: number;
+        chatThreads: number;
+        withdrawRequests: number;
+        bets: number;
+      };
+    }
+  | { status: 'error'; message: string };
+
+export async function purgeUserPlatformData(userId: string): Promise<PurgeUserPlatformDataResult> {
+  const session = await getCurrentSession();
+
+  if (!isAdminSession(session) || !session) {
+    return { status: 'error', message: 'Acesso não autorizado.' };
+  }
+
+  const parsed = purgeUserSchema.safeParse({ userId });
+  if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0]?.message ?? 'Dados inválidos.';
+    return { status: 'error', message: firstIssue };
+  }
+
+  try {
+    const result = await userDataPurgeService.purgeUserData(parsed.data.userId);
+
+    revalidatePath('/admin');
+
+    return {
+      status: 'success',
+      message: 'Conversas e pedidos do usuário foram apagados com sucesso.',
+      deleted: result.deleted,
+    };
+  } catch (error) {
+    console.error('[moderation] erro ao apagar dados do usuário', error);
+    const message = error instanceof Error ? error.message : 'Erro ao apagar dados do usuário.';
+    return { status: 'error', message };
   }
 }
