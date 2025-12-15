@@ -7,9 +7,11 @@ import { logger } from '../logger.js';
 import { resolveUserIdFromAccessToken } from './auth.js';
 import type { WsClientMessage, WsServerMessage } from './types.js';
 import { WsHub } from './WsHub.js';
+import type { StatePayload } from '../publisher/realtimePublisher.js';
 
 export type WsServerDeps = {
   hub: WsHub;
+  getStateSnapshot: () => StatePayload;
 };
 
 function safeJsonParse(input: string): unknown {
@@ -82,6 +84,15 @@ export function attachWebSocketServer(app: FastifyInstance, deps: WsServerDeps):
 
         const ready: WsServerMessage = { type: 'ready', userId };
         ws.send(JSON.stringify(ready));
+
+        // Envia um snapshot imediato para o cliente sair do estado "Desconectado"
+        // mesmo quando o loop está pausado/iniciando.
+        try {
+          const snapshot = deps.getStateSnapshot();
+          deps.hub.send(ws, 'game.state', snapshot);
+        } catch (error) {
+          logger.warn({ error }, 'Failed to send state snapshot to websocket client');
+        }
         return;
       }
 

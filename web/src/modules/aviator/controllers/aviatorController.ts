@@ -16,8 +16,17 @@ export class AviatorController {
   private readonly engineAccessToken: string | null;
   private static readonly MUSIC_STORAGE_KEY = 'aviator:music-enabled';
   private static readonly CLIENT_TICK_INTERVAL_MS = 750;
-  private static readonly ENABLE_CLIENT_TICK =
-    process.env.NEXT_PUBLIC_AVIATOR_ENABLE_CLIENT_TICK !== '0';
+  private static readonly ENABLE_CLIENT_TICK = (() => {
+    const configured = process.env.NEXT_PUBLIC_AVIATOR_ENABLE_CLIENT_TICK;
+
+    // Permite override explícito: 0 = desliga, 1 = liga.
+    if (configured === '0') return false;
+    if (configured === '1') return true;
+
+    // Padrão seguro: em produção, desliga para evitar polling/REST desnecessário.
+    // Em dev/test, mantém ligado para facilitar rodar sem depender da VPS.
+    return process.env.NODE_ENV !== 'production';
+  })();
   private tickTimer?: number;
 
   constructor(

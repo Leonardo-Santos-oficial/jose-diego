@@ -17,6 +17,7 @@ import { supabaseServiceClient } from './clients/supabaseClient.js';
 import { AdminCommandListener } from './clients/adminCommandListener.js';
 import { WsHub } from './ws/WsHub.js';
 import { attachWebSocketServer } from './ws/WsServer.js';
+import type { StatePayload } from './publisher/realtimePublisher.js';
 
 async function bootstrap(): Promise<void> {
   const wsHub = new WsHub();
@@ -52,7 +53,25 @@ async function bootstrap(): Promise<void> {
   );
   
   const app = createServer({ commandService, loopController });
-  attachWebSocketServer(app, { hub: wsHub });
+  attachWebSocketServer(app, {
+    hub: wsHub,
+    getStateSnapshot: (): StatePayload => {
+      const ctx = machine.getContext();
+      return {
+        roundId: ctx.roundId,
+        phase: ctx.phase,
+        state: ctx.phase,
+        multiplier: ctx.multiplier,
+        phaseStartedAt: ctx.phaseStartedAt,
+        hash: ctx.hash,
+        bettingWindowRemainingMs: ctx.bettingWindowRemainingMs,
+        bettingWindow: {
+          closesInMs: ctx.bettingWindowRemainingMs
+        },
+        targetMultiplier: ctx.crashTarget
+      };
+    }
+  });
 
   // Check saved state before starting
   const savedSettings = await engineStateService.getSettings();
