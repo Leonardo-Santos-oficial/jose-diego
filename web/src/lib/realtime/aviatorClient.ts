@@ -36,6 +36,9 @@ export class AviatorRealtimeClient {
   constructor(private readonly supabase: SupabaseClient = getSupabaseClient()) {}
 
   subscribe(handlers: HandlerOptions, options?: SubscribeOptions): void {
+    // Prevent duplicate subscriptions (e.g. re-mounts / repeated calls)
+    this.unsubscribe();
+
     this.stateChannel = this.supabase
       .channel('game.state')
       .on('broadcast', { event: 'state' }, (payload) => {

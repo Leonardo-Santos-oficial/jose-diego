@@ -54,7 +54,17 @@ export class SupabaseRealtimePublisher implements RealtimePublisher {
   private readonly betChannel: RealtimeChannel;
   private readonly cashoutChannel: RealtimeChannel;
 
+  private lastStateBroadcastAt = 0;
+  private lastStateRoundId?: string;
+  private lastStatePhase?: GameStateSnapshot['phase'];
+  private readonly minStateBroadcastIntervalMs: number;
+
   constructor(private readonly client: SupabaseClient = supabaseServiceClient) {
+    // Throttling to avoid hitting Supabase Realtime message quotas.
+    // Default: 250ms (~4 updates/sec). Can be overridden via env var.
+    const configured = Number(process.env.REALTIME_STATE_MIN_INTERVAL_MS ?? 250);
+    this.minStateBroadcastIntervalMs = Number.isFinite(configured) && configured >= 0 ? configured : 250;
+
     this.stateChannel = this.client.channel('game.state', { config: { broadcast: { self: false } } });
     this.historyChannel = this.client.channel('game.history', {
       config: { broadcast: { self: false } }
@@ -71,6 +81,21 @@ export class SupabaseRealtimePublisher implements RealtimePublisher {
   }
 
   async publishState(payload: StatePayload): Promise<void> {
+    const now = Date.now();
+    const shouldBypassThrottle =
+      payload.roundId !== this.lastStateRoundId || payload.phase !== this.lastStatePhase;
+
+    if (!shouldBypassThrottle && this.minStateBroadcastIntervalMs > 0) {
+      const elapsed = now - this.lastStateBroadcastAt;
+      if (elapsed < this.minStateBroadcastIntervalMs) {
+        return;
+      }
+    }
+
+    this.lastStateBroadcastAt = now;
+    this.lastStateRoundId = payload.roundId;
+    this.lastStatePhase = payload.phase;
+
     await this.broadcast(this.stateChannel, 'state', payload);
   }
 
