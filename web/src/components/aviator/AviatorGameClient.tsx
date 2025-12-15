@@ -15,16 +15,18 @@ import { GlobalChatWidget } from '@/components/global-chat/GlobalChatWidget';
 
 export type AviatorGameClientProps = {
   userId: string;
+  engineAccessToken?: string | null;
   initialWalletSnapshot?: WalletSnapshot | null;
   initialAutoCashoutPreference?: boolean;
 };
 
 export function AviatorGameClient({
   userId,
+  engineAccessToken,
   initialWalletSnapshot,
   initialAutoCashoutPreference,
 }: AviatorGameClientProps) {
-  const controller = useAviatorController(userId);
+  const controller = useAviatorController(userId, engineAccessToken ?? null);
   const state = useAviatorStore((store) => store.state);
   const history = useAviatorStore((store) => store.history);
   const betResult = useAviatorStore((store) => store.betResult);

@@ -13,6 +13,7 @@ export class AviatorController {
   private readonly client: AviatorRealtimeClient;
   private readonly audio: AviatorAudioEngine;
   private readonly userId: string;
+  private readonly engineAccessToken: string | null;
   private static readonly MUSIC_STORAGE_KEY = 'aviator:music-enabled';
   private static readonly CLIENT_TICK_INTERVAL_MS = 750;
   private static readonly ENABLE_CLIENT_TICK =
@@ -21,12 +22,14 @@ export class AviatorController {
 
   constructor(
     userId: string,
+    engineAccessToken: string | null,
     client: AviatorRealtimeClient = new AviatorRealtimeClient(),
     audio: AviatorAudioEngine = new AviatorAudioEngine()
   ) {
     this.client = client;
     this.audio = audio;
     this.userId = userId;
+    this.engineAccessToken = engineAccessToken;
   }
 
   connect(): () => void {
@@ -40,7 +43,7 @@ export class AviatorController {
         onCashoutResult: (payload) => this.handleCashoutResult(payload),
         onWalletSnapshot: (payload: WalletSnapshot) => this.handleWalletSnapshot(payload),
       },
-      { userId: this.userId }
+      { userId: this.userId, engineAccessToken: this.engineAccessToken }
     );
 
     this.startClientTickLoop();

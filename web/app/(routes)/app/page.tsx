@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { AviatorGameClient } from '@/components/aviator/AviatorGameClient';
 import { getCurrentSession, getDisplayName } from '@/lib/auth/session';
+import { getSupabaseServerClient } from '@/lib/supabase/serverClient';
 import { getWalletSnapshot } from '@/modules/wallet/server/getWalletSnapshot';
 import { getCashoutPreference } from '@/modules/preferences/server/getCashoutPreference';
 
@@ -19,6 +20,14 @@ export default async function AviatorAppPage() {
   }
 
   const displayName = getDisplayName(session);
+
+  // Token necessário para autenticar no WebSocket da engine.
+  // Em fluxos SSR, o browser pode não ter acesso ao access_token via supabase.auth.getSession().
+  const supabase = await getSupabaseServerClient({ readOnly: true });
+  const {
+    data: { session: authSession },
+  } = await supabase.auth.getSession();
+  const engineAccessToken = authSession?.access_token ?? null;
 
   let walletSnapshot: Awaited<ReturnType<typeof getWalletSnapshot>>;
   let autoCashoutPreference = false;
@@ -42,6 +51,7 @@ export default async function AviatorAppPage() {
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <AviatorGameClient
         userId={session.id}
+        engineAccessToken={engineAccessToken}
         initialWalletSnapshot={walletSnapshot}
         initialAutoCashoutPreference={autoCashoutPreference}
       />

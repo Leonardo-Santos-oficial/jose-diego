@@ -24,6 +24,7 @@ type HandlerOptions = {
 
 type SubscribeOptions = {
   userId?: string;
+  engineAccessToken?: string | null;
 };
 
 type WsServerMessage =
@@ -60,7 +61,7 @@ export class AviatorRealtimeClient {
     this.unsubscribe();
 
     this.wsShouldRun = true;
-    void this.connectWs(handlers);
+    void this.connectWs(handlers, options);
 
     // game.state + game.history agora vêm via WebSocket (VPS)
 
@@ -151,7 +152,10 @@ export class AviatorRealtimeClient {
     }
   }
 
-  private async connectWs(handlers: HandlerOptions): Promise<void> {
+  private async connectWs(
+    handlers: HandlerOptions,
+    options?: SubscribeOptions
+  ): Promise<void> {
     if (!this.wsShouldRun) {
       return;
     }
@@ -161,18 +165,21 @@ export class AviatorRealtimeClient {
       return;
     }
 
-    const {
-      data: { session },
-    } = await this.supabase.auth.getSession();
+    const tokenFromSSR = options?.engineAccessToken ?? null;
+    const tokenFromClient = tokenFromSSR
+      ? null
+      : (
+          await this.supabase.auth.getSession()
+        ).data.session?.access_token ?? null;
 
-    const token = session?.access_token;
+    const token = tokenFromSSR ?? tokenFromClient;
     if (!token) {
       // Em alguns cenários (SSR/hidratação), o token ainda não está disponível
       // no primeiro render. Re-tenta por alguns ciclos enquanto estiver ativo.
       if (typeof window !== 'undefined' && this.wsShouldRun && !this.wsReconnectTimer) {
         this.wsReconnectTimer = window.setTimeout(() => {
           this.wsReconnectTimer = undefined;
-          void this.connectWs(handlers);
+          void this.connectWs(handlers, options);
         }, 500);
       }
       return;
@@ -210,7 +217,7 @@ export class AviatorRealtimeClient {
       }
       // reconexão simples
       this.wsReconnectTimer = window.setTimeout(() => {
-        void this.connectWs(handlers);
+        void this.connectWs(handlers, options);
       }, 1000);
     };
 
