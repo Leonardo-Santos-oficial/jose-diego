@@ -25,7 +25,7 @@ install_dependencies() {
     cd "$SERVICE_DIR"
     # Precisamos das devDependencies para executar o build (ex.: tsup).
     # Após o build, removemos as devDependencies para deixar o runtime mais enxuto.
-    npm ci
+    npm ci --include=dev
     print_success "Dependências instaladas"
 }
 
