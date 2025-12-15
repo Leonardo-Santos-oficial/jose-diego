@@ -6,7 +6,27 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   REALTIME_URL: z.string().url(),
   ALLOWED_ORIGINS: z.string().default(
-    'https://gradbellagio.bet,https://grandbellagio.io,https://grandbellagio.gg,https://grandbellagio.com.br,https://grandbellagio.online,https://jose-diego.vercel.app,http://localhost:3000,http://localhost:5173'
+    [
+      // Produção (Vercel) — permitir todos os domínios do front
+      'https://grandbellagio.online',
+      'https://www.grandbellagio.online',
+      'https://grandbellagio.gg',
+      'https://www.grandbellagio.gg',
+      'https://grandbellagio.com.br',
+      'https://www.grandbellagio.com.br',
+      'https://grandbellagio.io',
+      'https://www.grandbellagio.io',
+      'https://grandbellagio.bet',
+      'https://www.grandbellagio.bet',
+      // Domínio legado/typo já usado anteriormente
+      'https://gradbellagio.bet',
+      'https://www.gradbellagio.bet',
+      // Vercel app
+      'https://jose-diego.vercel.app',
+      // Dev
+      'http://localhost:3000',
+      'http://localhost:5173'
+    ].join(',')
   )
 });
 
