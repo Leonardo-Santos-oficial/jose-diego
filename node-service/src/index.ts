@@ -3,6 +3,8 @@ import { env } from './config/env.js';
 import { logger } from './logger.js';
 import { createServer } from './server.js';
 import { SupabaseRealtimePublisher } from './publisher/realtimePublisher.js';
+import { CompositeRealtimePublisher } from './publisher/compositePublisher.js';
+import { WsRealtimePublisher } from './publisher/wsPublisher.js';
 import { GameStateMachine } from './loop/GameStateMachine.js';
 import { LoopScheduler } from './loop/LoopScheduler.js';
 import { LoopController } from './loop/LoopController.js';
@@ -13,9 +15,17 @@ import { SupabaseRoundService } from './services/roundService.js';
 import { SupabaseEngineStateService } from './services/engineStateService.js';
 import { supabaseServiceClient } from './clients/supabaseClient.js';
 import { AdminCommandListener } from './clients/adminCommandListener.js';
+import { WsHub } from './ws/WsHub.js';
+import { attachWebSocketServer } from './ws/WsServer.js';
 
 async function bootstrap(): Promise<void> {
-  const publisher = new SupabaseRealtimePublisher();
+  const wsHub = new WsHub();
+  const wsPublisher = new WsRealtimePublisher(wsHub);
+  const supabasePublisher = new SupabaseRealtimePublisher(supabaseServiceClient, {
+    publishState: false,
+    publishHistory: false
+  });
+  const publisher = new CompositeRealtimePublisher([wsPublisher, supabasePublisher]);
   const autoCashoutService = new AutoCashoutService(supabaseServiceClient, publisher);
   const roundService = new SupabaseRoundService(supabaseServiceClient);
   const engineStateService = new SupabaseEngineStateService(supabaseServiceClient);
@@ -42,6 +52,7 @@ async function bootstrap(): Promise<void> {
   );
   
   const app = createServer({ commandService, loopController });
+  attachWebSocketServer(app, { hub: wsHub });
 
   // Check saved state before starting
   const savedSettings = await engineStateService.getSettings();

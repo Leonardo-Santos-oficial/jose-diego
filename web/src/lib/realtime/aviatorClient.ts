@@ -26,6 +26,22 @@ type SubscribeOptions = {
   userId?: string;
 };
 
+type WsServerMessage =
+  | { type: 'ready'; userId: string }
+  | { type: 'event'; topic: 'game.state' | 'game.history'; payload: unknown }
+  | { type: 'error'; message: string }
+  | { type: 'pong' };
+
+function getEngineWsUrl(): string {
+  const base = process.env.NEXT_PUBLIC_ENGINE_URL ?? 'http://localhost:8081';
+  const url = new URL(base);
+  url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+  url.pathname = '/ws';
+  url.search = '';
+  url.hash = '';
+  return url.toString();
+}
+
 export class AviatorRealtimeClient {
   private stateChannel?: RealtimeChannel;
   private historyChannel?: RealtimeChannel;
@@ -33,25 +49,20 @@ export class AviatorRealtimeClient {
   private cashoutChannel?: RealtimeChannel;
   private walletChannel?: RealtimeChannel;
 
+  private ws?: WebSocket;
+  private wsShouldRun = false;
+  private wsReconnectTimer?: number;
+
   constructor(private readonly supabase: SupabaseClient = getSupabaseClient()) {}
 
   subscribe(handlers: HandlerOptions, options?: SubscribeOptions): void {
     // Prevent duplicate subscriptions (e.g. re-mounts / repeated calls)
     this.unsubscribe();
 
-    this.stateChannel = this.supabase
-      .channel('game.state')
-      .on('broadcast', { event: 'state' }, (payload) => {
-        handlers.onState?.(payload.payload as GameStateMessage);
-      })
-      .subscribe();
+    this.wsShouldRun = true;
+    void this.connectWs(handlers);
 
-    this.historyChannel = this.supabase
-      .channel('game.history')
-      .on('broadcast', { event: 'history' }, (payload) => {
-        handlers.onHistory?.(payload.payload as GameHistoryMessage);
-      })
-      .subscribe();
+    // game.state + game.history agora vêm via WebSocket (VPS)
 
     this.betChannel = this.supabase
       .channel('commands.bet')
@@ -98,6 +109,22 @@ export class AviatorRealtimeClient {
   }
 
   unsubscribe(): void {
+    this.wsShouldRun = false;
+
+    if (this.wsReconnectTimer) {
+      window.clearTimeout(this.wsReconnectTimer);
+      this.wsReconnectTimer = undefined;
+    }
+
+    if (this.ws) {
+      try {
+        this.ws.close();
+      } catch {
+        // ignore
+      }
+      this.ws = undefined;
+    }
+
     if (this.stateChannel) {
       void this.supabase.removeChannel(this.stateChannel);
       this.stateChannel = undefined;
@@ -122,5 +149,60 @@ export class AviatorRealtimeClient {
       void this.supabase.removeChannel(this.walletChannel);
       this.walletChannel = undefined;
     }
+  }
+
+  private async connectWs(handlers: HandlerOptions): Promise<void> {
+    if (!this.wsShouldRun) {
+      return;
+    }
+
+    const {
+      data: { session },
+    } = await this.supabase.auth.getSession();
+
+    const token = session?.access_token;
+    if (!token) {
+      return;
+    }
+
+    const wsUrl = getEngineWsUrl();
+    const ws = new WebSocket(wsUrl);
+    this.ws = ws;
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: 'auth', token }));
+    };
+
+    ws.onmessage = (event) => {
+      let parsed: WsServerMessage | null = null;
+      try {
+        parsed = JSON.parse(String(event.data)) as WsServerMessage;
+      } catch {
+        return;
+      }
+
+      if (parsed.type === 'event') {
+        if (parsed.topic === 'game.state') {
+          handlers.onState?.(parsed.payload as GameStateMessage);
+        }
+        if (parsed.topic === 'game.history') {
+          handlers.onHistory?.(parsed.payload as GameHistoryMessage);
+        }
+      }
+    };
+
+    ws.onclose = () => {
+      if (!this.wsShouldRun) {
+        return;
+      }
+      // reconexão simples
+      this.wsReconnectTimer = window.setTimeout(() => {
+        void this.connectWs(handlers);
+      }, 1000);
+    };
+
+    ws.onerror = () => {
+      // o onclose cuidará da reconexão
+    };
   }
 }

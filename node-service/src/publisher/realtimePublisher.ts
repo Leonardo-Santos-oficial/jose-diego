@@ -48,6 +48,11 @@ export class ConsolePublisher implements RealtimePublisher {
 
 type BroadcastEvent = 'state' | 'history' | 'commands.bet' | 'commands.cashout';
 
+export type SupabaseRealtimePublisherOptions = {
+  publishState?: boolean;
+  publishHistory?: boolean;
+};
+
 export class SupabaseRealtimePublisher implements RealtimePublisher {
   private readonly stateChannel: RealtimeChannel;
   private readonly historyChannel: RealtimeChannel;
@@ -59,11 +64,20 @@ export class SupabaseRealtimePublisher implements RealtimePublisher {
   private lastStatePhase?: GameStateSnapshot['phase'];
   private readonly minStateBroadcastIntervalMs: number;
 
-  constructor(private readonly client: SupabaseClient = supabaseServiceClient) {
+  private readonly publishStateEnabled: boolean;
+  private readonly publishHistoryEnabled: boolean;
+
+  constructor(
+    private readonly client: SupabaseClient = supabaseServiceClient,
+    options: SupabaseRealtimePublisherOptions = {}
+  ) {
     // Throttling to avoid hitting Supabase Realtime message quotas.
     // Default: 250ms (~4 updates/sec). Can be overridden via env var.
     const configured = Number(process.env.REALTIME_STATE_MIN_INTERVAL_MS ?? 250);
     this.minStateBroadcastIntervalMs = Number.isFinite(configured) && configured >= 0 ? configured : 250;
+
+    this.publishStateEnabled = options.publishState ?? true;
+    this.publishHistoryEnabled = options.publishHistory ?? true;
 
     this.stateChannel = this.client.channel('game.state', { config: { broadcast: { self: false } } });
     this.historyChannel = this.client.channel('game.history', {
@@ -81,6 +95,9 @@ export class SupabaseRealtimePublisher implements RealtimePublisher {
   }
 
   async publishState(payload: StatePayload): Promise<void> {
+    if (!this.publishStateEnabled) {
+      return;
+    }
     const now = Date.now();
     const shouldBypassThrottle =
       payload.roundId !== this.lastStateRoundId || payload.phase !== this.lastStatePhase;
@@ -108,6 +125,9 @@ export class SupabaseRealtimePublisher implements RealtimePublisher {
   }
 
   async publishHistory(payload: HistoryPayload): Promise<void> {
+    if (!this.publishHistoryEnabled) {
+      return;
+    }
     await this.broadcast(this.historyChannel, 'history', payload);
   }
 
