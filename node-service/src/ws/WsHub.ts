@@ -39,4 +39,18 @@ export class WsHub {
       }
     }
   }
+
+  send(ws: WebSocket, topic: WsServerMessage['topic'], payload: unknown): void {
+    if (ws.readyState !== ws.OPEN) {
+      return;
+    }
+
+    const message: WsServerMessage = { type: 'event', topic, payload };
+
+    try {
+      ws.send(JSON.stringify(message));
+    } catch (error) {
+      logger.warn({ error }, 'Failed to send websocket message');
+    }
+  }
 }

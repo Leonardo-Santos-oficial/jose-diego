@@ -23,6 +23,7 @@ const envSchema = z.object({
       'https://www.gradbellagio.bet',
       // Vercel app
       'https://jose-diego.vercel.app',
+      'https://www.jose-diego.vercel.app',
       // Dev
       'http://localhost:3000',
       'http://localhost:5173'
