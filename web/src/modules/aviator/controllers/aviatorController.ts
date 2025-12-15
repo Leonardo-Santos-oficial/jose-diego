@@ -30,6 +30,8 @@ export class AviatorController {
   }
 
   connect(): () => void {
+    useAviatorStore.getState().setConnected(false);
+
     this.client.subscribe(
       {
         onState: (payload) => this.handleState(payload),
@@ -41,7 +43,6 @@ export class AviatorController {
       { userId: this.userId }
     );
 
-    useAviatorStore.getState().setConnected(true);
     this.startClientTickLoop();
     return () => this.disconnect();
   }
@@ -74,7 +75,11 @@ export class AviatorController {
   }
 
   private handleState(payload: GameStateMessage) {
-    useAviatorStore.getState().setState(payload);
+    const store = useAviatorStore.getState();
+    if (!store.isConnected) {
+      store.setConnected(true);
+    }
+    store.setState(payload);
   }
 
   private handleHistory(payload: GameHistoryMessage) {

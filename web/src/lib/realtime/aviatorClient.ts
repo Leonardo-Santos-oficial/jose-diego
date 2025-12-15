@@ -156,12 +156,25 @@ export class AviatorRealtimeClient {
       return;
     }
 
+    // Se já existe uma conexão em andamento/aberta, não cria outra.
+    if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
+      return;
+    }
+
     const {
       data: { session },
     } = await this.supabase.auth.getSession();
 
     const token = session?.access_token;
     if (!token) {
+      // Em alguns cenários (SSR/hidratação), o token ainda não está disponível
+      // no primeiro render. Re-tenta por alguns ciclos enquanto estiver ativo.
+      if (typeof window !== 'undefined' && this.wsShouldRun && !this.wsReconnectTimer) {
+        this.wsReconnectTimer = window.setTimeout(() => {
+          this.wsReconnectTimer = undefined;
+          void this.connectWs(handlers);
+        }, 500);
+      }
       return;
     }
 
