@@ -23,7 +23,9 @@ pull_latest() {
 install_dependencies() {
     print_status "Instalando dependências..."
     cd "$SERVICE_DIR"
-    npm ci --only=production
+    # Precisamos das devDependencies para executar o build (ex.: tsup).
+    # Após o build, removemos as devDependencies para deixar o runtime mais enxuto.
+    npm ci
     print_success "Dependências instaladas"
 }
 
@@ -32,6 +34,10 @@ build_project() {
     cd "$SERVICE_DIR"
     npm run build
     print_success "Build concluído"
+
+    print_status "Removendo devDependencies..."
+    npm prune --omit=dev
+    print_success "Dependências de produção prontas"
 }
 
 restart_service() {
